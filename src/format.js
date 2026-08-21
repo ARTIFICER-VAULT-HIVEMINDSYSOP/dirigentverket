@@ -17,7 +17,6 @@ export function formatSek(n) {
   return sek.format(Math.round(Number(n)));
 }
 
-/** Compact SEK for the summary strip: tkr / mnkr / mdkr. */
 export function formatSekShort(n) {
   const v = Number(n);
   if (!Number.isFinite(v)) return '—';
@@ -41,7 +40,6 @@ export function formatNumber(n, digits = 0) {
   return fmt.format(Number(n));
 }
 
-/** Decimal share → signed percent string, e.g. +3,4 %. */
 export function formatPct(share, digits = 1) {
   if (!Number.isFinite(Number(share))) return '—';
   const pct = Number(share) * 100;
@@ -61,6 +59,7 @@ export function formatDate(iso) {
 }
 
 export function formatPeriod(start, slut) {
+  if (!start && !slut) return 'saknar period';
   return `${formatDate(start)} – ${formatDate(slut)}`;
 }
 
@@ -80,4 +79,30 @@ export function parseList(raw) {
     .split(/[,;]/)
     .map((s) => s.trim())
     .filter(Boolean);
+}
+
+export function hasKalkylUtfall(budget, kostnad) {
+  return Number(budget) > 0 && Number(kostnad) > 0;
+}
+
+export function formatFyllI(n) {
+  const v = Number(n);
+  if (!Number.isFinite(v) || v === 0) return 'fyll i';
+  return formatSek(v);
+}
+
+export function formatSaknarUtfall(n) {
+  const v = Number(n);
+  if (!Number.isFinite(v) || v === 0) return 'saknar utfall';
+  return formatSek(v);
+}
+
+export function formatSekShortOrEmpty(n) {
+  const v = Number(n);
+  if (!Number.isFinite(v) || v === 0) return 'saknar utfall';
+  return formatSekShort(v);
+}
+
+export function emptyFigure(text = 'saknar utfall') {
+  return `<span class="empty-figure">${escapeHtml(text)}</span>`;
 }
