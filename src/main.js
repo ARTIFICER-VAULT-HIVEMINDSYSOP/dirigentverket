@@ -143,3 +143,97 @@ function renderShell(inner) {
     </div>
   `;
 }
+
+function renderPortfolio() {
+  const rows = state.projects.map((p) => {
+    const m = projectMetrics(p);
+    return { p, m };
+  });
+
+  const toggle = `
+    <div class="view-toggle">
+      <button class="btn ${portfolioMode === 'cards' ? 'btn-gold' : ''}" type="button" data-action="mode-cards">Kort</button>
+      <button class="btn ${portfolioMode === 'table' ? 'btn-gold' : ''}" type="button" data-action="mode-table">Tabell</button>
+    </div>
+  `;
+
+  if (portfolioMode === 'table') {
+    const body = rows
+      .map(
+        ({ p, m }) => `
+        <tr data-href="#/verksamhet/${encodeURIComponent(p.id)}">
+          <td>${escapeHtml(p.namn)}</td>
+          <td>${escapeHtml(typLabel(p.typ))}</td>
+          <td>${escapeHtml(p.plats) || '<span class="faint">—</span>'}</td>
+          <td>${statusBadge(p.status)}</td>
+          <td class="num">${moneyCell(m.budget, m.budget > 0)}</td>
+          <td class="num">${moneyCell(m.kostnad, m.kostnad > 0)}</td>
+          <td class="num ${m.hasUtfall ? avvikelseClass(m.avvikelse) : ''}">${
+            m.hasUtfall
+              ? `${escapeHtml(formatSek(m.avvikelse))}<br /><span class="faint">${escapeHtml(formatPct(m.avvikelse_pct))}</span>`
+              : emptyFigure('saknar utfall')
+          }</td>
+        </tr>`
+      )
+      .join('');
+    return `
+      ${toggle}
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Verksamhet</th><th>Typ</th><th>Plats</th><th>Status</th>
+              <th class="num">Budget</th><th class="num">Kostnad</th>
+              <th class="num">Avvikelse</th>
+            </tr>
+          </thead>
+          <tbody>${body}</tbody>
+        </table>
+      </div>
+    `;
+  }
+
+  const cards = rows
+    .map(({ p, m }) => {
+      const risk = m.risk ? `<span class="badge risk">Risk &gt; 8 %</span>` : '';
+      const avvikelse = m.hasUtfall
+        ? `<div class="metric-value ${avvikelseClass(m.avvikelse)}">${escapeHtml(formatSek(m.avvikelse))} · ${escapeHtml(formatPct(m.avvikelse_pct))}</div>`
+        : emptyFigure('saknar utfall');
+      return `
+        <article class="card clickable" data-href="#/verksamhet/${encodeURIComponent(p.id)}">
+          <div class="card-top">
+            <div>
+              <h3>${escapeHtml(p.namn)}</h3>
+              <div class="muted">${escapeHtml(typLabel(p.typ))}${p.plats ? ` · ${escapeHtml(p.plats)}` : ''}</div>
+            </div>
+            <div>${statusBadge(p.status)} ${risk}</div>
+          </div>
+          <div class="metrics">
+            <div>
+              <div class="metric-label">Budget</div>
+              <div class="metric-value">${m.budget > 0 ? escapeHtml(formatSek(m.budget)) : emptyFigure('fyll i')}</div>
+            </div>
+            <div>
+              <div class="metric-label">Kostnad</div>
+              <div class="metric-value">${m.kostnad > 0 ? escapeHtml(formatSek(m.kostnad)) : emptyFigure('fyll i')}</div>
+            </div>
+            <div>
+              <div class="metric-label">Avvikelse</div>
+              ${avvikelse}
+            </div>
+            <div>
+              <div class="metric-label">Täckningsbidrag</div>
+              ${
+                m.hasUtfall
+                  ? `<div class="metric-value ${avvikelseClass(-m.tackningsbidrag)}">${escapeHtml(formatSek(m.tackningsbidrag))}</div>`
+                  : emptyFigure('saknar utfall')
+              }
+            </div>
+          </div>
+        </article>
+      `;
+    })
+    .join('');
+
+  return `${toggle}<div class="grid-cards">${cards || '<p class="empty">Inga verksamheter ännu.</p>'}</div>`;
+}
