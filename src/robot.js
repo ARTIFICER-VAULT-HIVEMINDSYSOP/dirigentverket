@@ -93,7 +93,7 @@ export function seasonPlan(input) {
       action: 'radda',
       reverseTo: prognos,
       flattenNow: true,
-      note: `äddning, snabbare tempo: stäng den öppna (paper) och föreslå vändning till ${prognos}. Vänta inte in nästa säsong. ÖB godkänner. Ingen order lagd. Inte personlig rådgivning.`,
+      note: `räddning, snabbare tempo: stäng den öppna (paper) och föreslå vändning till ${prognos}. Vänta inte in nästa säsong. ÖB godkänner. Ingen order lagd. Inte personlig rådgivning.`,
     });
   }
   return paperStamp({
