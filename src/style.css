@@ -1040,3 +1040,40 @@ body.view-artificer #app-root {
     padding-right: 0;
   }
 }
+
+
+/* —— Structure gate on the stone tablet —— */
+.structure-banner {
+  padding: 12px 14px;
+  margin: 16px 0 8px;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.structure-banner p {
+  margin: 4px 0 0;
+}
+
+.structure-ok {
+  border: 1px solid rgba(201, 166, 107, 0.55);
+  background: var(--gold-soft);
+  color: var(--gold-2);
+}
+
+.structure-wait {
+  border: 1px solid var(--line-strong);
+  background: rgba(16, 12, 8, 0.45);
+  color: var(--ink-mute);
+}
+
+.stone-tablet .structure-ok {
+  border-color: rgba(201, 166, 107, 0.55);
+  background: rgba(201, 166, 107, 0.12);
+  color: var(--gold-2);
+}
+
+.stone-tablet .structure-wait {
+  border-color: rgba(201, 166, 107, 0.18);
+  background: rgba(16, 12, 8, 0.5);
+  color: #8a7a58;
+}

@@ -19,6 +19,7 @@ import {
   formatSize,
   loadRobotDraft,
   saveRobotDraft,
+  emptyRobotDraft,
 } from './robot.js';
 
 const root = document.getElementById('app-root');
@@ -503,16 +504,24 @@ function val(name) {
 function renderRobotResult() {
   const r = robotResult;
   if (!r) {
-    return `<p class="muted">Fyll i instrument, sida, entry, risk och RR. Kurs hämtas inte — skriv den själv.</p>`;
+    return `<p class="muted">Fyll i instrument, sida, entry, risk och RR. Kurs hämtas inte — skriv den själv. SL flyttas bara vid RSI+Bollinger+budstuds.</p>`;
   }
   if (!r.ok) {
     return `<div class="info-banner">${r.errors.map((e) => escapeHtml(e)).join(' ')}</div>`;
   }
-  const { initial, dynamic, size, input } = r;
+  const { initial, dynamic, size, input, structure } = r;
   const sizeBlock =
     size !== null
       ? `<div class="card"><div class="metric-label">Positionsstorlek</div><div class="metric-value">${escapeHtml(formatSize(size))}</div><div class="faint">riskbelopp / SL-avstånd</div></div>`
       : `<div class="card"><div class="metric-label">Positionsstorlek</div>${emptyFigure('fyll i riskbelopp')}<div class="faint">ingen kontostorlek antas</div></div>`;
+
+  const struct = structure || { trail: false, note: 'ingen struktur.' };
+  const structureBlock = `
+      <div class="structure-banner ${struct.trail ? 'structure-ok' : 'structure-wait'}">
+        <div class="metric-label">Struktur</div>
+        <p>${escapeHtml(struct.note)}</p>
+        <p class="faint">${struct.trail ? 'SL får flyttas.' : 'SL ligger kvar.'}</p>
+      </div>`;
 
   const dyn = dynamic
     ? `
@@ -533,6 +542,7 @@ function renderRobotResult() {
       <div class="card"><div class="metric-label">Initial TP</div><div class="metric-value">${escapeHtml(formatPx(initial.tp))}</div><div class="faint">TP-avstånd = SL-avstånd × ${escapeHtml(formatPx(initial.rr))}</div></div>
       ${sizeBlock}
     </div>
+    ${structureBlock}
     ${dyn}
   `;
 }
@@ -591,12 +601,25 @@ function renderRobot() {
               <input name="current" inputmode="decimal" value="${val('current')}" /></label>
             <label class="full">Riskbelopp, kr <span class="hint">valfritt — utan belopp lämnas storlek tom</span>
               <input name="riskSek" inputmode="decimal" placeholder="fyll i för storlek" value="${val('riskSek')}" /></label>
+            <label>RSI
+              <input name="rsi" inputmode="decimal" placeholder="t.ex. 28" value="${val('rsi')}" /></label>
+            <label>Bollinger nedre
+              <input name="bbLower" inputmode="decimal" value="${val('bbLower')}" /></label>
+            <label>Bollinger övre
+              <input name="bbUpper" inputmode="decimal" value="${val('bbUpper')}" /></label>
+            <label>Bud studsar mot
+              <select name="bounce">
+                <option value="nej" ${robotDraft.bounce !== 'nedre' && robotDraft.bounce !== 'övre' ? 'selected' : ''}>Nej</option>
+                <option value="nedre" ${robotDraft.bounce === 'nedre' ? 'selected' : ''}>Nedre band</option>
+                <option value="övre" ${robotDraft.bounce === 'övre' ? 'selected' : ''}>Övre band</option>
+              </select></label>
           </div>
           <div class="btn-row">
             <button class="btn btn-gold" type="submit">Räkna paper-plan</button>
             <button class="btn btn-ghost" type="button" data-action="robot-clear">Rensa</button>
           </div>
         </form>
+        <p class="muted stone-lead">SL flyttas bara vid RSI+Bollinger+budstuds.</p>
         <div id="robot-out" class="stone-out">${renderRobotResult()}</div>
       </div>
     </section>
@@ -654,6 +677,10 @@ function readRobotForm(form) {
     atr: String(fd.get('atr') || ''),
     current: String(fd.get('current') || ''),
     riskSek: String(fd.get('riskSek') || ''),
+    rsi: String(fd.get('rsi') || ''),
+    bbLower: String(fd.get('bbLower') || ''),
+    bbUpper: String(fd.get('bbUpper') || ''),
+    bounce: String(fd.get('bounce') || 'nej'),
   };
 }
 
@@ -690,17 +717,7 @@ root.addEventListener('click', (ev) => {
       render();
     }
   } else if (action === 'robot-clear') {
-    robotDraft = {
-      instrument: '',
-      side: 'köp',
-      entry: '',
-      risk: '',
-      riskMode: 'pris',
-      rr: '2',
-      atr: '',
-      current: '',
-      riskSek: '',
-    };
+    robotDraft = emptyRobotDraft();
     robotResult = null;
     saveRobotDraft(robotDraft);
     render();
