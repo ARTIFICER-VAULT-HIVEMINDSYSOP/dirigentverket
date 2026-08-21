@@ -20,6 +20,16 @@ import {
   renderRobot,
   readRobotForm,
 } from './robot-ui.js';
+import {
+  loadNews,
+  saveNews,
+  fetchRss,
+  importRssItems,
+  updateModuleUrl,
+  addManualItem,
+  attachCompliantImage,
+} from './news.js';
+import { renderNews } from './news-ui.js';
 
 const root = document.getElementById('app-root');
 
@@ -27,9 +37,31 @@ let state = loadState();
 let portfolioMode = 'cards';
 let robotDraft = loadRobotDraft();
 let robotResult = null;
+let news = loadNews();
 
 function persist() {
   saveState(state);
+}
+
+function persistNews() {
+  saveNews(news);
+}
+
+function readNewsBild(form) {
+  const fd = new FormData(form);
+  return {
+    kalla: String(fd.get('kalla') || '').trim(),
+    credit: String(fd.get('credit') || '').trim(),
+    license: String(fd.get('license') || '').trim(),
+    src: String(fd.get('src') || '').trim(),
+  };
+}
+
+function nearbyNewsUrl(btn, id) {
+  const card = btn.closest('[data-module-id], .card');
+  const input = (card && card.querySelector('[data-news-url], input[name="url"]'))
+    || document.querySelector(`[data-news-url="${id}"]`);
+  return input ? String(input.value || '').trim() : '';
 }
 
 function go(hash) {
@@ -56,6 +88,7 @@ function render() {
   if (view === 'verksamhet') inner = renderProject(id, c);
   else if (view === 'kalkyl') inner = renderKalkyl(c);
   else if (view === 'synergier') inner = renderSynergier(c);
+  else if (view === 'nyheter') inner = renderNews(news, { selectedModuleId: id });
   else if (view === 'robot') inner = renderRobot(robotDraft, robotResult);
   else if (view === 'nytt') inner = renderForm(null, c);
   else if (view === 'redigera') {
@@ -126,6 +159,49 @@ root.addEventListener('click', (ev) => {
     robotResult = null;
     saveRobotDraft(robotDraft);
     render();
+  } else if (action === 'news-save-url') {
+    const nid = btn.getAttribute('data-id');
+    updateModuleUrl(news, nid, nearbyNewsUrl(btn, nid));
+    news.error = '';
+    persistNews();
+    render();
+  } else if (action === 'news-fetch') {
+    const nid = btn.getAttribute('data-id');
+    const url = nearbyNewsUrl(btn, nid);
+    updateModuleUrl(news, nid, url);
+    persistNews();
+    fetchRss(url).then((res) => {
+      if (!res.ok) {
+        news.error = res.error;
+      } else {
+        news.error = '';
+        importRssItems(nid, res.items, news);
+      }
+      persistNews();
+      render();
+    });
+  } else if (action === 'news-attach') {
+    if (btn.type === 'submit') return;
+    const form = btn.closest('form');
+    const itemId = btn.getAttribute('data-id') || form?.dataset.itemId;
+    if (!form || !itemId) return;
+    const r = attachCompliantImage(itemId, readNewsBild(form), news);
+    news.error = r.ok ? '' : r.error;
+    persistNews();
+    render();
+  } else if (action === 'news-add') {
+    if (btn.type === 'submit') return;
+    const form = btn.closest('#news-manual-form') || document.getElementById('news-manual-form');
+    if (!form) return;
+    const fd = new FormData(form);
+    const r = addManualItem(news, String(fd.get('moduleId') || ''), {
+      title: String(fd.get('title') || ''),
+      lead: String(fd.get('lead') || ''),
+      link: String(fd.get('link') || ''),
+    });
+    news.error = r.ok ? '' : r.error;
+    persistNews();
+    render();
   }
 });
 
@@ -162,6 +238,30 @@ root.addEventListener('submit', (ev) => {
     robotDraft = readRobotForm(robotForm);
     saveRobotDraft(robotDraft);
     robotResult = computeRobot(robotDraft);
+    render();
+    return;
+  }
+  const manual = ev.target.closest('#news-manual-form');
+  if (manual) {
+    ev.preventDefault();
+    const fd = new FormData(manual);
+    const r = addManualItem(news, String(fd.get('moduleId') || ''), {
+      title: String(fd.get('title') || ''),
+      lead: String(fd.get('lead') || ''),
+      link: String(fd.get('link') || ''),
+    });
+    news.error = r.ok ? '' : r.error;
+    persistNews();
+    render();
+    return;
+  }
+  const bildForm = ev.target.closest('#news-bild-form, .news-bild-form');
+  if (bildForm) {
+    ev.preventDefault();
+    const itemId = bildForm.dataset.itemId || String(new FormData(bildForm).get('itemId') || '');
+    const r = attachCompliantImage(itemId, readNewsBild(bildForm), news);
+    news.error = r.ok ? '' : r.error;
+    persistNews();
     render();
   }
 });
