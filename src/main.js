@@ -75,3 +75,71 @@ function derivedCell(has, value, extra = '') {
   if (!has) return emptyFigure('saknar utfall');
   return `${escapeHtml(formatSek(value))}${extra}`;
 }
+
+function renderShell(inner) {
+  const port = portfolioMetrics(state.projects);
+  const findings = detectSynergies(state.projects);
+  const synVal = totalSynergyValue(findings);
+  const { view } = parseRoute();
+  const nav = (href, label, key) =>
+    `<a href="${href}" class="${view === key ? 'is-active' : ''}">${label}</a>`;
+
+  return `
+    <div class="shell">
+      <header class="masthead">
+        <div>
+          <p class="brand-kicker">Kluster · verksamheter</p>
+          <h1 class="brand-title">Dirigent<span>verket</span></h1>
+          <p class="brand-tag">Bok för det första vinstdrivande klustret — struktur, kalkyl och synergihypoteser.</p>
+        </div>
+        <div class="mast-meta">
+          lokal lagring · dirigentverket.kluster.v1<br />
+          ${state.projects.length} verksamheter i boken
+        </div>
+      </header>
+
+      <div class="command-strip" role="note">
+        ÖB Daniel · Stab Dirigentverket · utförare får utreda och föreslå, inte binda pengar/avtal
+      </div>
+
+      <div class="banner-struktur" role="status">
+        Struktur för klustret, inte bokföring. Tom kalkyl är inte ett resultat — fyll i utfall när de finns.
+      </div>
+
+      <div class="strip">
+        <div class="strip-cell">
+          <div class="strip-label">Antal verksamheter</div>
+          <div class="strip-value">${port.antal}</div>
+        </div>
+        <div class="strip-cell">
+          <div class="strip-label">Total budget</div>
+          <div class="strip-value">${port.hasUtfall ? escapeHtml(formatSekShortOrEmpty(port.budget)) : 'saknar utfall'}</div>
+        </div>
+        <div class="strip-cell">
+          <div class="strip-label">Hittade synergier</div>
+          <div class="strip-value">${findings.length}</div>
+        </div>
+        <div class="strip-cell">
+          <div class="strip-label">Estimerad samordning</div>
+          <div class="strip-value">${synVal > 0 ? escapeHtml(formatSekShortOrEmpty(synVal)) : 'saknar utfall'}</div>
+        </div>
+      </div>
+
+      <nav class="nav">
+        ${nav('#/portfolj', 'Portfölj', 'portfolj')}
+        ${nav('#/kalkyl', 'Kalkyl', 'kalkyl')}
+        ${nav('#/synergier', 'Synergier', 'synergier')}
+        ${nav('#/robot', 'Artificer AI', 'robot')}
+        <span class="spacer"></span>
+        <a class="btn btn-gold" href="#/nytt">+ Ny verksamhet</a>
+      </nav>
+
+      <main>${inner}</main>
+
+      <footer class="footer-bar">
+        <span>Dirigentverket · klusterbok. Ändringar sparas i webbläsaren. Artificer AI är paper / utredning.</span>
+        <button class="btn btn-ghost" type="button" data-action="reset-seed">Återställ klustret</button>
+      </footer>
+    </div>
+  `;
+}
