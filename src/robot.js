@@ -16,6 +16,20 @@ function parseBounce(v) {
   return 'nej';
 }
 
+function parseTempo(v) {
+  const s = String(v || '').trim().toLowerCase();
+  if (s === 'snabbare' || s.startsWith('snabbare')) return 'snabbare';
+  return 'sasong';
+}
+
+function parsePrognos(v) {
+  const s = String(v || '').trim().toLowerCase();
+  if (s === 'köp') return 'köp';
+  if (s === 'sälj') return 'sälj';
+  if (s === 'neutral') return 'neutral';
+  return '';
+}
+
 export function parseRobotInput(raw) {
   return {
     instrument: String(raw.instrument || '').trim(),
@@ -31,7 +45,64 @@ export function parseRobotInput(raw) {
     bbLower: num(raw.bbLower),
     bbUpper: num(raw.bbUpper),
     bounce: parseBounce(raw.bounce),
+    tempo: parseTempo(raw.tempo),
+    nastaSasong: String(raw.nastaSasong || '').trim(),
+    prognos: parsePrognos(raw.prognos),
+    prognosRr: num(raw.prognosRr),
+    hallaRr: num(raw.hallaRr),
   };
+}
+
+function paperStamp(obj) {
+  return { ...obj, paper: true, advice: false };
+}
+
+/**
+ * Paper multi-year / VIP season plan. Never invents a forecast or RR.
+ * Empty forecast = no reverse. Missing forecast-RR = cannot claim the other side can make money.
+ */
+export function seasonPlan(input) {
+  const prognos = parsePrognos(input.prognos);
+  const side = input.side === 'sälj' ? 'sälj' : 'köp';
+  const tempo = parseTempo(input.tempo);
+  const prognosRr = num(input.prognosRr);
+  const hallaRr = num(input.hallaRr);
+  const seasonLabel = String(input.nastaSasong || '').trim() || 'nästa säsong';
+
+  if (!prognos) {
+    return paperStamp({ action: 'ingen', note: 'prognos saknas — ingen vändning föreslås.' });
+  }
+  if (prognos === 'neutral') {
+    return paperStamp({ action: 'ingen', note: 'prognos neutral — behåll öppen sida tills ÖB säger annat.' });
+  }
+  if (prognos === side) {
+    return paperStamp({ action: 'halla', note: 'prognos samma håll som öppen position. Behåll. Ingen order.' });
+  }
+
+  if (prognosRr === null || prognosRr <= 0) {
+    return paperStamp({
+      action: 'saknar_rr',
+      note: 'prognos pekar mot andra hållet, men prognos-RR saknas. Fyll i innan vi påstår att nästa säsong kan bära.',
+    });
+  }
+  if (hallaRr !== null && prognosRr <= hallaRr) {
+    return paperStamp({ action: 'halla', note: 'prognos-RR slår inte att sitta kvar. Behåll öppen sida.' });
+  }
+  if (tempo === 'snabbare') {
+    return paperStamp({
+      action: 'radda',
+      reverseTo: prognos,
+      flattenNow: true,
+      note: `äddning, snabbare tempo: stäng den öppna (paper) och föreslå vändning till ${prognos}. Vänta inte in nästa säsong. ÖB godkänner. Ingen order lagd. Inte personlig rådgivning.`,
+    });
+  }
+  return paperStamp({
+    action: 'byt_hall',
+    reverseTo: prognos,
+    flattenNow: false,
+    season: seasonLabel,
+    note: `flerår: byt håll till ${prognos} när ${seasonLabel} börjar, om prognos-RR ${prognosRr} håller. ÖB godkänner. Ingen order lagd.`,
+  });
 }
 
 /**
@@ -294,12 +365,12 @@ export function computeRobot(raw) {
   const dist = slDistance(input);
   if (dist === null) errors.push('Ange riskavstånd (pris eller %) eller ATR.');
   if (errors.length) {
-    return { ok: false, errors, input, initial: null, dynamic: null, size: null, structure };
+    return { ok: false, errors, input, initial: null, dynamic: null, size: null, structure, season: seasonPlan(input) };
   }
   const initial = initialLevels(input);
   const dynamic = resolveDynamic(input, initial, structure);
   const size = positionSize(input, dist);
-  return { ok: true, errors: [], input, initial, dynamic, size, dist, structure };
+  return { ok: true, errors: [], input, initial, dynamic, size, dist, structure, season: seasonPlan(input) };
 }
 
 export function formatPx(n) {
@@ -336,6 +407,11 @@ export function emptyRobotDraft() {
     bbLower: '',
     bbUpper: '',
     bounce: 'nej',
+    tempo: 'sasong',
+    nastaSasong: '',
+    prognos: '',
+    prognosRr: '',
+    hallaRr: '',
   };
 }
 
