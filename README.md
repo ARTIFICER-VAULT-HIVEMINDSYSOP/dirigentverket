@@ -39,7 +39,7 @@ Paper / utredning i samma app. Foreslar SL och TP. Lagger inga ordrar. Inga kurs
 
 SL flyttas bara när RSI närmar sig ett Bollinger-band och bud studsar mot bandet. Paper. Användaren skriver RSI, band och budstuds själv.
 
-Flerårsplan för VIP: byt håll på öppen position om ifylld prognos för nästa säsong bär; snabbare tempo räddar genom att föreslå stäng/vänd nu. Paper. ÖB godkänner. Tom prognos ger ingen vändning. Saknas prognos-RR påstås inte att nästa säsong kan bära.
+Flerårsplan för VIP: byt håll på öppen position om ifylld prognos för nästa säsong bär; snabbare tempo räddar genom att föreslå stäng/vänd nu. Rokadläge vid vändning: volym −25 % (ny volym = 75 % av ifylld öppen storlek; tom storlek gissas inte). Paper. ÖB godkänner. Tom prognos ger ingen vändning. Saknas prognos-RR påstås inte att nästa säsong kan bära.
 
 ## Teknik
 
