@@ -50,12 +50,25 @@ export function parseRobotInput(raw) {
     prognos: parsePrognos(raw.prognos),
     prognosRr: num(raw.prognosRr),
     hallaRr: num(raw.hallaRr),
+    openSize: num(raw.openSize != null && raw.openSize !== '' ? raw.openSize : raw.volym),
   };
 }
 
 function paperStamp(obj) {
   return { ...obj, paper: true, advice: false };
 }
+
+function rokadCut(input) {
+  const openSize = num(input.openSize != null && input.openSize !== '' ? input.openSize : input.volym);
+  const filled = openSize !== null && openSize > 0;
+  return {
+    rokad: true,
+    volymFaktor: 0.75,
+    nyVolym: filled ? openSize * 0.75 : null,
+  };
+}
+
+const ROKAD_NOTE = 'rokadläge: byt håll, volym −25 %. ÖB godkänner. Ingen order lagd. Inte personlig rådgivning.';
 
 /**
  * Paper multi-year / VIP season plan. Never invents a forecast or RR.
@@ -70,30 +83,32 @@ export function seasonPlan(input) {
   const seasonLabel = String(input.nastaSasong || '').trim() || 'nästa säsong';
 
   if (!prognos) {
-    return paperStamp({ action: 'ingen', note: 'prognos saknas — ingen vändning föreslås.' });
+    return paperStamp({ action: 'ingen', rokad: false, note: 'prognos saknas — ingen vändning föreslås.' });
   }
   if (prognos === 'neutral') {
-    return paperStamp({ action: 'ingen', note: 'prognos neutral — behåll öppen sida tills ÖB säger annat.' });
+    return paperStamp({ action: 'ingen', rokad: false, note: 'prognos neutral — behåll öppen sida tills ÖB säger annat.' });
   }
   if (prognos === side) {
-    return paperStamp({ action: 'halla', note: 'prognos samma håll som öppen position. Behåll. Ingen order.' });
+    return paperStamp({ action: 'halla', rokad: false, note: 'prognos samma håll som öppen position. Behåll. Ingen order.' });
   }
 
   if (prognosRr === null || prognosRr <= 0) {
     return paperStamp({
       action: 'saknar_rr',
+      rokad: false,
       note: 'prognos pekar mot andra hållet, men prognos-RR saknas. Fyll i innan vi påstår att nästa säsong kan bära.',
     });
   }
   if (hallaRr !== null && prognosRr <= hallaRr) {
-    return paperStamp({ action: 'halla', note: 'prognos-RR slår inte att sitta kvar. Behåll öppen sida.' });
+    return paperStamp({ action: 'halla', rokad: false, note: 'prognos-RR slår inte att sitta kvar. Behåll öppen sida.' });
   }
   if (tempo === 'snabbare') {
     return paperStamp({
       action: 'radda',
       reverseTo: prognos,
       flattenNow: true,
-      note: `räddning, snabbare tempo: stäng den öppna (paper) och föreslå vändning till ${prognos}. Vänta inte in nästa säsong. ÖB godkänner. Ingen order lagd. Inte personlig rådgivning.`,
+      ...rokadCut(input),
+      note: `räddning, snabbare tempo: stäng den öppna (paper) och föreslå vändning till ${prognos}. Vänta inte in nästa säsong. ${ROKAD_NOTE}`,
     });
   }
   return paperStamp({
@@ -101,7 +116,8 @@ export function seasonPlan(input) {
     reverseTo: prognos,
     flattenNow: false,
     season: seasonLabel,
-    note: `flerår: byt håll till ${prognos} när ${seasonLabel} börjar, om prognos-RR ${prognosRr} håller. ÖB godkänner. Ingen order lagd.`,
+    ...rokadCut(input),
+    note: `flerår: byt håll till ${prognos} när ${seasonLabel} börjar, om prognos-RR ${prognosRr} håller. ${ROKAD_NOTE}`,
   });
 }
 
@@ -412,6 +428,8 @@ export function emptyRobotDraft() {
     prognos: '',
     prognosRr: '',
     hallaRr: '',
+    openSize: '',
+    volym: '',
   };
 }
 
