@@ -1,9 +1,9 @@
 {
   "name": "dirigentverket",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.1.0",
   "type": "module",
-  "description": "Utredningsverktyg för byggprojekt — kalkyl och synergi.",
+  "description": "Bok för det första vinstdrivande klustret — verksamheter, kalkyl, synergihypoteser och paper-robot.",
   "scripts": {
     "dev": "vite",
     "build": "vite build",

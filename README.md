@@ -1,69 +1,50 @@
 # Dirigentverket
 
-Utredningsverktyg för byggprojekt — kalkyl och synergi.
+Bok för Daniels första vinstdrivande kluster. Inte en byggportfölj. Inte bokföring.
 
-Dirigentverket är ett desktop-först (men användbart på mobil) verktyg för att hålla en byggportfölj, räkna kalkyl live och låta en synergimotor peka ut samordning mellan uppdrag. Det är inte en säljsida. Allt körs i webbläsaren; inget backend.
+De fyra verksamheterna ligger i boken från start. Belopp, elevtal, AUM och affärsvolymer är avsiktligt tomma. En tom kalkyl läses som *saknar utfall* / *fyll i*, inte som 0 kr.
 
-Ändringar sparas i localStorage under nyckeln dirigentverket.v1. Första laddningen fylls med sex påhittade men plausibla svenska projekt så att kalkyl och synergier syns med en gång.
+## Klustret
+
+1. **Kapital och Strategi** — kapital, rådgivning, strategi. Nod. Domän i git: kapitalstrategi.com.
+2. **Tradingskolan** — utbildning och R&D-yta. Elever och marknadsdata in.
+3. **Fastigheterutomlands** — fastigheter utanför Sverige.
+4. **North Investments LTD** — investeringsfordon / struktur. Jurisdiktion och bolagsnummer är inte verifierade här.
+
+Dirigentverket är staben. ÖB är Daniel. Utförare får utreda och föreslå, inte binda pengar eller avtal.
 
 ## Köra
 
-Kräver Node.js 18 eller nyare. I projektmappen: installera beroenden, starta utvecklingsservern med scriptet `dev`, bygg med `build` och förhandsgranska med `preview` (se package.json). Vite lyssnar vanligtvis på port 5173.
+Kräver Node.js 18 eller nyare. I projektmappen: `npm install`, `npm run dev`, `npm run build`.
+
+Vite lyssnar vanligtvis på port 5173. Allt körs i webbläsaren. Klustret sparas under `dirigentverket.kluster.v1`. Paper-robotens utkast under `dirigentverket.robot.v1`.
 
 ## Vyerna
 
-- Portfölj — kort eller tabell över alla projekt: status, budget, m²-pris, avvikelse.
-- Projekt — ett valt uppdrag med alla fält och live kalkyl. Redigera eller ta bort.
-- Kalkyl — portföljsiffror, totalsummor per typ, överlapp i tid, riskflagga.
-- Synergier — automatiskt hittade fynd med förklaring och estimerat värde i kronor.
+- **Portfölj** — kort eller tabell över verksamheterna.
+- **Kalkyl** — totalsummor när budget och kostnad är ifyllda. Annars *saknar utfall*.
+- **Synergier** — kvalitativa hypoteser, estimated_sek = 0 tills någon fyller i utfall.
+- **Robot** — paper / utredning under Tradingskolan. Föreslår SL/TP, lägger inga ordrar.
+- **Verksamhet** — detalj, redigera, ta bort.
 
-Nytt projekt läggs till via knappen Nytt projekt. Testdata kan återställas från sidfoten.
+Typer: kapital, utbildning, fastighet, investering. Status: utredning, aktiv, paus.
 
-## Kalkyl
-
-Alla belopp är kronor. Andelar räknas som decimaler och visas i procent med sv-SE.
-
-Per projekt:
-
-- avvikelse = kostnad minus budget (även i procent)
-- m²-pris = kostnad / yta
-- täckningsbidrag = budget minus kostnad
-- marginal_pct = täckningsbidrag / budget
-- duration_days från start- och slutdatum (inklusive båda dagarna)
-- risk om avvikelse är större än 8 procent mot budget
-
-Portfölj:
-
-- total budget, total kostnad, total avvikelse
-- viktat m²-pris = summa kostnad / summa yta
-- delsummor per typ (bostäder, kontor, infrastruktur, ROT, anläggning)
-- kalenderdagar där minst två projekt är aktiva samtidigt, plus summa av parvisa överlappsdygn
-- riskflagga om något projekt har avvikelse över 8 procent
-
-Siffrorna räknas om så fort ett projekt sparas.
+Kanaler och datakällor är etiketter. m2-pris visas inte. Täckningsbidrag och avvikelse visas bara när både budget och kostnad är större än noll.
 
 ## Synergi
 
-Motorn jämför alla projekt och skriver fynd på svenska. Varje fynd har titel, inblandade projekt, sort, 2-4 meningars förklaring, estimated_sek och tillförlitlighet (hög / medel / låg).
+- Tradingskolan matar Kapital och Strategi
+- Kapital och Strategi och North Investments strukturerar Fastigheterutomlands
+- Fastighetsaffärer blir case till Tradingskolan
+- Gemensam datayta i Dirigentverket
+- North Investments som fordon för mer än en verksamhet
 
-- Logistik och etablering: samma eller närliggande ort. Cirka 1,2-1,8 procent av de mindre projektens kostnad.
-- Samordnat inköp: delad leverantör. 4-8 procent av överlappande materialkostnad (andelen stiger med antalet projekt).
-- Gemensamt material: samma material i minst tre projekt. Samma procentsats mot den hopslagna materialvolymen.
-- Delad besättning: närliggande ort, minst 14 dagars överlapp, samma eller kompletterande kompetens. 22 procent av den mindre besättningen, 35 procent utnyttjande, 3800 kr per persondag.
-- Infrastruktur möjliggör: infrastruktur nära bostäder eller kontor. 1,2 procent av bostads- eller kontorsbudgeten (utredningspost, inte kassa).
+Ingen bygglogik. Fynden är hypoteser utan påhittade kronor.
 
-Närliggande orter: Stockholm, Solna och Sundbyberg; Göteborg och Mölndal.
+## Robot (paper)
 
-Materialkostnad schabloniseras som andel av projektkostnad (till exempel 38 procent för bostäder, 42 procent för infrastruktur). Fyndens belopp kan överlappa — läs dem som hypoteser i en utredning, inte som en summerbar kassa.
+Modul i samma app. Inga kurser hämtas. Inget backtest. Ingen live-körning. Storlek räknas bara om riskbelopp i kronor är ifyllt.
 
 ## Teknik
 
-Vite och vanilla JavaScript. Ingen React, ingen server. Testdata ligger i src/seed.js. Kalkyl i src/calc.js, synergimotor i src/synergy.js.
-
-Exempel:
-
-    npm install
-    npm run dev
-
-    npm run build
-    npm run preview
+Vite och vanilla JavaScript. Testdata i src/seed.js. Kalkyl i src/calc.js. Synergimotor i src/synergy.js. Paper-robot i src/robot.js.

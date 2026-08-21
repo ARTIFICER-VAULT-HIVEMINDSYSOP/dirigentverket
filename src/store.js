@@ -1,6 +1,6 @@
 import { SEED_PROJECTS } from './seed.js';
 
-export const STORAGE_KEY = 'dirigentverket.v1';
+export const STORAGE_KEY = 'dirigentverket.kluster.v1';
 
 function clone(v) {
   return JSON.parse(JSON.stringify(v));
@@ -9,8 +9,8 @@ function clone(v) {
 function normalizeProject(p, index) {
   return {
     id: String(p.id || `p-${index}-${Date.now()}`),
-    namn: String(p.namn || 'Namnlöst projekt'),
-    typ: p.typ || 'bostäder',
+    namn: String(p.namn || 'Namnlös verksamhet'),
+    typ: p.typ || 'kapital',
     plats: String(p.plats || ''),
     status: p.status || 'utredning',
     yta_m2: Number(p.yta_m2) || 0,
@@ -65,18 +65,17 @@ export function resetToSeed() {
 }
 
 export function newProjectDraft() {
-  const y = new Date().getFullYear();
   return {
     id: `p-${Date.now().toString(36)}`,
     namn: '',
-    typ: 'bostäder',
+    typ: 'kapital',
     plats: '',
     status: 'utredning',
     yta_m2: 0,
     budget_sek: 0,
     kostnad_sek: 0,
-    start: `${y}-09-01`,
-    slut: `${y + 1}-06-30`,
+    start: '',
+    slut: '',
     besättning: 0,
     kompetens: [],
     leverantörer: [],
