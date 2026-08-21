@@ -91,6 +91,7 @@ export function renderArtificerShell(inner, parseRoute) {
         ${nav('#/portfolj', 'Portfölj', 'portfolj')}
         ${nav('#/kalkyl', 'Kalkyl', 'kalkyl')}
         ${nav('#/synergier', 'Synergier', 'synergier')}
+        ${nav('#/nyheter', 'Nyheter', 'nyheter')}
         ${nav('#/robot', 'Artificer AI', 'robot')}
       </nav>
       <main>${inner}</main>
