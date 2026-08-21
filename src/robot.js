@@ -9,6 +9,13 @@ function num(v) {
   return Number.isFinite(x) ? x : null;
 }
 
+function parseBounce(v) {
+  const s = String(v || '').trim().toLowerCase();
+  if (s === 'nedre' || s.startsWith('nedre')) return 'nedre';
+  if (s === 'övre' || s.startsWith('övre')) return 'övre';
+  return 'nej';
+}
+
 export function parseRobotInput(raw) {
   return {
     instrument: String(raw.instrument || '').trim(),
@@ -20,9 +27,117 @@ export function parseRobotInput(raw) {
     atr: num(raw.atr),
     current: num(raw.current),
     riskSek: num(raw.riskSek),
+    rsi: num(raw.rsi),
+    bbLower: num(raw.bbLower),
+    bbUpper: num(raw.bbUpper),
+    bounce: parseBounce(raw.bounce),
   };
 }
 
+/**
+ * Paper structure gate. Never invents RSI, bands, or bounce.
+ * Trail only when RSI approaches a Bollinger band and the user marks a bid bounce.
+ */
+export function structureSignal(input) {
+  const rsi = num(input.rsi);
+  const bbLower = num(input.bbLower);
+  const bbUpper = num(input.bbUpper);
+  const current = num(input.current);
+  const bounce = parseBounce(input.bounce);
+  const side = input.side === 'sälj' ? 'sälj' : 'köp';
+
+  if (rsi === null || bbLower === null || bbUpper === null) {
+    return {
+      known: false,
+      confirmed: false,
+      trail: false,
+      band: null,
+      note: 'ingen struktur — fyll i RSI och båda Bollinger-banden.',
+    };
+  }
+
+  if (bbUpper <= bbLower) {
+    return {
+      known: false,
+      confirmed: false,
+      trail: false,
+      error: true,
+      note: 'Övre band måste vara högre än nedre.',
+    };
+  }
+
+  const width = bbUpper - bbLower;
+  const nearLower = current !== null && current <= bbLower + width * 0.15;
+  const nearUpper = current !== null && current >= bbUpper - width * 0.15;
+  const rsiLow = rsi <= 40;
+  const rsiHigh = rsi >= 60;
+  const bounceSet = bounce === 'nedre' || bounce === 'övre';
+
+  const base = { known: true, confirmed: false, trail: false, band: null };
+
+  if (current === null && (rsiLow || rsiHigh) && bounceSet) {
+    return { ...base, note: 'aktuell kurs saknas.' };
+  }
+
+  if (nearLower && rsiLow && bounce === 'nedre') {
+    if (side === 'sälj') {
+      return {
+        ...base,
+        confirmed: true,
+        band: 'nedre',
+        note: 'strukturen pekar mot andra hållet än vald sida.',
+      };
+    }
+    return {
+      known: true,
+      confirmed: true,
+      trail: true,
+      band: 'nedre',
+      note: 'struktur: RSI närmar sig nedre band, bud studsar mot det.',
+    };
+  }
+
+  if (nearUpper && rsiHigh && bounce === 'övre') {
+    if (side === 'köp') {
+      return {
+        ...base,
+        confirmed: true,
+        band: 'övre',
+        note: 'strukturen pekar mot andra hållet än vald sida.',
+      };
+    }
+    return {
+      known: true,
+      confirmed: true,
+      trail: true,
+      band: 'övre',
+      note: 'struktur: RSI närmar sig övre band, bud studsar mot det.',
+    };
+  }
+
+  if (nearLower && rsiLow && bounce !== 'nedre') {
+    return { ...base, band: 'nedre', note: 'RSI närmar sig nedre band, väntar på budstuds.' };
+  }
+
+  if (nearUpper && rsiHigh && bounce !== 'övre') {
+    return { ...base, band: 'övre', note: 'RSI närmar sig övre band, väntar på budstuds.' };
+  }
+
+  if (rsiLow && !nearLower) {
+    return { ...base, note: 'RSI närmar sig översålt, kursen är inte vid nedre band än.' };
+  }
+
+  if (rsiHigh && !nearUpper) {
+    return { ...base, note: 'RSI närmar sig överköpt, kursen är inte vid övre band än.' };
+  }
+
+  return { ...base, note: 'ingen struktur.' };
+}
+
+/**
+ * SL distance in price units.
+ * Prefer explicit risk. If risk is empty, ATR may be used. Never invent either.
+ */
 export function slDistance(input) {
   const { entry, risk, riskMode, atr } = input;
   if (entry === null || entry <= 0) return null;
@@ -43,6 +158,10 @@ export function initialLevels(input) {
   return { sl, tp, dist, rr, side, entry };
 }
 
+/**
+ * Trail SL toward breakeven / lock R, recompute TP so RR is held or improved.
+ * Requires a user-typed current price. Never invents quotes.
+ */
 export function dynamicLevels(input, initial) {
   const current = input.current;
   if (current === null || !initial) return null;
@@ -105,13 +224,69 @@ export function dynamicLevels(input, initial) {
   };
 }
 
+/** Size only when the user types a risk amount in SEK. No account size invented. */
 export function positionSize(input, dist) {
   if (input.riskSek === null || input.riskSek <= 0 || !dist || dist <= 0) return null;
   return input.riskSek / dist;
 }
 
+function isStoppedAtInitial(input, initial) {
+  const current = input.current;
+  if (current === null || !initial) return false;
+  const long = initial.side !== 'sälj';
+  return long ? current <= initial.sl : current >= initial.sl;
+}
+
+function stoppedDynamic(input, initial) {
+  const { sl: sl0, tp: tp0, dist, side, entry } = initial;
+  const long = side !== 'sälj';
+  const current = input.current;
+  return {
+    sl: sl0,
+    tp: tp0,
+    openR: long ? (current - entry) / dist : (entry - current) / dist,
+    stopped: true,
+    trailed: false,
+    note: long
+      ? 'Kursen är vid eller under initial SL. Papper — ingen order är lagd.'
+      : 'Kursen är vid eller över initial SL. Papper — ingen order är lagd.',
+  };
+}
+
+function heldInitialDynamic(input, initial, structure) {
+  const { sl: sl0, tp: tp0, dist, side, entry } = initial;
+  const long = side !== 'sälj';
+  const current = input.current;
+  const openR = long ? (current - entry) / dist : (entry - current) / dist;
+  const remainRisk = long ? current - sl0 : sl0 - current;
+  const remainReward = Math.abs(tp0 - current);
+  const heldRr = remainRisk > 0 ? remainReward / remainRisk : null;
+  const structNote = structure && structure.note ? structure.note : 'ingen struktur.';
+  return {
+    sl: sl0,
+    tp: tp0,
+    openR,
+    heldRr,
+    stopped: false,
+    trailed: false,
+    note: `${structNote} Initial SL/TP ligger kvar.`,
+  };
+}
+
+function resolveDynamic(input, initial, structure) {
+  if (input.current === null || !initial) return null;
+  if (isStoppedAtInitial(input, initial)) return stoppedDynamic(input, initial);
+  if (structure.trail) {
+    const dyn = dynamicLevels(input, initial);
+    if (dyn && !dyn.stopped) dyn.trailed = true;
+    return dyn;
+  }
+  return heldInitialDynamic(input, initial, structure);
+}
+
 export function computeRobot(raw) {
   const input = parseRobotInput(raw);
+  const structure = structureSignal(input);
   const errors = [];
   if (!input.instrument) errors.push('Ange instrument.');
   if (input.entry === null || input.entry <= 0) errors.push('Ange entry (kurs).');
@@ -119,12 +294,12 @@ export function computeRobot(raw) {
   const dist = slDistance(input);
   if (dist === null) errors.push('Ange riskavstånd (pris eller %) eller ATR.');
   if (errors.length) {
-    return { ok: false, errors, input, initial: null, dynamic: null, size: null };
+    return { ok: false, errors, input, initial: null, dynamic: null, size: null, structure };
   }
   const initial = initialLevels(input);
-  const dynamic = dynamicLevels(input, initial);
+  const dynamic = resolveDynamic(input, initial, structure);
   const size = positionSize(input, dist);
-  return { ok: true, errors: [], input, initial, dynamic, size, dist };
+  return { ok: true, errors: [], input, initial, dynamic, size, dist, structure };
 }
 
 export function formatPx(n) {
@@ -157,6 +332,10 @@ export function emptyRobotDraft() {
     atr: '',
     current: '',
     riskSek: '',
+    rsi: '',
+    bbLower: '',
+    bbUpper: '',
+    bounce: 'nej',
   };
 }
 

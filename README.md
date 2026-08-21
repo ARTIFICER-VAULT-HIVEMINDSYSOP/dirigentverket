@@ -2,7 +2,7 @@
 
 Bok för Daniels första vinstdrivande kluster. Inte en byggportfölj. Inte bokföring.
 
-De fyra verksamheterna ligger i boken från start. Belopp, elevtal, AUM och affärsvolymer är avsiktligt tomma. En tom kalkyl läses som *saknar utfall* / *fyll i*, inte som 0 kr.
+De fyra verksamheterna ligger i boken från start. Belopp är avsiktligt tomma. En tom kalkyl läses som saknar utfall / fyll i, inte som 0 kr.
 
 ## Klustret
 
@@ -13,38 +13,32 @@ De fyra verksamheterna ligger i boken från start. Belopp, elevtal, AUM och aff�
 
 Dirigentverket är staben. ÖB är Daniel. Utförare får utreda och föreslå, inte binda pengar eller avtal.
 
-## Köra
+## Kora
 
-Kräver Node.js 18 eller nyare. I projektmappen: `npm install`, `npm run dev`, `npm run build`.
-
-Vite lyssnar vanligtvis på port 5173. Allt körs i webbläsaren. Klustret sparas under `dirigentverket.kluster.v1`. Paper-robotens utkast under `dirigentverket.robot.v1`.
+Kraver Node 18.
+Vite lyssnar pa port 5173.
 
 ## Vyerna
 
-- **Portfölj** — kort eller tabell över verksamheterna.
-- **Kalkyl** — totalsummor när budget och kostnad är ifyllda. Annars *saknar utfall*.
-- **Synergier** — kvalitativa hypoteser, estimated_sek = 0 tills någon fyller i utfall.
-- **Robot** — paper / utredning under Tradingskolan. Föreslår SL/TP, lägger inga ordrar.
-- **Verksamhet** — detalj, redigera, ta bort.
-
-Typer: kapital, utbildning, fastighet, investering. Status: utredning, aktiv, paus.
-
-Kanaler och datakällor är etiketter. m2-pris visas inte. Täckningsbidrag och avvikelse visas bara när både budget och kostnad är större än noll.
+- Portfolio: kort eller tabell.
+- Kalkyl: saknar utfall tills budget och kostnad fylls i.
+- Synergier: hypoteser utan paahittade kronor.
+- Robot: paper / utredning under Tradingskolan.
 
 ## Synergi
 
 - Tradingskolan matar Kapital och Strategi
 - Kapital och Strategi och North Investments strukturerar Fastigheterutomlands
-- Fastighetsaffärer blir case till Tradingskolan
+- Fastighetsaffarer blir case till Tradingskolan
 - Gemensam datayta i Dirigentverket
-- North Investments som fordon för mer än en verksamhet
+- North Investments som fordon for mer an en verksamhet
 
-Ingen bygglogik. Fynden är hypoteser utan påhittade kronor.
+## Robot
 
-## Robot (paper)
+Paper / utredning i samma app. Foreslar SL och TP. Lagger inga ordrar. Inga kurser hamtas. Ingen live-maklare.
 
-Modul i samma app. Inga kurser hämtas. Inget backtest. Ingen live-körning. Storlek räknas bara om riskbelopp i kronor är ifyllt.
+SL flyttas bara när RSI närmar sig ett Bollinger-band och bud studsar mot bandet. Paper. Användaren skriver RSI, band och budstuds själv.
 
 ## Teknik
 
-Vite och vanilla JavaScript. Testdata i src/seed.js. Kalkyl i src/calc.js. Synergimotor i src/synergy.js. Paper-robot i src/robot.js.
+Vite. seed.js, calc.js, synergy.js, robot.js.
