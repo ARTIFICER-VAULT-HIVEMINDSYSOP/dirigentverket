@@ -44,3 +44,7 @@ Flerårsplan för VIP: byt håll på öppen position om ifylld prognos för näs
 ## Teknik
 
 Vite. seed.js, calc.js, synergy.js, robot.js.
+
+## Nyheter
+
+Nyheter är externa moduler (RSS eller manuell). Feed-foto används inte. Artikelbild krävs: egen eller Unsplash/Pexels/Wikimedia med credit.
