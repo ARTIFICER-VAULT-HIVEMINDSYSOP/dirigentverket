@@ -74,7 +74,6 @@ textarea {
   padding: 28px 28px 80px;
 }
 
-/* —— Header —— */
 .masthead {
   display: grid;
   grid-template-columns: 1fr auto;
@@ -122,7 +121,6 @@ textarea {
   font-size: 12px;
 }
 
-/* —— Summary strip —— */
 .strip {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -158,7 +156,6 @@ textarea {
   color: var(--warn);
 }
 
-/* —— Nav —— */
 .nav {
   display: flex;
   flex-wrap: wrap;
@@ -234,7 +231,6 @@ textarea {
   margin-top: 18px;
 }
 
-/* —— Cards / tables —— */
 .grid-cards {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -274,13 +270,8 @@ textarea {
   letter-spacing: -0.02em;
 }
 
-.muted {
-  color: var(--ink-mute);
-}
-
-.faint {
-  color: var(--ink-faint);
-}
+.muted { color: var(--ink-mute); }
+.faint { color: var(--ink-faint); }
 
 .badge {
   display: inline-flex;
@@ -297,51 +288,33 @@ textarea {
   white-space: nowrap;
 }
 
-.badge.status-produktion {
+.badge.status-utredning { color: var(--ink-mute); }
+.badge.status-aktiv {
   color: var(--gold-2);
   border-color: var(--gold-dim);
   background: var(--gold-soft);
 }
-
-.badge.status-kalkyl {
-  color: #b7c4d4;
-  border-color: #3a4554;
+.badge.status-paus {
+  color: var(--ink-faint);
+  border-color: var(--line-strong);
 }
-
-.badge.status-utredning {
-  color: var(--ink-mute);
-}
-
-.badge.status-klart {
-  color: var(--ok);
-  border-color: #355338;
-  background: var(--ok-soft);
-}
-
 .badge.risk {
   color: var(--danger);
   border-color: rgba(196, 92, 74, 0.5);
   background: var(--danger-soft);
 }
-
 .badge.ok {
   color: var(--ok);
   border-color: #355338;
   background: var(--ok-soft);
 }
-
-.badge.conf-hög {
-  color: var(--ok);
-  border-color: #355338;
-}
-
-.badge.conf-medel {
+.badge.conf-hög { color: var(--ok); border-color: #355338; }
+.badge.conf-medel { color: var(--warn); border-color: #5a4a22; }
+.badge.conf-låg { color: var(--ink-faint); }
+.badge.hypotes {
   color: var(--warn);
   border-color: #5a4a22;
-}
-
-.badge.conf-låg {
-  color: var(--ink-faint);
+  background: var(--warn-soft);
 }
 
 .metrics {
@@ -366,14 +339,8 @@ textarea {
   font-size: 15px;
   font-weight: 600;
 }
-
-.metric-value.neg {
-  color: var(--danger);
-}
-
-.metric-value.pos {
-  color: var(--ok);
-}
+.metric-value.neg { color: var(--danger); }
+.metric-value.pos { color: var(--ok); }
 
 .table-wrap {
   overflow-x: auto;
@@ -388,8 +355,7 @@ table {
   font-size: 14px;
 }
 
-th,
-td {
+th, td {
   text-align: left;
   padding: 11px 14px;
   border-bottom: 1px solid var(--line);
@@ -406,39 +372,18 @@ th {
   background: var(--bg-raised);
 }
 
-tr:last-child td {
-  border-bottom: 0;
-}
-
-tbody tr[data-href] {
-  cursor: pointer;
-}
-
-tbody tr[data-href]:hover {
-  background: var(--bg-hover);
-}
-
-td.num,
-th.num {
+tr:last-child td { border-bottom: 0; }
+tbody tr[data-href] { cursor: pointer; }
+tbody tr[data-href]:hover { background: var(--bg-hover); }
+td.num, th.num {
   text-align: right;
   font-variant-numeric: tabular-nums;
   font-family: var(--mono);
   font-size: 13px;
 }
 
-.view-toggle {
-  display: flex;
-  gap: 6px;
-  margin-bottom: 14px;
-}
-
-.chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-top: 8px;
-}
-
+.view-toggle { display: flex; gap: 6px; margin-bottom: 14px; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
 .chip {
   font-size: 12px;
   padding: 3px 8px;
@@ -447,7 +392,6 @@ th.num {
   color: var(--ink-mute);
 }
 
-/* —— Project detail —— */
 .detail-head {
   display: flex;
   justify-content: space-between;
@@ -455,7 +399,6 @@ th.num {
   align-items: flex-start;
   margin-bottom: 8px;
 }
-
 .detail-head h2 {
   font-family: var(--serif);
   font-size: 34px;
@@ -469,11 +412,7 @@ th.num {
   gap: 10px;
   margin: 20px 0;
 }
-
-.kalkyl-live .card {
-  padding: 14px;
-  box-shadow: none;
-}
+.kalkyl-live .card { padding: 14px; box-shadow: none; }
 
 .section-title {
   font-family: var(--serif);
@@ -493,7 +432,6 @@ th.num {
   grid-template-columns: repeat(2, 1fr);
   gap: 10px 28px;
 }
-
 .dl-grid dt {
   font-family: var(--mono);
   font-size: 10px;
@@ -501,10 +439,7 @@ th.num {
   text-transform: uppercase;
   color: var(--ink-faint);
 }
-
-.dl-grid dd {
-  margin: 2px 0 10px;
-}
+.dl-grid dd { margin: 2px 0 10px; }
 
 .picker {
   min-width: 260px;
@@ -515,13 +450,11 @@ th.num {
   padding: 8px 10px;
 }
 
-/* —— Forms —— */
 .form-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 14px 18px;
 }
-
 .form-grid label {
   display: flex;
   flex-direction: column;
@@ -529,11 +462,7 @@ th.num {
   font-size: 13px;
   color: var(--ink-mute);
 }
-
-.form-grid label.full {
-  grid-column: 1 / -1;
-}
-
+.form-grid label.full { grid-column: 1 / -1; }
 .form-grid input,
 .form-grid select,
 .form-grid textarea {
@@ -544,25 +473,15 @@ th.num {
   padding: 9px 11px;
   font-size: 15px;
 }
-
-.form-grid textarea {
-  min-height: 110px;
-  resize: vertical;
-}
-
+.form-grid textarea { min-height: 110px; resize: vertical; }
 .form-grid input:focus,
 .form-grid select:focus,
 .form-grid textarea:focus {
   outline: 1px solid var(--gold-dim);
   border-color: var(--gold-dim);
 }
+.hint { font-size: 12px; color: var(--ink-faint); }
 
-.hint {
-  font-size: 12px;
-  color: var(--ink-faint);
-}
-
-/* —— Synergy findings —— */
 .finding {
   background: var(--bg-card);
   border: 1px solid var(--line);
@@ -571,7 +490,6 @@ th.num {
   padding: 20px 22px 18px;
   margin-bottom: 14px;
 }
-
 .finding-meta {
   display: flex;
   flex-wrap: wrap;
@@ -579,7 +497,6 @@ th.num {
   align-items: center;
   margin-bottom: 8px;
 }
-
 .finding-index {
   font-family: var(--mono);
   font-size: 11px;
@@ -587,20 +504,17 @@ th.num {
   text-transform: uppercase;
   color: var(--gold);
 }
-
 .finding h3 {
   font-family: var(--serif);
   font-size: 22px;
   margin: 4px 0 8px;
   letter-spacing: -0.02em;
 }
-
 .finding p {
   color: var(--ink-mute);
   max-width: 78ch;
   margin: 0 0 12px;
 }
-
 .finding-foot {
   display: flex;
   justify-content: space-between;
@@ -610,17 +524,17 @@ th.num {
   border-top: 1px solid var(--line);
   padding-top: 12px;
 }
-
 .finding-value {
   font-family: var(--serif);
   font-size: 24px;
   font-weight: 600;
   color: var(--gold-2);
 }
-
-.finding-projects a {
-  margin-right: 10px;
-  font-size: 13px;
+.finding-projects a { margin-right: 10px; font-size: 13px; }
+.finding-value .empty-figure {
+  font-family: var(--serif);
+  font-size: 18px;
+  color: var(--ink-faint);
 }
 
 .empty {
@@ -656,33 +570,65 @@ th.num {
   margin: -8px 0 20px;
 }
 
+.command-strip {
+  margin-top: 16px;
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  color: var(--gold-2);
+  padding: 8px 12px;
+  border: 1px dashed var(--gold-dim);
+  border-radius: var(--radius);
+  background: var(--gold-soft);
+}
+
+.banner-struktur,
+.banner-robot,
+.info-banner {
+  margin-top: 12px;
+  padding: 12px 16px;
+  border-radius: var(--radius);
+  font-size: 14px;
+}
+.banner-struktur {
+  background: var(--gold-soft);
+  border: 1px solid rgba(201, 166, 107, 0.35);
+  color: var(--gold-2);
+}
+.banner-robot {
+  background: var(--warn-soft);
+  border: 1px solid rgba(196, 160, 74, 0.4);
+  color: #e6d3a2;
+  margin-bottom: 16px;
+}
+.info-banner {
+  background: rgba(183, 196, 212, 0.1);
+  border: 1px solid #3a4554;
+  color: #c5d0de;
+  margin-bottom: 16px;
+}
+.empty-figure {
+  color: var(--ink-faint);
+  font-style: italic;
+  font-weight: 500;
+  font-size: 14px;
+}
+
 @media (max-width: 860px) {
-  .shell {
-    padding: 18px 16px 64px;
-  }
+  .shell { padding: 18px 16px 64px; }
   .masthead,
   .kalkyl-live,
   .form-grid,
   .dl-grid,
-  .strip {
-    grid-template-columns: 1fr 1fr;
-  }
-  .kalkyl-live {
-    grid-template-columns: 1fr 1fr;
-  }
-  .mast-meta {
-    text-align: left;
-  }
+  .strip { grid-template-columns: 1fr 1fr; }
+  .kalkyl-live { grid-template-columns: 1fr 1fr; }
+  .mast-meta { text-align: left; }
 }
 
 @media (max-width: 560px) {
   .strip,
   .kalkyl-live,
   .form-grid,
-  .dl-grid {
-    grid-template-columns: 1fr;
-  }
-  .detail-head {
-    flex-direction: column;
-  }
+  .dl-grid { grid-template-columns: 1fr; }
+  .detail-head { flex-direction: column; }
 }
