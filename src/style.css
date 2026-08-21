@@ -1077,3 +1077,28 @@ body.view-artificer #app-root {
   background: rgba(16, 12, 8, 0.5);
   color: #8a7a58;
 }
+
+
+/* —— Season / VIP paper plan on the stone tablet —— */
+.season-banner {
+  padding: 12px 14px;
+  margin: 16px 0 8px;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.season-banner p {
+  margin: 4px 0 0;
+}
+
+.stone-tablet .season-banner.structure-ok {
+  border-color: rgba(201, 166, 107, 0.55);
+  background: rgba(201, 166, 107, 0.12);
+  color: var(--gold-2);
+}
+
+.stone-tablet .season-banner.structure-wait {
+  border-color: rgba(201, 166, 107, 0.18);
+  background: rgba(16, 12, 8, 0.5);
+  color: #8a7a58;
+}
