@@ -336,3 +336,37 @@ function renderProject(routeId) {
     </div>
   `;
 }
+
+function renderForm(existing) {
+  const p = existing || newProjectDraft();
+  const isNew = !existing;
+  const opt = (arr, cur) => arr.map((v) => `<option value="${escapeHtml(v)}" ${v === cur ? 'selected' : ''}>${escapeHtml(TYP_LABEL[v] || STATUS_LABEL[v] || v)}</option>`).join('');
+  return `
+    <h2 class="section-title" style="margin-top:0">${isNew ? 'Ny verksamhet' : 'Redigera verksamhet'}</h2>
+    <p class="page-lead">Alla fält sparas lokalt. Kompetens, kanaler och datakällor anges kommaseparerat. Lämna belopp tomma tills det finns utfall — 0 är inte ett resultat.</p>
+    <form id="project-form" data-id="${escapeHtml(p.id)}" data-new="${isNew ? '1' : '0'}">
+      <div class="form-grid">
+        <label>Namn<input name="namn" required value="${escapeHtml(p.namn)}" /></label>
+        <label>Typ<select name="typ">${opt(TYP_OPTIONS, p.typ)}</select></label>
+        <label>Plats / marknad<input name="plats" value="${escapeHtml(p.plats)}" /></label>
+        <label>Status<select name="status">${opt(STATUS_OPTIONS, p.status)}</select></label>
+        <label>Budget, kr<input name="budget_sek" type="number" min="0" step="1" value="${p.budget_sek ? escapeHtml(p.budget_sek) : ''}" placeholder="fyll i" /></label>
+        <label>Kostnad, kr<input name="kostnad_sek" type="number" min="0" step="1" value="${p.kostnad_sek ? escapeHtml(p.kostnad_sek) : ''}" placeholder="fyll i" /></label>
+        <label>Start<input name="start" type="date" value="${escapeHtml(p.start)}" /></label>
+        <label>Slut<input name="slut" type="date" value="${escapeHtml(p.slut)}" /></label>
+        <label class="full">Kompetens <span class="hint">t.ex. kapital, rådgivning, utbildning, fastighet</span>
+          <input name="kompetens" value="${escapeHtml((p.kompetens || []).join(', '))}" /></label>
+        <label class="full">Kanaler
+          <input name="leverantörer" value="${escapeHtml((p.leverantörer || []).join(', '))}" /></label>
+        <label class="full">Datakällor
+          <input name="material" value="${escapeHtml((p.material || []).join(', '))}" /></label>
+        <label class="full">Anteckningar
+          <textarea name="anteckningar">${escapeHtml(p.anteckningar)}</textarea></label>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-gold" type="submit">Spara</button>
+        <a class="btn" href="#/verksamhet/${encodeURIComponent(p.id)}">Avbryt</a>
+      </div>
+    </form>
+  `;
+}
