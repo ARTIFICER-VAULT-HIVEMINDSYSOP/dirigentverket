@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Стол</title>
+  <meta name="robots" content="noindex, nofollow, noarchive" />
+  <meta name="googlebot" content="noindex, nofollow" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400&family=IBM+Plex+Mono:wght@400;500&family=Source+Sans+3:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #12110e;
+      --card: #1c1b14;
+      --gold: #c9a66b;
+      --gold-2: #e0c48a;
+      --ink: #ece7dc;
+      --mute: #9c9688;
+      --faint: #6e695c;
+      --line: #2f2c22;
+      --serif: "Fraunces", "Times New Roman", serif;
+      --sans: "Source Sans 3", "Segoe UI", sans-serif;
+      --mono: "IBM Plex Mono", ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; background: #12110e; color: var(--ink); font-family: var(--sans); }
+    body {
+      background-image:
+        radial-gradient(1100px 480px at 12% -8%, rgba(201,166,107,.07), transparent 55%),
+        linear-gradient(180deg, #14130f 0%, #12110e 42%, #10100d 100%);
+    }
+    .gate, .deck { min-height: 100vh; }
+    .gate { display: grid; place-items: center; padding: 2rem 1.2rem; }
+    .gate-box { width: min(28rem, 100%); border: 1px solid var(--line); background: var(--card); padding: 2rem 1.6rem 1.6rem; box-shadow: 0 18px 40px rgba(0,0,0,.28); }
+    .kicker { font-family: var(--mono); font-size: .72rem; letter-spacing: .16em; text-transform: uppercase; color: var(--gold); margin: 0 0 .6rem; }
+    h1 { font-family: var(--serif); font-weight: 600; font-size: 2rem; margin: 0 0 .5rem; color: var(--gold-2); }
+    .lede { color: var(--mute); margin: 0 0 1.3rem; line-height: 1.55; }
+    label { display: block; font-size: .85rem; color: var(--mute); margin: 0 0 .35rem; }
+    input[type="password"] {
+      width: 100%; background: #12110e; color: var(--ink); border: 1px solid var(--line);
+      padding: .7rem .8rem; font: 400 1rem var(--sans);
+    }
+    input[type="password"]:focus { outline: 1px solid var(--gold); }
+    button {
+      margin-top: 1rem; background: rgba(201,166,107,.12); color: var(--gold-2);
+      border: 1px solid var(--line); padding: .65rem 1.1rem; font: 600 .95rem var(--sans); cursor: pointer;
+    }
+    button:hover { box-shadow: 0 0 18px rgba(201,166,107,.22); }
+    .err { color: #c45c4a; font-size: .85rem; min-height: 1.2rem; margin: .4rem 0 0; }
+    .deck { display: none; }
+    .deck.on { display: block; }
+    .shell { max-width: 40rem; margin: 0 auto; padding: 3.2rem 1.3rem 5rem; }
+    header .site { font-family: var(--mono); font-size: .72rem; letter-spacing: .14em; text-transform: uppercase; color: var(--gold); }
+    header h1 { font-size: 2.35rem; line-height: 1.15; margin: .35rem 0 .7rem; }
+    p { line-height: 1.65; color: var(--ink); }
+    .mute { color: var(--mute); }
+    section { margin: 2.2rem 0; padding-top: 1.6rem; border-top: 1px solid var(--line); }
+    h2 { font-family: var(--serif); font-size: 1.35rem; color: var(--gold-2); font-weight: 600; margin: 0 0 .7rem; }
+    ul { margin: .4rem 0 0; padding-left: 1.15rem; color: var(--ink); }
+    li { margin: .35rem 0; line-height: 1.55; }
+    .note { font-size: .92rem; color: var(--mute); }
+    footer { margin-top: 2.8rem; color: var(--faint); font-family: var(--mono); font-size: .72rem; letter-spacing: .08em; }
+  </style>
+</head>
+<body>
+  <div class="gate" id="gate">
+    <div class="gate-box">
+      <p class="kicker">Kapitalstrategi</p>
+      <h1>Стол</h1>
+      <p class="lede">Только для того, кому дали ключ. Не в меню. Не в поиске.</p>
+      <label for="key">Ключ</label>
+      <input id="key" type="password" autocomplete="off" />
+      <p class="err" id="err"></p>
+      <button type="button" id="go">Открыть</button>
+    </div>
+  </div>
+  <main class="deck" id="deck">
+    <div class="shell">
+      <header>
+        <p class="site">kapitalstrategi.com · письмо к столу</p>
+        <h1>Друг.</h1>
+        <p class="lede mute">Мы не ждали готовую машину. Собрали контур сами. Это карта, не касса и не сцена.</p>
+      </header>
+
+      <section>
+        <h2>ForceX</h2>
+        <p>ForceX — торговый CRM. Не сайт и не календарь. Там карточки, комментарии, очередь на звонок.</p>
+        <p>Две сессии в одном контуре: два стола, одни правила. Агенты открывают карточку через деталь, пишут комментарий, ставят четверть часа в календарь, отдают копируемый номер. Звонят люди. Живые сделки выключены, пока сами не зажжём. Кроны не выдумываем. Пустая ячейка — нет данных, не ноль.</p>
+      </section>
+
+      <section>
+        <h2>Онбординг — карта</h2>
+        <p>Онбординг не форма. Это карта клиента: кто это, с какой площадки, сколько ждал, какой потенциал. После звонка знаем человека, не строку. Магазин кормится этой картой. Без неё шесть номеров — лотерея.</p>
+        <p>Дальше можно нести метод и карту. Реестр телефонов не продаём. Карточки остаются в бренде.</p>
+      </section>
+
+      <section>
+        <h2>Магазин</h2>
+        <p>Экран на шесть следующих номеров. Для двух столов и агентов.</p>
+        <ul>
+          <li>давно не звонили</li>
+          <li>лучшая площадка</li>
+          <li>или сказано: высокий потенциал</li>
+        </ul>
+        <p class="note">Оболочка есть. Очередь заливается. Сначала это.</p>
+      </section>
+
+      <section>
+        <h2>После звонка</h2>
+        <p>Следующий шаг — смотреть капитал и сортировать. Кого легче забрать — того сразу, даже если разговор тяжёлый. Это ещё впереди. Суммы не сочиняем.</p>
+      </section>
+
+      <section>
+        <h2>Фон сайта</h2>
+        <p>kapitalstrategi.com уже стоит. Школа и Trade Rider как paper-демо. Клиент видит то же дыхание на сайте и в CRM, не вторую сказку. У обычного конкурента один логин и очередь в голове. Здесь два стола, агенты, магазин, live тухлый пока не зажжёте.</p>
+      </section>
+
+      <section>
+        <h2>Протокол</h2>
+        <p>Нужен протокол, не настроение. Система агентов ставится на повтор. Личное и семья не входят в контур. Ситуация со стола не снимается на стол.</p>
+      </section>
+
+      <section>
+        <h2>Вариант Соломона</h2>
+        <p>Если один выносит стол наружу или жжёт мост — окно закрывается для обоих. Никто не уносит встречу в одиночку. Одинаковая тишина, одинаковый допуск, одинаковый выход. Это не месть. Это замок: либо держим вместе, либо оба теряем стол.</p>
+        <p>Сначала договорённость. Потом показ. Легитимные инвесторы — когда оба кивнули. Не сцена и не дым.</p>
+      </section>
+
+      <section>
+        <h2>Дальше</h2>
+        <p>Магазин. Затем капитал после звонка. Затем, если оба за одним замком, встреча. Paper. Live не трогаем, пока сами не зажжём.</p>
+      </section>
+
+      <footer>HERMES · купцы и речь · не в индексе</footer>
+    </div>
+  </main>
+  <script>
+    const HASH = "e6bd44256b99c1d146061ff4ea53f2c5914310d645470890dc7f98e103f4fbb3";
+    const gate = document.getElementById("gate");
+    const deck = document.getElementById("deck");
+    const err = document.getElementById("err");
+    const key = document.getElementById("key");
+    async function sha(s) {
+      const b = new TextEncoder().encode(s);
+      const d = await crypto.subtle.digest("SHA-256", b);
+      return [...new Uint8Array(d)].map(x => x.toString(16).padStart(2, "0")).join("");
+    }
+    function open() {
+      gate.style.display = "none";
+      deck.classList.add("on");
+    }
+    async function tryKey() {
+      err.textContent = "";
+      const h = await sha(key.value.trim());
+      if (h === HASH) {
+        sessionStorage.setItem("ks-bord", "1");
+        open();
+      } else {
+        err.textContent = "Нет.";
+      }
+    }
+    if (sessionStorage.getItem("ks-bord") === "1") open();
+    document.getElementById("go").onclick = tryKey;
+    key.addEventListener("keydown", e => { if (e.key === "Enter") tryKey(); });
+  </script>
+</body>
+</html>
