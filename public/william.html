@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>William magasin</title>
+  <meta name="robots" content="noindex, nofollow, noarchive" />
+  <meta name="googlebot" content="noindex, nofollow" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400&family=IBM+Plex+Mono:wght@400;500&family=Source+Sans+3:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./magasin-chrome.css" />
+</head>
+<body>
+  <main class="shell">
+    <header>
+      <p class="site">Verktygslåda · ForceX</p>
+      <h1>William magasin</h1>
+      <p class="lede">Standard. Aldrig tom på anropbara rader. North först. Telefon krävs.</p>
+    </header>
+
+    <nav class="quiet" aria-label="Verktygslåda">
+      <a href="magasin.html">Magasin</a>
+      <a href="william.html" aria-current="page">William magasin</a>
+      <a href="luckor.html">Luckor</a>
+    </nav>
+
+    <div class="lamp-row">
+      <span class="lamp lamp-yellow" id="william-lamp" aria-hidden="true"></span>
+      <span id="william-lamp-text">väntar William-session</span>
+    </div>
+
+    <section>
+      <h2>Kö</h2>
+      <div id="william-list">
+        <p class="empty">väntar session, inte saknat verktyg</p>
+      </div>
+    </section>
+
+    <footer>Standardverktyg. Paper. Inte live. Inte Daniels kö. Inga telefoner i kalender.</footer>
+  </main>
+  <script type="module" src="./william.js"></script>
+</body>
+</html>

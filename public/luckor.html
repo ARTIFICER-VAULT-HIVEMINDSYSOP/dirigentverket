@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Luckor</title>
+  <meta name="robots" content="noindex, nofollow, noarchive" />
+  <meta name="googlebot" content="noindex, nofollow" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400&family=IBM+Plex+Mono:wght@400;500&family=Source+Sans+3:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./magasin-chrome.css" />
+  <style>
+    .chips { display: flex; flex-wrap: wrap; gap: .5rem; margin: 0 0 1rem; }
+    .suggest {
+      appearance: none; cursor: pointer;
+      background: #16150f; color: var(--gold-2); border: 1px solid var(--line);
+      border-radius: 999px; padding: .55rem .95rem; font: 500 .95rem var(--sans);
+    }
+    .suggest:hover { box-shadow: 0 0 18px rgba(201,166,107,.18); }
+    .suggest.is-on { background: var(--gold-soft); border-color: #5a4c32; }
+    #detail { min-height: 4.5rem; margin: 0 0 1.8rem; }
+    .hint { color: var(--ink); line-height: 1.55; margin: 0; }
+    .example {
+      margin: .85rem 0 0; padding: .85rem 1rem; border: 1px solid var(--line); background: var(--card);
+    }
+    .who { font-family: var(--serif); font-size: 1.15rem; color: var(--gold-2); margin: 0 0 .3rem; }
+    .meta { color: var(--mute); font-size: .9rem; margin: .15rem 0 0; }
+    details.alla { border-top: 1px solid var(--line); padding-top: 1.1rem; }
+    details.alla summary {
+      cursor: pointer; color: var(--mute); font-family: var(--mono);
+      font-size: .72rem; letter-spacing: .12em; text-transform: uppercase; list-style: none;
+    }
+    details.alla summary::-webkit-details-marker { display: none; }
+    details.alla summary::after { content: " ▾"; color: var(--faint); }
+    details.alla[open] summary::after { content: " ▴"; }
+    .pills { display: flex; flex-wrap: wrap; gap: .4rem; margin: .9rem 0 0; }
+    .pill {
+      font-family: var(--mono); font-size: .72rem; letter-spacing: .02em;
+      color: var(--mute); border: 1px solid var(--line); border-radius: 999px;
+      padding: .28rem .55rem; background: #16150f;
+    }
+    .pill small { display: inline-block; margin-left: .35rem; color: var(--faint); font-size: .62rem; letter-spacing: .08em; text-transform: uppercase; }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header>
+      <p class="site">Verktygslåda · ForceX</p>
+      <h1>Tomma luckor</h1>
+      <p class="lede">Bara lediga kvartar. Tre ombokningar. Inte hela registret.</p>
+    </header>
+
+    <nav class="quiet" aria-label="Verktygslåda">
+      <a href="magasin.html">Magasin</a>
+      <a href="william.html">William magasin</a>
+      <a href="luckor.html" aria-current="page">Luckor</a>
+    </nav>
+
+    <section>
+      <h2>Omboka hit</h2>
+      <div class="chips" id="chips"></div>
+      <div id="detail"></div>
+    </section>
+
+    <details class="alla">
+      <summary>Alla tomma</summary>
+      <div class="pills" id="pills"></div>
+    </details>
+
+    <footer id="stamp"></footer>
+  </main>
+  <script type="module" src="./magasin.js"></script>
+</body>
+</html>
