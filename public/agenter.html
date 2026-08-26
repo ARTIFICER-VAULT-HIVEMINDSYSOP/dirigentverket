@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>investeringsgruppen.tech · agenter, styrverk, balanstjänst</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --navy: #0a1f44;
+      --navy-2: #0a2463;
+      --cyan: #2ee0f2;
+      --cyan-2: #1ad0e4;
+      --bg: #eef2f5;
+      --card: #ffffff;
+      --mute: #5b6b80;
+      --line: #d5dee6;
+      --warn: #8a6a12;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; background: var(--bg); color: var(--navy); font: 400 16px/1.5 Outfit, Segoe UI, sans-serif; }
+    a { color: var(--navy-2); }
+    header {
+      max-width: 960px; margin: 0 auto; padding: 28px 24px 8px;
+    }
+    header img { height: 56px; width: auto; display: block; }
+    .soon { max-width: 960px; margin: 8px auto 0; padding: 0 24px; }
+    .soon b {
+      display: block;
+      background: linear-gradient(90deg, #3BE8F8 0%, #1C7AD4 52%, #07183F 100%);
+      color: #fff; text-align: center; letter-spacing: .04em;
+      font-weight: 600; font-size: 15px; padding: 10px 16px; border-radius: 999px;
+    }
+    main { max-width: 960px; margin: 0 auto; padding: 20px 24px 64px; }
+    h1 { font-size: 34px; line-height: 1.15; font-weight: 650; margin: 22px 0 10px; letter-spacing: -.02em; }
+    h2 { font-size: 22px; margin: 0 0 8px; letter-spacing: -.01em; }
+    h3 { font-size: 16px; margin: 0 0 6px; }
+    .lead { color: var(--mute); max-width: 42rem; margin: 0 0 28px; }
+    .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .grid4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+    @media (max-width: 800px) {
+      .grid, .grid4 { grid-template-columns: 1fr; }
+      h1 { font-size: 28px; }
+    }
+    article.paket, .card {
+      background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 18px 18px 14px;
+      box-shadow: 0 1px 0 rgba(10,31,68,.04);
+    }
+    article.paket h2, .card h3 { margin: 0 0 6px; font-size: 18px; }
+    article.paket p, .card p { margin: 0 0 14px; color: var(--mute); font-size: 14px; }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th { text-align: left; font-weight: 500; color: var(--mute); font-size: 12px; padding: 0 0 6px; }
+    td { padding: 6px 0; border-top: 1px solid var(--line); vertical-align: middle; }
+    td.lbl { width: 38%; }
+    input[type="text"] {
+      width: 100%; border: 0; background: transparent; font: 500 14px Outfit, sans-serif;
+      color: var(--navy); padding: 4px 0; outline: none;
+    }
+    input[type="text"]::placeholder { color: #9aa8b8; font-weight: 400; }
+    input[type="checkbox"] { accent-color: var(--navy-2); }
+    .note { font-size: 13px; color: var(--mute); margin: 18px 0 0; }
+    .offert, .balans {
+      margin-top: 28px; background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 22px;
+    }
+    .sum { margin-top: 12px; font-weight: 600; }
+    .saknas { color: var(--warn); font-weight: 500; }
+    .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 16px 0; }
+    @media (max-width: 800px) { .steps { grid-template-columns: 1fr; } }
+    .step { border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; background: #f7fafc; }
+    .step b { display: block; font-size: 13px; color: var(--cyan-2); letter-spacing: .04em; text-transform: uppercase; }
+    .kall { font-size: 12px; color: var(--mute); margin-top: 16px; }
+    footer { max-width: 960px; margin: 0 auto; padding: 0 24px 40px; color: var(--mute); font-size: 13px; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--cyan-2); display: inline-block; margin-right: 8px; }
+    ul.tracks { margin: 0 0 16px; padding: 0 0 0 1.1rem; color: var(--mute); font-size: 14px; }
+    ul.tracks li { margin: 4px 0; }
+    .tag { display: inline-block; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: #1C7AD4; font-weight: 600; margin-bottom: 8px; }
+  </style>
+</head>
+<body>
+  <header>
+    <img src="./ig-logo.svg" alt="investeringsgruppen.tech" />
+  </header>
+  <div class="soon"><b>Artificer AI 3.0 kommer snart</b></div>
+  <main>
+    <h1>Skräddarsydda lösningar för AI-agenter och styrverk</h1>
+    <p class="lead">Vi bygger utförare och det styrverk som leder dem. Kommando, stab, älvor. Sidan är live. Inte investeringsrådgivning. Pris, licens och underhåll kan ingå. Tom cell är saknas, inte noll.</p>
+
+    <div class="grid">
+      <article class="paket" data-paket="agent">
+        <h2>AI-agent</h2>
+        <p>En älva för ett namngivet jobb. Arver volym, höjer den aldrig.</p>
+        <table>
+          <thead><tr><th></th><th>Ingår</th><th>Belopp</th></tr></thead>
+          <tbody>
+            <tr><td class="lbl">Bygge</td><td><input type="checkbox" data-k="bygge" /></td><td><input type="text" data-v="bygge" placeholder="saknas" inputmode="decimal" autocomplete="off" /></td></tr>
+            <tr><td class="lbl">Licens / år</td><td><input type="checkbox" data-k="licens" /></td><td><input type="text" data-v="licens" placeholder="saknas" inputmode="decimal" autocomplete="off" /></td></tr>
+            <tr><td class="lbl">Underhåll / år</td><td><input type="checkbox" data-k="underhall" /></td><td><input type="text" data-v="underhall" placeholder="saknas" inputmode="decimal" autocomplete="off" /></td></tr>
+          </tbody>
+        </table>
+      </article>
+      <article class="paket" data-paket="styrverk">
+        <h2>Styrverk</h2>
+        <p>Panel, kö, regler och lampa. Stab, inte slavhållning.</p>
+        <table>
+          <thead><tr><th></th><th>Ingår</th><th>Belopp</th></tr></thead>
+          <tbody>
+            <tr><td class="lbl">Bygge</td><td><input type="checkbox" data-k="bygge" /></td><td><input type="text" data-v="bygge" placeholder="saknas" inputmode="decimal" autocomplete="off" /></td></tr>
+            <tr><td class="lbl">Licens / år</td><td><input type="checkbox" data-k="licens" /></td><td><input type="text" data-v="licens" placeholder="saknas" inputmode="decimal" autocomplete="off" /></td></tr>
+            <tr><td class="lbl">Underhåll / år</td><td><input type="checkbox" data-k="underhall" /></td><td><input type="text" data-v="underhall" placeholder="saknas" inputmode="decimal" autocomplete="off" /></td></tr>
+          </tbody>
+        </table>
+      </article>
+      <article class="paket" data-paket="kluster">
+        <h2>Kluster</h2>
+        <p>Flera agenter under ett styrverk. Artificer 3.0 kan kopplas in när den släpps.</p>
+        <table>
+          <thead><tr><th></th><th>Ingår</th><th>Belopp</th></tr></thead>
+          <tbody>
+            <tr><td class="lbl">Bygge</td><td><input type="checkbox" data-k="bygge" /></td><td><input type="text" data-v="bygge" placeholder="saknas" inputmode="decimal" autocomplete="off" /></td></tr>
+            <tr><td class="lbl">Licens / år</td><td><input type="checkbox" data-k="licens" /></td><td><input type="text" data-v="licens" placeholder="saknas" inputmode="decimal" autocomplete="off" /></td></tr>
+            <tr><td class="lbl">Underhåll / år</td><td><input type="checkbox" data-k="underhall" /></td><td><input type="text" data-v="underhall" placeholder="saknas" inputmode="decimal" autocomplete="off" /></td></tr>
+          </tbody>
+        </table>
+      </article>
+    </div>
+
+    <section class="balans">
+      <span class="tag">Tilltänkt · paper</span>
+      <h2>Balanstjänst för hembatterier</h2>
+      <p class="lead" style="margin-bottom:14px">Samma pedagogik som på kapitalstrategi.com: hemmabatteri som balanserar, och en pool mot elnätet. Inte live-VPP. Live mot Svenska kraftnät kräver BSP. Artificer AI 3.0 är aviserad som styrskikt, inte släppt.</p>
+
+      <p>Fyra spår i KS-läget, på samma batteri:</p>
+      <ul class="tracks">
+        <li>Egenanvändning</li>
+        <li>Elprisarbitrage (köp billigt)</li>
+        <li>FCR via aggregator</li>
+        <li>Effekttopp</li>
+      </ul>
+      <p class="note" style="margin-top:0">Kassaflöde mot bostaden är pedagogik, inte taxering och inte mäklarutlåtande. kW är effekt (FCR, inverter). kWh är energi (pack, backup). Blanda inte.</p>
+
+      <div class="steps">
+        <div class="step"><b>FCR-D/N</b>Bud från 100 kW. Frekvens, börvärde ladda/ur.</div>
+        <div class="step"><b>FFR</b>Nästa tröskel 500 kW. Skiva ovanpå FCR, inte 100 % av samma kW.</div>
+        <div class="step"><b>aFRR + mFRR</b>Från 1 MW. Då är du operator, aggregatorandel 0 i den kalkylen.</div>
+      </div>
+
+      <div class="grid4">
+        <div class="card">
+          <h3>Flower-läge</h3>
+          <p>VPP mot FCR. Batteri ofta ~50 % SOC så det kan ta emot och ge. Spot har de sagt kommer senare.</p>
+        </div>
+        <div class="card">
+          <h3>Emaldo-läge</h3>
+          <p>Power Core-boxar 5,12 kWh, växelriktare 10,8 kW. KeepON ger nödström ~10 ms. SOC-reserv minst 10 %. Nödström är beredskap, inte försäkring.</p>
+        </div>
+        <div class="card">
+          <h3>CheckWatt-stack</h3>
+          <p>FCR-D/N, plus AI-skiva ~16–17 % till sol/spot bakom mätaren. SOC ofta 30–70 %. Toppning, inte antingen-eller.</p>
+        </div>
+        <div class="card">
+          <h3>Tibber / Varberg</h3>
+          <p>Grid Rewards eller Nätflex (egen BRP). Auto den som betalar mest, eller Flex Plus redan netto till kund. Kräver deras elavtal. Inte våra paketpriser.</p>
+        </div>
+      </div>
+
+      <p class="note">Samma batteri kan tjäna flera lager: SvK-frekvens, DSO-flex, spot och effekttopp. Simulering tills BSP-avtal, förkvalificerad grupp och Nordic MMS. Fifty/MMS-adapter är inte inkopplad på KS. Snabb värvning till 1 MW är ett scenario, inte ett löfte. FCR-priser har sjunkit sedan 2024. Vi sätter inga kronor här.</p>
+
+      <article class="paket" data-paket="balans" style="margin-top:18px;box-shadow:none">
+        <h2>Offert · balanstjänst</h2>
+        <p>Bygge, licens och underhåll kan ingå. Tom cell är saknas.</p>
+        <table>
+          <thead><tr><th></th><th>Ingår</th><th>Belopp</th></tr></thead>
+          <tbody>
+            <tr><td class="lbl">Bygge (styrning)</td><td><input type="checkbox" data-k="bygge" /></td><td><input type="text" data-v="bygge" placeholder="saknas" inputmode="decimal" autocomplete="off" /></td></tr>
+            <tr><td class="lbl">Licens / år</td><td><input type="checkbox" data-k="licens" /></td><td><input type="text" data-v="licens" placeholder="saknas" inputmode="decimal" autocomplete="off" /></td></tr>
+            <tr><td class="lbl">Underhåll / år</td><td><input type="checkbox" data-k="underhall" /></td><td><input type="text" data-v="underhall" placeholder="saknas" inputmode="decimal" autocomplete="off" /></td></tr>
+          </tbody>
+        </table>
+      </article>
+
+      <p class="kall">Källa: <a href="https://www.kapitalstrategi.com/batteri">kapitalstrategi.com/batteri</a> och <a href="https://www.kapitalstrategi.com/elnat">/elnat</a>. Utbildning, inte investerings-, elhandels- eller energirådgivning. Andra bolags publika siffror stannar hos dem. Våra belopp fylls här, annars saknas.</p>
+    </section>
+
+    <section class="offert">
+      <h2>Offert</h2>
+      <p class="note" style="margin-top:0">Bara ifyllda belopp räknas. Rader som ingår men saknar belopp märks saknas. Inget summeras som noll.</p>
+      <div id="offert-rader"></div>
+      <p class="sum" id="offert-sum">Inget belopp ifyllt.</p>
+    </section>
+
+    <p class="note"><span class="dot"></span>Artificer AI 3.0 kommer snart. Inga resultat- eller avkastningssiffror här.</p>
+  </main>
+  <footer>
+    investeringsgruppen.tech · live · utbildning och verktyg, inte direkt rådgivning. Balanstjänst mot SvK är fortfarande tilltänkt.
+  </footer>
+  <script>
+    const KEY = "ig-offert-v1";
+    const paketen = [...document.querySelectorAll("article[data-paket]")];
+    const keys = ["bygge", "licens", "underhall"];
+
+    function read() {
+      const data = {};
+      for (const a of paketen) {
+        const id = a.dataset.paket;
+        data[id] = {};
+        for (const k of keys) {
+          const on = a.querySelector(`[data-k="${k}"]`).checked;
+          const raw = a.querySelector(`[data-v="${k}"]`).value.trim();
+          data[id][k] = { on, raw };
+        }
+      }
+      return data;
+    }
+
+    function write(data) {
+      if (!data) return;
+      for (const a of paketen) {
+        const row = data[a.dataset.paket];
+        if (!row) continue;
+        for (const k of keys) {
+          if (!row[k]) continue;
+          a.querySelector(`[data-k="${k}"]`).checked = !!row[k].on;
+          a.querySelector(`[data-v="${k}"]`).value = row[k].raw || "";
+        }
+      }
+    }
+
+    function label(k) {
+      return k === "bygge" ? "Bygge" : k === "licens" ? "Licens / år" : "Underhåll / år";
+    }
+    function namn(id) {
+      return ({ agent: "AI-agent", styrverk: "Styrverk", kluster: "Kluster", balans: "Balanstjänst" })[id] || id;
+    }
+    function parseBelopp(raw) {
+      if (!raw) return null;
+      const n = Number(String(raw).replace(/\s/g, "").replace(",", "."));
+      return Number.isFinite(n) ? n : null;
+    }
+
+    function render() {
+      const data = read();
+      const lines = [];
+      let sum = 0;
+      let any = false;
+      let missing = 0;
+      for (const id of ["agent", "styrverk", "kluster", "balans"]) {
+        if (!data[id]) continue;
+        for (const k of keys) {
+          const cell = data[id][k];
+          if (!cell.on) continue;
+          any = true;
+          const n = parseBelopp(cell.raw);
+          if (n === null) {
+            missing += 1;
+            lines.push(`<div>${namn(id)} · ${label(k)} · <span class="saknas">saknas</span></div>`);
+          } else {
+            sum += n;
+            lines.push(`<div>${namn(id)} · ${label(k)} · ${cell.raw}</div>`);
+          }
+        }
+      }
+      document.getElementById("offert-rader").innerHTML = lines.join("") || "<div>Inga rader markerade som ingår.</div>";
+      const el = document.getElementById("offert-sum");
+      if (!any) el.textContent = "Inget belopp ifyllt.";
+      else if (missing && !sum) el.innerHTML = "<span class=\"saknas\">saknas</span> på markerade rader. Ingen summa.";
+      else if (missing) el.innerHTML = "Delsumma av ifyllda rader: " + String(sum) + " · <span class=\"saknas\">saknas</span> på " + missing + " rad" + (missing > 1 ? "er" : "");
+      else el.textContent = "Summa ifyllda rader: " + String(sum);
+      try { localStorage.setItem(KEY, JSON.stringify(data)); } catch (e) {}
+    }
+
+    try { write(JSON.parse(localStorage.getItem(KEY) || "null")); } catch (e) {}
+    document.querySelector("main").addEventListener("input", render);
+    document.querySelector("main").addEventListener("change", render);
+    render();
+  </script>
+</body>
+</html>
