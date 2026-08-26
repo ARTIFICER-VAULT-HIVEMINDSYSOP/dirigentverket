@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 160" role="img" aria-label="investeringsgruppen.tech">
+  <defs>
+    <linearGradient id="orb" x1="24" y1="12" x2="140" y2="148" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#3BE8F8"/>
+      <stop offset=".45" stop-color="#1C7AD4"/>
+      <stop offset="1" stop-color="#07183F"/>
+    </linearGradient>
+  </defs>
+  <g fill="none" stroke="url(#orb)" stroke-linecap="round" transform="translate(8,0)">
+    <path stroke-width="13" d="M118.5 44.2 A62 62 0 1 0 118.5 115.8"/>
+    <path stroke-width="7.2" d="M104.8 49.6 A46 46 0 1 0 104.8 110.4"/>
+  </g>
+  <circle cx="128" cy="80" r="17.5" fill="#0A2463"/>
+  <g font-family="Outfit, DM Sans, Segoe UI, Helvetica Neue, sans-serif" fill="#0A1F44" font-weight="600">
+    <text x="168" y="76" font-size="42" letter-spacing="-0.035em">investerings</text>
+    <text x="168" y="122" font-size="42" letter-spacing="-0.035em">gruppen.tech</text>
+  </g>
+</svg>
