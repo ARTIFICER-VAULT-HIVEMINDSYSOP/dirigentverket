@@ -1,5 +1,6 @@
 import { computeRobot, formatPx, formatSize } from './robot.js';
 import { emptyFigure, escapeHtml } from './format.js';
+import { renderKontrollpanel } from './panel-ui.js';
 
 export function val(robotDraft, name) {
   const v = robotDraft[name];
@@ -107,6 +108,7 @@ export function renderRobot(robotDraft, robotResult) {
         <h2 class="artificer-title">Artificer AI</h2>
         <div class="artificer-ring" aria-hidden="true"></div>
       </header>
+      ${renderKontrollpanel()}
       <div class="banner-robot" role="status">Föreslår SL/TP, lägger inga ordrar. Flerårsplan är bara ett förslag. Ingen mäklare, ingen live-exekvering, inga påhittade kurser eller backtest. ÖB godkänner varje drag.</div>
       <div class="stone-tablet">
         <p class="page-lead stone-lead">Modul under Tradingskolan. Skriv instrument och kurser själv. Positionsstorlek räknas bara om du anger riskbelopp i kronor — kontostorlek gissas inte.</p>
