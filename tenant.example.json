@@ -13,8 +13,18 @@
     "open": "detail"
   },
   "calendars": [],
+  "queue": {
+    "csv": "",
+    "skip_names": []
+  },
   "magazines": [
-    { "id": "desk-a", "title": "Desk A", "queue_file": "desk-a.json" }
+    {
+      "id": "desk-a",
+      "title": "Desk A",
+      "queue_file": "desk-a.json",
+      "not_owned_by": [],
+      "sticky_files": []
+    }
   ],
   "rules": {
     "one_card_per_customer": true,

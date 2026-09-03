@@ -20,3 +20,6 @@ leads-magasin.json
 tenant.json
 tenants/*.json
 !tenant.example.json
+skip-names.local.json
+sticky-files.local.json
+skip-owners.local.json
