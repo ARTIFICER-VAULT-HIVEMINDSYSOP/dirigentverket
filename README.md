@@ -48,3 +48,11 @@ Vite. seed.js, calc.js, synergy.js, robot.js.
 ## Nyheter
 
 Nyheter är externa moduler (RSS eller manuell). Feed-foto används inte. Artikelbild krävs: egen eller Unsplash/Pexels/Wikimedia med credit.
+
+## White-label
+
+Maskineriet ska kunna licensieras till ett nytt system. Skinn, CRM-adress, kalendrar och loggor ligger i `tenant.json` (se `tenant.example.json`). Motorn är densamma. Kundinfo backas inte upp. Licenstext är paper tills Legal skriver och ÖB säger ja. Se WHITE-LABEL.md.
+
+## Backup
+
+Allt vi arbetar med backas upp utom kundinfo. Magasinköer, pending-kommentarer och saldo stannar lokalt.

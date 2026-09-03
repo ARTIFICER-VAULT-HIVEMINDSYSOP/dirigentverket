@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Leads</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=IBM+Plex+Mono:wght@400;500&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./magasin.css?v=logo2" />
+</head>
+<body>
+  <div class="hero"><img class="bg" src="./william-lampa.png" alt="" /><img class="mark" src="./ks-logo.png" alt="Kapital och Strategi" /></div>
+  <main class="wrap">
+    <div class="brandline"><img src="./ks-logo.png" alt="" /><h1>Leads</h1></div>
+    <p class="lede">Gemensam lead-kö. NA/VM = No answer. Tid = callback. Patron ur när kunden är klar.</p>
+    <div class="bar"><a class="nav-swap" href="./magasin.html">Daniel</a>
+      <a class="nav-swap" href="./william.html">William</a>
+      <button type="button" id="reload">Ladda om magasinet</button>
+    </div>
+    <p class="flash" id="flash"></p>
+    <div id="vimana" class="vimana" hidden></div>
+    <div id="list"></div>
+  </main>
+  <script>
+    const MAGASIN = 'leads'
+    const JSON_URL = './leads-magasin.json'
+  </script>
+  <script src="./tenant.js"></script>
+  <script src="./magasin-ui.js?v=copy-mail1"></script>
+</body>
+</html>

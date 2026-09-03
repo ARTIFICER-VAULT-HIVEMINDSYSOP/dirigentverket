@@ -1,0 +1,33 @@
+{
+  "id": "example",
+  "label": "Ny licenstagare",
+  "skin": {
+    "name": "Exempel",
+    "logo": "./logo.png",
+    "hero": "./hero.png",
+    "lang": "sv"
+  },
+  "crm": {
+    "kind": "adapter",
+    "url": "",
+    "open": "detail"
+  },
+  "calendars": [],
+  "magazines": [
+    { "id": "desk-a", "title": "Desk A", "queue_file": "desk-a.json" }
+  ],
+  "rules": {
+    "one_card_per_customer": true,
+    "na_equals_vm": true,
+    "comment_on_every_outcome": true,
+    "never_duplicate_comment": true,
+    "paper_default": true,
+    "no_invented_amounts": true
+  },
+  "license": {
+    "status": "paper",
+    "licensor": "saknas",
+    "licensee": "saknas",
+    "fee": "saknas"
+  }
+}
