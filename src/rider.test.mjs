@@ -8,8 +8,16 @@ import {
   saveRideTemplate,
   loadRideTemplate,
   emptyRideDraft,
+  coreIncomplete,
+  clampLeverage,
+  leverageSpeed,
+  commitRail,
+  commitLeverage,
+  cycleLens,
+  rideJump,
+  HOP_WINDOW_MS,
 } from './rider.js';
-import { renderRideResult, renderRider } from './rider-ui.js';
+import { renderRideResult, renderRider, renderPlayArena } from './rider-ui.js';
 
 function memStore() {
   const data = {};
@@ -23,6 +31,15 @@ function memStore() {
   };
 }
 
+const bandBounce = {
+  rsi: 28,
+  bbLower: 98,
+  bbUpper: 106,
+  current: 98.2,
+  bounce: 'nedre',
+  side: 'köp',
+};
+
 test('minimal first-ride ROBOT: entry+maxFel+rr → ok, grav 100, horizon not empty', () => {
   const r = computeRide({ entry: 100, maxFel: 2, rr: 2, tillgang: 'ROBOT' });
   assert.equal(r.ok, true);
@@ -35,6 +52,7 @@ test('minimal first-ride ROBOT: entry+maxFel+rr → ok, grav 100, horizon not em
   assert.ok(r.horizon.length > 0);
   assert.equal(r.horizon[0].kind, 'paper-trendlinje');
   assert.equal(r.horizon[0].at, 100);
+  assert.ok(r.horizon.prices.length > 0);
   assert.equal(r.coast, null);
   assert.equal(r.jump.jumped, false);
   assert.equal(r.missing.length, 0);
@@ -54,6 +72,12 @@ test('tom övre ger entry som enda paper-trendlinje (horizon inte tom)', () => {
   assert.equal(r.ok, true);
   assert.equal(r.horizon.length, 1);
   assert.equal(r.horizon[0].at, 100);
+});
+
+test('tom övre + ifylld grav → horizon.prices = [grav], etikett grav', () => {
+  const r = computeRide({ entry: 100, maxFel: 2, rr: 2, grav: 100, ovre: '' });
+  assert.deepEqual(r.horizon.prices, [100]);
+  assert.equal(r.horizon.label, 'en paper-linje · grav');
 });
 
 test('ifylld övre används, entry läggs inte på', () => {
@@ -96,13 +120,24 @@ test('inga påhittade RSI/BB och inget saknar-spam för valfria fält', () => {
   assert.ok(!/saknar_rsi|saknar_bb|saknar_coast|saknar_grav|saknar_ovre/i.test(blob));
 });
 
-test('hopp: jumped from grav to hopp; tom hopp = håll', () => {
-  const hold = computeRide({ entry: 100, maxFel: 2, rr: 2 });
+test('hopp bara vid band+studs; requested utan struktur = håll', () => {
+  const hold = computeRide({ entry: 100, maxFel: 2, rr: 2, requested: 104 });
   assert.equal(hold.jump.jumped, false);
-  const hop = computeRide({ entry: 100, maxFel: 2, rr: 2, hopp: 104 });
+  const hop = computeRide({ entry: 100, maxFel: 2, rr: 2, grav: 100, ...bandBounce });
   assert.equal(hop.jump.jumped, true);
   assert.equal(hop.jump.from, 100);
-  assert.equal(hop.jump.to, 104);
+  assert.equal(hop.jump.to, 98);
+  assert.equal(hop.jump.windowMs, HOP_WINDOW_MS);
+  assert.equal(hop.jump.tell, true);
+});
+
+test('mid-air stjäl inte ett andra hopp', () => {
+  const hop = rideJump({ ...parseRideInput({ entry: 100, ...bandBounce }), midAir: true }, 100, {
+    trail: true,
+    band: 'nedre',
+  });
+  assert.equal(hop.jumped, false);
+  assert.equal(hop.reason, 'mid-air');
 });
 
 test('sälj vänder SL/TP kring entry', () => {
@@ -116,6 +151,31 @@ test('parsePriceList lämnar tom text tom', () => {
   assert.deepEqual(parsePriceList('102; 104'), [102, 104]);
 });
 
+test('hävstång 1–4×: HUD-faktor = fart, aldrig 100×', () => {
+  assert.equal(clampLeverage(100), 4);
+  assert.equal(clampLeverage(''), 1);
+  assert.equal(leverageSpeed(4), 4);
+  assert.equal(leverageSpeed(1), 1);
+  assert.ok(leverageSpeed(4) > leverageSpeed(1));
+  const bumped = commitLeverage({ leverage: 4 }, 1);
+  assert.equal(bumped.leverage, 4);
+});
+
+test('W/S räls commit är steglös i state (ingen delay i funktionen)', () => {
+  const rails = [98, 100, 104];
+  const up = commitRail({ rail: 1 }, rails, 1);
+  assert.equal(up.rail, 2);
+  const down = commitRail(up, rails, -1);
+  assert.equal(down.rail, 1);
+});
+
+test('space/tempo-lins cyklar, ändrar inte fill', () => {
+  const a = cycleLens({ lens: 1 });
+  assert.equal(a.lens, 1.5);
+  const b = cycleLens(a);
+  assert.equal(b.lens, 2);
+});
+
 test('mallar per tillgång: spara/ladda hittar inte på siffror i tomma rutor', () => {
   const store = memStore();
   const draft = {
@@ -127,6 +187,7 @@ test('mallar per tillgång: spara/ladda hittar inte på siffror i tomma rutor', 
     grav: '',
     ovre: '',
     coast: '',
+    pilotVolume: '',
   };
   saveRideTemplate('AIIND', draft, store);
   const loaded = loadRideTemplate('AIIND', store);
@@ -137,6 +198,7 @@ test('mallar per tillgång: spara/ladda hittar inte på siffror i tomma rutor', 
   assert.equal(loaded.grav, '');
   assert.equal(loaded.ovre, '');
   assert.equal(loaded.coast, '');
+  assert.equal(loaded.pilotVolume, '');
 
   const missing = loadRideTemplate('GULDR', store);
   assert.equal(missing.tillgang, 'GULDR');
@@ -145,12 +207,17 @@ test('mallar per tillgång: spara/ladda hittar inte på siffror i tomma rutor', 
   assert.equal(missing.rr, '');
 });
 
-test('arena-UI: hopp visar from→to, håll när ingen hopp, kicker inte lampa', () => {
-  const hop = computeRide({ entry: 100, maxFel: 2, rr: 2, hopp: 104 });
+test('arena-UI A–E: tom play-rad, kicker inte lampa, hopp from→to', () => {
+  const emptyPlay = renderPlayArena(null);
+  assert.match(emptyPlay, /rider-play is-empty/);
+  assert.match(emptyPlay, /Fyll pilotvolym · entry · max-fel · RR · grav/);
+  assert.ok(!/saknar horisont|saknar kust|saknar hävstång/i.test(emptyPlay));
+
+  const hop = computeRide({ entry: 100, maxFel: 2, rr: 2, grav: 100, ...bandBounce });
   const hopHtml = renderRideResult(hop);
   assert.match(hopHtml, /is-jump/);
   assert.match(hopHtml, /→/);
-  assert.match(hopHtml, /104/);
+  assert.match(hopHtml, /98/);
 
   const hold = computeRide({ entry: 100, maxFel: 2, rr: 2 });
   const holdHtml = renderRideResult(hold);
@@ -158,8 +225,14 @@ test('arena-UI: hopp visar from→to, håll när ingen hopp, kicker inte lampa',
   assert.match(holdHtml, /Håll/);
   assert.ok(!/saknar_rsi|saknar_bb|saknar_coast|WATCHERS|anden i lampan/i.test(holdHtml));
 
-  const page = renderRider(emptyRideDraft(), hold);
+  const page = renderRider(emptyRideDraft(), null);
   assert.match(page, /Trade Rider · paper/);
-  assert.ok(!page.startsWith('WATCHERS'));
+  assert.match(page, /PAPER · live=false · ingen mäklare/);
+  assert.match(page, /id="rider-core"/);
+  assert.match(page, /id="rider-advanced"/);
+  assert.match(page, /data-action="rider-first"/);
+  assert.match(page, /Första paper-ride/);
+  assert.match(page, /Minst: tillgång, pilotvolym, entry, max-fel, RR/);
   assert.ok(!/WATCHERS · anden i lampan/.test(page));
+  assert.equal(coreIncomplete(emptyRideDraft()), true);
 });

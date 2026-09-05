@@ -27,8 +27,17 @@ import {
   emptyRideDraft,
   saveRideTemplate,
   loadRideTemplate,
+  emptyPlayState,
+  rideRails,
+  commitRail,
+  commitFollow,
+  commitLeverage,
+  cycleLens,
+  reservedRiderKey,
+  applyPlayDom,
+  HOP_WINDOW_MS,
 } from './rider.js';
-import { renderRider, readRiderForm } from './rider-ui.js';
+import { renderRider, readRiderForm, focusRiderCore } from './rider-ui.js';
 import {
   loadNews,
   saveNews,
@@ -49,6 +58,8 @@ let robotResult = null;
 let riderDraft = loadRideDraft();
 let riderResult = null;
 let riderHopPulse = 0;
+let riderPlay = emptyPlayState();
+let riderFirstHint = '';
 let news = loadNews();
 
 function persist() {
@@ -102,7 +113,12 @@ function render() {
   else if (view === 'synergier') inner = renderSynergier(c);
   else if (view === 'nyheter') inner = renderNews(news, { selectedModuleId: id });
   else if (view === 'robot') inner = renderRobot(robotDraft, robotResult);
-  else if (view === 'rider') inner = renderRider(riderDraft, riderResult, riderHopPulse);
+  else if (view === 'rider') {
+    inner = renderRider(riderDraft, riderResult, riderHopPulse, riderPlay, {
+      firstHint: riderFirstHint,
+      liveLocked: true,
+    });
+  }
   else if (view === 'nytt') inner = renderForm(null, c);
   else if (view === 'redigera') {
     const p = state.projects.find((x) => x.id === id);
@@ -185,7 +201,21 @@ root.addEventListener('click', (ev) => {
     riderDraft = emptyRideDraft();
     riderResult = null;
     riderHopPulse = 0;
+    riderPlay = emptyPlayState();
+    riderFirstHint = '';
     saveRideDraft(riderDraft);
+    render();
+  } else if (action === 'rider-first') {
+    const form = document.getElementById('rider-form');
+    if (form) riderDraft = readRiderForm(form);
+    saveRideDraft(riderDraft);
+    const name = focusRiderCore(riderDraft);
+    riderFirstHint = name ? `Kärnan: fyll ${name}. Inga påhittade tal.` : '';
+    render();
+    focusRiderCore(riderDraft);
+  } else if (action === 'rider-live-ask') {
+    window.confirm('Live-order är låst. Paper. ÖB godkänner live. Detta stannar paper.');
+    riderPlay = { ...riderPlay, robbanOpen: true };
     render();
   } else if (action === 'rider-save-tpl') {
     const form = document.getElementById('rider-form');
@@ -299,10 +329,21 @@ root.addEventListener('submit', (ev) => {
     ev.preventDefault();
     riderDraft = readRiderForm(riderForm);
     saveRideDraft(riderDraft);
-    riderResult = computeRide(riderDraft);
-    riderHopPulse = riderResult.ok && riderResult.jump && riderResult.jump.jumped
-      ? riderHopPulse + 1
-      : 0;
+    const now = Date.now();
+    const midAir = riderPlay.hopping && now < riderPlay.hopUntil;
+    riderResult = computeRide({ ...riderDraft, midAir });
+    if (riderResult.ok && riderResult.havstang) {
+      riderPlay = { ...riderPlay, leverage: riderResult.havstang };
+    }
+    if (riderResult.ok && riderResult.jump && riderResult.jump.jumped && !midAir) {
+      riderHopPulse += 1;
+      riderPlay = { ...riderPlay, hopping: true, hopUntil: now + HOP_WINDOW_MS };
+      window.setTimeout(() => {
+        riderPlay = { ...riderPlay, hopping: false, hopUntil: 0 };
+      }, HOP_WINDOW_MS);
+    } else {
+      riderHopPulse = 0;
+    }
     render();
     return;
   }
@@ -329,6 +370,29 @@ root.addEventListener('submit', (ev) => {
     persistNews();
     render();
   }
+});
+
+function riderTypingTarget(el) {
+  if (!el) return false;
+  const tag = el.tagName;
+  return tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || el.isContentEditable;
+}
+
+window.addEventListener('keydown', (ev) => {
+  if (parseRoute().view !== 'rider') return;
+  if (!reservedRiderKey(ev.key)) return;
+  const robbanOpen = Boolean(document.getElementById('rider-robban')?.open);
+  if (riderTypingTarget(ev.target) && !robbanOpen) return;
+  ev.preventDefault();
+  const rails = rideRails(riderResult);
+  const key = ev.key.length === 1 ? ev.key.toLowerCase() : ev.key;
+  if (key === 'w') riderPlay = commitRail(riderPlay, rails, 1);
+  else if (key === 's') riderPlay = commitRail(riderPlay, rails, -1);
+  else if (key === 'f') riderPlay = commitFollow(riderPlay);
+  else if (key === '[') riderPlay = commitLeverage(riderPlay, -1);
+  else if (key === ']') riderPlay = commitLeverage(riderPlay, 1);
+  else if (key === ' ' || key === 'Spacebar') riderPlay = cycleLens(riderPlay);
+  applyPlayDom(riderPlay, rails);
 });
 
 window.addEventListener('hashchange', render);

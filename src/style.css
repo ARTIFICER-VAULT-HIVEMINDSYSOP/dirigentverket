@@ -1160,6 +1160,26 @@ body.view-rider .shell-artificer {
   max-width: 42ch;
 }
 
+.rider-badge-paper {
+  position: sticky;
+  top: 8px;
+  z-index: 2;
+  align-self: stretch;
+  max-width: 720px;
+  width: 100%;
+  margin: 0 auto 12px;
+  padding: 8px 12px;
+  text-align: center;
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #d7ecd8;
+  background: rgba(18, 32, 20, 0.92);
+  border: 1px solid rgba(122, 158, 126, 0.55);
+  border-radius: 999px;
+}
+
 .rider-mode {
   display: flex;
   gap: 8px;
@@ -1232,6 +1252,7 @@ body.view-rider .shell-artificer {
   margin-top: 18px;
 }
 
+.rider-play,
 .rider-arena {
   position: relative;
   min-height: 220px;
@@ -1241,6 +1262,75 @@ body.view-rider .shell-artificer {
   border: 1px solid rgba(122, 158, 126, 0.28);
   background:
     linear-gradient(180deg, rgba(18, 24, 18, 0.9) 0%, rgba(10, 12, 10, 0.95) 100%);
+}
+
+.rider-play.is-empty {
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rider-play-empty {
+  margin: 8px 12px;
+  text-align: center;
+  color: var(--ink-mute);
+}
+
+.rider-play-hud {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 18px;
+  margin: 0 0 10px;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--ink-mute);
+}
+
+.rider-play-hud strong {
+  color: var(--ink);
+}
+
+.rider-robban-row {
+  margin: 0 0 12px;
+}
+
+.rider-robban {
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 6px 10px;
+  background: rgba(12, 14, 12, 0.45);
+}
+
+.rider-robban summary {
+  cursor: pointer;
+  font-family: var(--mono);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-size: 12px;
+}
+
+.rider-live-lock {
+  color: var(--ink-faint);
+  font-size: 12px;
+}
+
+#rider-advanced {
+  margin-top: 14px;
+  padding: 8px 0 0;
+}
+
+#rider-advanced summary {
+  cursor: pointer;
+  color: var(--ink-mute);
+}
+
+.rider-mark.is-rail .rider-mark-line {
+  background: var(--gold-2);
+}
+
+.rider-mark.is-sit .rider-mark-label {
+  color: var(--ok);
 }
 
 .rider-arena-field {

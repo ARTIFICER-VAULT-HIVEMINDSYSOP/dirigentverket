@@ -4,15 +4,38 @@
  * Optional grav / övre / coast stay empty honestly; they are not invent-filled.
  */
 
-import { formatPx } from './robot.js';
+import { formatPx, structureSignal } from './robot.js';
 
 export { formatPx };
 
 export const TILLGANGAR = ['ROBOT', 'AIIND', 'GULDR'];
 export const RIDER_DRAFT_KEY = 'dirigentverket.rider.v1';
 export const RIDER_TEMPLATE_KEY = 'dirigentverket.rider.templates.v1';
+export const HOP_WINDOW_MS = 2000;
+export const LEVERAGE_MIN = 1;
+export const LEVERAGE_MAX = 4;
+export const LENS_STEPS = [1, 1.5, 2];
 
-const TEMPLATE_FIELDS = ['side', 'entry', 'maxFel', 'rr', 'grav', 'ovre', 'coast', 'hopp'];
+const TEMPLATE_FIELDS = [
+  'side',
+  'pilotVolume',
+  'entry',
+  'maxFel',
+  'rr',
+  'grav',
+  'requested',
+  'current',
+  'rsi',
+  'bbLower',
+  'bbUpper',
+  'bounce',
+  'ovre',
+  'undre',
+  'coast',
+  'havstang',
+  'cluster',
+  'tempo',
+];
 
 function num(v) {
   if (v === '' || v === null || v === undefined) return null;
@@ -42,17 +65,39 @@ export function parsePriceList(raw) {
     .filter((x) => x !== null);
 }
 
+export function clampLeverage(v) {
+  const n = num(v);
+  if (n === null) return 1;
+  return Math.min(LEVERAGE_MAX, Math.max(LEVERAGE_MIN, Math.round(n)));
+}
+
+/** HUD factor must equal motion factor. 4× is four times 1×. Never 100×. */
+export function leverageSpeed(lev) {
+  return clampLeverage(lev);
+}
+
 export function parseRideInput(raw) {
   return {
     tillgang: normalizeTillgang(raw.tillgang),
     side: raw.side === 'sälj' ? 'sälj' : 'köp',
+    pilotVolume: num(raw.pilotVolume),
     entry: num(raw.entry),
     maxFel: num(raw.maxFel),
     rr: num(raw.rr),
     grav: num(raw.grav),
+    requested: num(raw.requested),
+    current: num(raw.current),
+    rsi: num(raw.rsi),
+    bbLower: num(raw.bbLower),
+    bbUpper: num(raw.bbUpper),
+    bounce: raw.bounce,
     ovre: parsePriceList(raw.ovre),
+    undre: parsePriceList(raw.undre),
     coast: num(raw.coast),
-    hopp: num(raw.hopp),
+    havstang: clampLeverage(raw.havstang),
+    cluster: String(raw.cluster || '').trim(),
+    tempo: String(raw.tempo || '').trim(),
+    midAir: Boolean(raw.midAir),
   };
 }
 
@@ -75,39 +120,93 @@ export function rideLevels(input) {
   return { sl, tp, dist: maxFel, rr, side, entry };
 }
 
+function stampHorizon(lines, label) {
+  lines.prices = lines.map((l) => l.at);
+  lines.label = label;
+  return lines;
+}
+
 /**
- * Paper horizon. Empty övre is not a failure: entry is the sole paper-trendlinje.
+ * Paper horizon. Empty övre + typed grav → [grav], «en paper-linje · grav».
+ * Empty övre + empty grav → entry as sole paper-trendlinje (first ride).
  */
 export function rideHorizon(input) {
-  const entry = input.entry;
-  if (entry === null || entry <= 0) return [];
-  const lines = input.ovre && input.ovre.length ? input.ovre : [entry];
-  return lines.map((at) => ({ kind: 'paper-trendlinje', at }));
-}
-
-/**
- * Hop only when the user typed a hopp that differs from sit (grav).
- * No hopp → hold. Never invent a jump.
- */
-export function rideJump(input, grav) {
-  const hopp = input.hopp;
-  if (hopp === null || grav === null || hopp === grav) {
-    return { jumped: false, from: grav, to: grav };
+  const ovre = input.ovre || [];
+  const undre = input.undre || [];
+  if (ovre.length || undre.length) {
+    const lines = [
+      ...undre.map((at) => ({ kind: 'paper-trendlinje', at, band: 'undre' })),
+      ...ovre.map((at) => ({ kind: 'paper-trendlinje', at, band: 'övre' })),
+    ];
+    return stampHorizon(lines, 'ifyllda linjer');
   }
-  return { jumped: true, from: grav, to: hopp };
+  if (input.grav !== null) {
+    return stampHorizon([{ kind: 'paper-trendlinje', at: input.grav, band: 'grav' }], 'en paper-linje · grav');
+  }
+  if (input.entry !== null && input.entry > 0) {
+    return stampHorizon([{ kind: 'paper-trendlinje', at: input.entry }], 'paper-trendlinje');
+  }
+  return stampHorizon([], '');
 }
 
 /**
- * First ride needs entry + maxFel + RR.
- * grav empty → sit at entry. övre empty → horizon = [entry].
- * coast empty stays null. RSI/BB are never invented or required.
+ * Hop only on band+bounce (structure.trail). Same window every time.
+ * Mid-air refuses a stolen second hop. Never invent RSI/BB.
+ */
+export function rideJump(input, grav, structure) {
+  const hold = {
+    jumped: false,
+    from: grav,
+    to: grav,
+    windowMs: HOP_WINDOW_MS,
+    tell: false,
+  };
+  if (input.midAir) {
+    return { ...hold, stolen: false, reason: 'mid-air' };
+  }
+  if (!structure || !structure.trail || !structure.band) {
+    return hold;
+  }
+  const to = structure.band === 'övre' ? input.bbUpper : structure.band === 'nedre' ? input.bbLower : null;
+  if (to === null) return hold;
+  return {
+    jumped: true,
+    from: grav,
+    to,
+    windowMs: HOP_WINDOW_MS,
+    tell: true,
+    band: structure.band,
+  };
+}
+
+function rideStructure(input) {
+  const s = structureSignal({
+    rsi: input.rsi,
+    bbLower: input.bbLower,
+    bbUpper: input.bbUpper,
+    bounce: input.bounce,
+    current: input.current,
+    side: input.side,
+  });
+  return {
+    ...s,
+    rsi: input.rsi,
+    bbLower: input.bbLower,
+    bbUpper: input.bbUpper,
+  };
+}
+
+/**
+ * First ride needs entry + maxFel + RR for SL/TP.
+ * grav empty → sit at entry. övre empty → horizon from grav or entry.
+ * coast / hävstång empty stay muted. RSI/BB never invented.
  */
 export function computeRide(raw) {
   const input = parseRideInput(raw);
   const required = missingRequired(input);
   const saknar_sl_tp = required.length > 0;
   const levels = rideLevels(input);
-  const structure = { known: false, rsi: null, bbLower: null, bbUpper: null };
+  const structure = rideStructure(input);
 
   if (saknar_sl_tp || !levels) {
     return paperStamp({
@@ -120,10 +219,12 @@ export function computeRide(raw) {
       dist: null,
       rr: input.rr,
       grav: null,
-      horizon: [],
+      horizon: stampHorizon([], ''),
       coast: null,
-      jump: { jumped: false, from: null, to: null },
+      havstang: input.havstang,
+      jump: { jumped: false, from: null, to: null, windowMs: HOP_WINDOW_MS, tell: false },
       tillgang: input.tillgang,
+      pilotVolume: input.pilotVolume,
       input,
       structure,
     });
@@ -131,7 +232,7 @@ export function computeRide(raw) {
 
   const grav = input.grav !== null ? input.grav : input.entry;
   const horizon = rideHorizon(input);
-  const jump = rideJump(input, grav);
+  const jump = rideJump(input, grav, structure);
   const coast = input.coast;
 
   return paperStamp({
@@ -146,8 +247,10 @@ export function computeRide(raw) {
     grav,
     horizon,
     coast,
+    havstang: input.havstang,
     jump,
     tillgang: input.tillgang,
+    pilotVolume: input.pilotVolume,
     input,
     structure,
   });
@@ -157,14 +260,112 @@ export function emptyRideDraft() {
   return {
     tillgang: 'ROBOT',
     side: 'köp',
+    pilotVolume: '',
     entry: '',
     maxFel: '',
     rr: '',
     grav: '',
+    requested: '',
+    current: '',
+    rsi: '',
+    bbLower: '',
+    bbUpper: '',
+    bounce: 'nej',
     ovre: '',
+    undre: '',
     coast: '',
-    hopp: '',
+    havstang: '',
+    cluster: '',
+    tempo: '',
   };
+}
+
+export function coreIncomplete(draft) {
+  const filled = (k) => String(draft?.[k] ?? '').trim() !== '';
+  return !filled('pilotVolume') || !filled('entry') || !filled('maxFel') || !filled('rr') || !filled('grav');
+}
+
+export function firstEmptyCoreName(draft) {
+  for (const name of ['pilotVolume', 'entry', 'maxFel', 'rr', 'grav']) {
+    if (String(draft?.[name] ?? '').trim() === '') return name;
+  }
+  return null;
+}
+
+export function emptyPlayState() {
+  return {
+    rail: 0,
+    sit: 0,
+    leverage: 1,
+    lens: 1,
+    hopping: false,
+    hopUntil: 0,
+    robbanOpen: false,
+  };
+}
+
+export function rideRails(ride) {
+  const prices = new Set();
+  if (ride && ride.ok) {
+    for (const p of ride.horizon?.prices || []) prices.add(p);
+    if (ride.grav != null) prices.add(ride.grav);
+  }
+  return [...prices].sort((a, b) => a - b);
+}
+
+export function commitRail(play, rails, dir) {
+  if (!rails.length) return { ...play };
+  const next = Math.min(rails.length - 1, Math.max(0, (play.rail || 0) + dir));
+  return { ...play, rail: next };
+}
+
+export function commitFollow(play) {
+  return { ...play, sit: play.rail };
+}
+
+export function commitLeverage(play, delta) {
+  return { ...play, leverage: clampLeverage((play.leverage || 1) + delta) };
+}
+
+export function cycleLens(play) {
+  const i = LENS_STEPS.indexOf(play.lens);
+  const next = LENS_STEPS[(i < 0 ? 0 : i + 1) % LENS_STEPS.length];
+  return { ...play, lens: next };
+}
+
+export function reservedRiderKey(key) {
+  const k = String(key).length === 1 ? String(key).toLowerCase() : String(key);
+  return k === 'w' || k === 's' || k === 'f' || k === '[' || k === ']' || k === ' ' || k === 'Spacebar';
+}
+
+export function applyPlayDom(play, rails, root = globalThis.document) {
+  if (!root) return play;
+  const host = root.querySelector('[data-rider-play]');
+  if (!host) return play;
+  const speed = leverageSpeed(play.leverage);
+  host.dataset.rail = String(play.rail);
+  host.dataset.sit = String(play.sit);
+  host.dataset.leverage = String(play.leverage);
+  host.dataset.speed = String(speed);
+  host.dataset.lens = String(play.lens);
+  host.style.setProperty('--rider-speed', String(speed));
+  host.style.setProperty('--rider-lens', String(play.lens));
+  const levHud = host.querySelector('[data-rider-leverage-hud]');
+  if (levHud) levHud.textContent = `${play.leverage}×`;
+  const speedHud = host.querySelector('[data-rider-speed-hud]');
+  if (speedHud) speedHud.textContent = `${speed}×`;
+  const marks = host.querySelectorAll('[data-rail-index]');
+  marks.forEach((el) => {
+    el.classList.toggle('is-rail', Number(el.getAttribute('data-rail-index')) === play.rail);
+    el.classList.toggle('is-sit', Number(el.getAttribute('data-rail-index')) === play.sit);
+  });
+  const price = rails[play.sit] ?? rails[play.rail];
+  const dot = host.querySelector('[data-rider-dot]');
+  const mark = host.querySelector(`[data-rail-price="${price}"]`);
+  if (dot && mark) {
+    dot.style.top = mark.style.top || mark.getAttribute('data-top') || '';
+  }
+  return play;
 }
 
 function storeApi(store) {
