@@ -21,6 +21,15 @@ import {
   readRobotForm,
 } from './robot-ui.js';
 import {
+  computeRide,
+  loadRideDraft,
+  saveRideDraft,
+  emptyRideDraft,
+  saveRideTemplate,
+  loadRideTemplate,
+} from './rider.js';
+import { renderRider, readRiderForm } from './rider-ui.js';
+import {
   loadNews,
   saveNews,
   fetchRss,
@@ -37,6 +46,9 @@ let state = loadState();
 let portfolioMode = 'cards';
 let robotDraft = loadRobotDraft();
 let robotResult = null;
+let riderDraft = loadRideDraft();
+let riderResult = null;
+let riderHopPulse = 0;
 let news = loadNews();
 
 function persist() {
@@ -90,6 +102,7 @@ function render() {
   else if (view === 'synergier') inner = renderSynergier(c);
   else if (view === 'nyheter') inner = renderNews(news, { selectedModuleId: id });
   else if (view === 'robot') inner = renderRobot(robotDraft, robotResult);
+  else if (view === 'rider') inner = renderRider(riderDraft, riderResult, riderHopPulse);
   else if (view === 'nytt') inner = renderForm(null, c);
   else if (view === 'redigera') {
     const p = state.projects.find((x) => x.id === id);
@@ -97,8 +110,17 @@ function render() {
   } else inner = renderPortfolio(c);
 
   document.body.classList.toggle('view-artificer', view === 'robot');
-  document.title = view === 'robot' ? 'Artificer AI — WATCHERS' : 'Dirigentverket — klusterbok';
-  root.innerHTML = view === 'robot' ? renderArtificerShell(inner, parseRoute) : renderShell(inner, c);
+  document.body.classList.toggle('view-rider', view === 'rider');
+  document.title =
+    view === 'rider'
+      ? 'Trade Rider — paper'
+      : view === 'robot'
+        ? 'Artificer AI — WATCHERS'
+        : 'Dirigentverket — klusterbok';
+  root.innerHTML =
+    view === 'robot' || view === 'rider'
+      ? renderArtificerShell(inner, parseRoute)
+      : renderShell(inner, c);
 }
 
 function readForm(form) {
@@ -159,6 +181,26 @@ root.addEventListener('click', (ev) => {
     robotResult = null;
     saveRobotDraft(robotDraft);
     render();
+  } else if (action === 'rider-clear') {
+    riderDraft = emptyRideDraft();
+    riderResult = null;
+    riderHopPulse = 0;
+    saveRideDraft(riderDraft);
+    render();
+  } else if (action === 'rider-save-tpl') {
+    const form = document.getElementById('rider-form');
+    if (form) riderDraft = readRiderForm(form);
+    saveRideDraft(riderDraft);
+    saveRideTemplate(riderDraft.tillgang, riderDraft);
+    render();
+  } else if (action === 'rider-load-tpl') {
+    const form = document.getElementById('rider-form');
+    const tillgang = form ? readRiderForm(form).tillgang : riderDraft.tillgang;
+    riderDraft = loadRideTemplate(tillgang);
+    riderResult = null;
+    riderHopPulse = 0;
+    saveRideDraft(riderDraft);
+    render();
   } else if (action === 'news-save-url') {
     const nid = btn.getAttribute('data-id');
     updateModuleUrl(news, nid, nearbyNewsUrl(btn, nid));
@@ -207,10 +249,21 @@ root.addEventListener('click', (ev) => {
 
 root.addEventListener('change', (ev) => {
   const sel = ev.target.closest('[data-action="select-project"]');
-  if (!sel) return;
-  state.selectedId = sel.value;
-  persist();
-  go(`#/verksamhet/${encodeURIComponent(sel.value)}`);
+  if (sel) {
+    state.selectedId = sel.value;
+    persist();
+    go(`#/verksamhet/${encodeURIComponent(sel.value)}`);
+    return;
+  }
+  const tillgangSel = ev.target.closest('#rider-form [name="tillgang"]');
+  if (tillgangSel) {
+    const form = tillgangSel.closest('#rider-form');
+    if (form) {
+      riderDraft = readRiderForm(form);
+      saveRideDraft(riderDraft);
+      render();
+    }
+  }
 });
 
 root.addEventListener('submit', (ev) => {
@@ -238,6 +291,18 @@ root.addEventListener('submit', (ev) => {
     robotDraft = readRobotForm(robotForm);
     saveRobotDraft(robotDraft);
     robotResult = computeRobot(robotDraft);
+    render();
+    return;
+  }
+  const riderForm = ev.target.closest('#rider-form');
+  if (riderForm) {
+    ev.preventDefault();
+    riderDraft = readRiderForm(riderForm);
+    saveRideDraft(riderDraft);
+    riderResult = computeRide(riderDraft);
+    riderHopPulse = riderResult.ok && riderResult.jump && riderResult.jump.jumped
+      ? riderHopPulse + 1
+      : 0;
     render();
     return;
   }
