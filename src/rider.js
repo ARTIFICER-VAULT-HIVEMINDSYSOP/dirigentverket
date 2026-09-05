@@ -15,6 +15,7 @@ export const HOP_WINDOW_MS = 2000;
 export const LEVERAGE_MIN = 1;
 export const LEVERAGE_MAX = 4;
 export const LENS_STEPS = [1, 1.5, 2];
+export const COAST_PERIOD_MS = 1600;
 
 const TEMPLATE_FIELDS = [
   'side',
@@ -74,6 +75,11 @@ export function clampLeverage(v) {
 /** HUD factor must equal motion factor. 4× is four times 1×. Never 100×. */
 export function leverageSpeed(lev) {
   return clampLeverage(lev);
+}
+
+/** Coast scan period. 4× is one quarter of 1×. Hop window stays HOP_WINDOW_MS. */
+export function coastPeriodMs(lev) {
+  return COAST_PERIOD_MS / leverageSpeed(lev);
 }
 
 export function parseRideInput(raw) {
@@ -350,6 +356,7 @@ export function applyPlayDom(play, rails, root = globalThis.document) {
   host.dataset.lens = String(play.lens);
   host.style.setProperty('--rider-speed', String(speed));
   host.style.setProperty('--rider-lens', String(play.lens));
+  host.style.setProperty('--rider-coast-ms', `${coastPeriodMs(play.leverage)}ms`);
   const levHud = host.querySelector('[data-rider-leverage-hud]');
   if (levHud) levHud.textContent = `${play.leverage}×`;
   const speedHud = host.querySelector('[data-rider-speed-hud]');
@@ -363,8 +370,11 @@ export function applyPlayDom(play, rails, root = globalThis.document) {
   const dot = host.querySelector('[data-rider-dot]');
   const mark = host.querySelector(`[data-rail-price="${price}"]`);
   if (dot && mark) {
+    dot.style.transition = 'none';
     dot.style.top = mark.style.top || mark.getAttribute('data-top') || '';
   }
+  const field = host.querySelector('[data-rider-field]');
+  if (field) field.style.transform = `scale(${play.lens || 1})`;
   return play;
 }
 

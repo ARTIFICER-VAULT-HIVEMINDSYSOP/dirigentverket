@@ -1398,14 +1398,41 @@ body.view-rider .shell-artificer {
   box-shadow: 0 0 0 4px rgba(122, 158, 126, 0.2), 0 0 16px rgba(122, 158, 126, 0.45);
   top: var(--from, 50%);
   transform: translateY(-50%);
+  transition: none;
 }
 
 .rider-dot.is-jump {
-  animation: rider-hop-dot 2s ease forwards;
+  animation: rider-hop-dot var(--hop-window, 2s) ease forwards;
 }
 
 .rider-dot.is-hold {
   outline: 2px solid rgba(201, 166, 107, 0.35);
+  animation: rider-coast-pulse var(--rider-coast-ms, 1600ms) linear infinite;
+}
+
+.rider-speed-scan {
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  height: 16%;
+  pointer-events: none;
+  background: linear-gradient(180deg, transparent, rgba(122, 158, 126, 0.2), transparent);
+  animation: rider-speed-scan var(--rider-coast-ms, 1600ms) linear infinite;
+}
+
+.rider-play.has-hop .rider-speed-scan {
+  animation-play-state: paused;
+}
+
+@keyframes rider-speed-scan {
+  0% { top: 88%; }
+  100% { top: -8%; }
+}
+
+@keyframes rider-coast-pulse {
+  0%,
+  100% { box-shadow: 0 0 0 4px rgba(122, 158, 126, 0.16), 0 0 12px rgba(122, 158, 126, 0.3); }
+  50% { box-shadow: 0 0 0 7px rgba(122, 158, 126, 0.28), 0 0 22px rgba(122, 158, 126, 0.55); }
 }
 
 @keyframes rider-hop-dot {
@@ -1428,7 +1455,7 @@ body.view-rider .shell-artificer {
   color: var(--gold-2);
   background: rgba(201, 166, 107, 0.14);
   border: 1px solid rgba(201, 166, 107, 0.45);
-  animation: rider-hop-flash 2s ease;
+  animation: rider-hop-flash var(--hop-window, 2s) ease;
 }
 
 .rider-hop.is-hold {

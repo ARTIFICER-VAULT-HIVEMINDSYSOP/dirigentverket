@@ -11,11 +11,14 @@ import {
   coreIncomplete,
   clampLeverage,
   leverageSpeed,
+  coastPeriodMs,
   commitRail,
   commitLeverage,
   cycleLens,
   rideJump,
+  reservedRiderKey,
   HOP_WINDOW_MS,
+  COAST_PERIOD_MS,
 } from './rider.js';
 import { renderRideResult, renderRider, renderPlayArena } from './rider-ui.js';
 
@@ -159,6 +162,24 @@ test('hävstång 1–4×: HUD-faktor = fart, aldrig 100×', () => {
   assert.ok(leverageSpeed(4) > leverageSpeed(1));
   const bumped = commitLeverage({ leverage: 4 }, 1);
   assert.equal(bumped.leverage, 4);
+  const r = computeRide({ entry: 100, maxFel: 2, rr: 2, havstang: 100 });
+  assert.equal(r.havstang, 4);
+  const html = renderPlayArena(r, { leverage: r.havstang });
+  assert.match(html, /data-speed="4"/);
+  assert.match(html, /data-rider-leverage-hud>4×/);
+  assert.match(html, /data-rider-speed-hud>4×/);
+  assert.match(html, /--rider-coast-ms:400ms/);
+  assert.ok(!/data-rider-(?:leverage|speed)-hud>100×/.test(html));
+  assert.equal(coastPeriodMs(1), COAST_PERIOD_MS);
+  assert.equal(coastPeriodMs(4) * 4, coastPeriodMs(1));
+});
+
+test('reserverade tangenter W/S/F [ ] space; hopp-fönster oberoende av hävstång', () => {
+  for (const k of ['w', 's', 'f', '[', ']', ' ']) assert.equal(reservedRiderKey(k), true);
+  const hop1 = computeRide({ entry: 100, maxFel: 2, rr: 2, grav: 100, havstang: 1, ...bandBounce });
+  const hop4 = computeRide({ entry: 100, maxFel: 2, rr: 2, grav: 100, havstang: 4, ...bandBounce });
+  assert.equal(hop1.jump.windowMs, HOP_WINDOW_MS);
+  assert.equal(hop4.jump.windowMs, HOP_WINDOW_MS);
 });
 
 test('W/S räls commit är steglös i state (ingen delay i funktionen)', () => {

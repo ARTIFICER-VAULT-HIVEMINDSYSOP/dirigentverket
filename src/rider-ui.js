@@ -5,6 +5,7 @@ import {
   coreIncomplete,
   firstEmptyCoreName,
   leverageSpeed,
+  coastPeriodMs,
   rideRails,
   HOP_WINDOW_MS,
 } from './rider.js';
@@ -110,21 +111,23 @@ export function renderPlayArena(ride, play = {}) {
   const toTop = scale.y(toPrice);
   const coastMuted = ride.coast === null || ride.coast === undefined;
 
+  const coastMs = coastPeriodMs(lev);
   return `<div class="rider-play ${jumped ? 'has-hop' : 'has-hold'}" data-rider-play
       data-leverage="${lev}" data-speed="${speed}" data-lens="${lens}" data-rail="${rail}" data-sit="${sit}"
-      style="--rider-speed:${speed};--rider-lens:${lens};--hop-window:${HOP_WINDOW_MS}ms;"
+      style="--rider-speed:${speed};--rider-lens:${lens};--rider-coast-ms:${coastMs}ms;--hop-window:${HOP_WINDOW_MS}ms;"
       role="img" aria-label="Paper-arena">
     <div class="rider-play-hud">
       <span>hävstång <strong data-rider-leverage-hud>${lev}×</strong></span>
       <span>fart <strong data-rider-speed-hud>${speed}×</strong></span>
       <span class="faint">W/S räls · F fäst · [ ] 1–4× · space lins</span>
     </div>
-    <div class="rider-arena-field" style="transform:scale(var(--rider-lens));transform-origin:center;">
+    <div class="rider-arena-field" data-rider-field style="transform:scale(var(--rider-lens));transform-origin:center;">
+      <div class="rider-speed-scan" aria-hidden="true"></div>
       ${markHtml}
-      <div class="rider-dot ${jumped ? 'is-jump' : 'is-hold'}" data-rider-dot style="--from:${sitTop}%;--to:${toTop}%;top:${sitTop}%;animation-duration:${HOP_WINDOW_MS}ms;"></div>
+      <div class="rider-dot ${jumped ? 'is-jump' : 'is-hold'}" data-rider-dot style="--from:${sitTop}%;--to:${toTop}%;top:${sitTop}%;"></div>
     </div>
     ${hop}
-    <p class="faint rider-muted-opt">${coastMuted ? 'coast tyst' : ''} · hävstång HUD = fart (inte 100×)</p>
+    <p class="faint rider-muted-opt">${coastMuted ? 'coast tyst' : ''} · hävstång HUD = fart · max 4×</p>
   </div>`;
 }
 
@@ -203,7 +206,7 @@ export function renderRider(draft, ride, hopPulse = 0, play = {}, opts = {}) {
           <details class="rider-robban" id="rider-robban">
             <summary>Robban</summary>
             <p class="faint">Menyn tar inte W/S/F. Demo stannar paper.</p>
-            <button class="btn btn-ghost" type="button" data-action="rider-live-ask">Demo → live</button>
+            <button class="btn btn-ghost" type="button" data-action="rider-live-ask" data-rider-no-wsf>Demo → live</button>
             <p class="rider-live-lock">${liveLocked ? 'live låst · paper' : 'paper'}</p>
           </details>
         </div>

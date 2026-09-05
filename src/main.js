@@ -378,22 +378,27 @@ function riderTypingTarget(el) {
   return tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || el.isContentEditable;
 }
 
-window.addEventListener('keydown', (ev) => {
-  if (parseRoute().view !== 'rider') return;
-  if (!reservedRiderKey(ev.key)) return;
-  const robbanOpen = Boolean(document.getElementById('rider-robban')?.open);
-  if (riderTypingTarget(ev.target) && !robbanOpen) return;
-  ev.preventDefault();
-  const rails = rideRails(riderResult);
-  const key = ev.key.length === 1 ? ev.key.toLowerCase() : ev.key;
-  if (key === 'w') riderPlay = commitRail(riderPlay, rails, 1);
-  else if (key === 's') riderPlay = commitRail(riderPlay, rails, -1);
-  else if (key === 'f') riderPlay = commitFollow(riderPlay);
-  else if (key === '[') riderPlay = commitLeverage(riderPlay, -1);
-  else if (key === ']') riderPlay = commitLeverage(riderPlay, 1);
-  else if (key === ' ' || key === 'Spacebar') riderPlay = cycleLens(riderPlay);
-  applyPlayDom(riderPlay, rails);
-});
+window.addEventListener(
+  'keydown',
+  (ev) => {
+    if (parseRoute().view !== 'rider') return;
+    if (!reservedRiderKey(ev.key)) return;
+    const inRobban = Boolean(ev.target && ev.target.closest && ev.target.closest('#rider-robban'));
+    if (riderTypingTarget(ev.target) && !inRobban) return;
+    ev.preventDefault();
+    ev.stopPropagation();
+    const rails = rideRails(riderResult);
+    const key = ev.key.length === 1 ? ev.key.toLowerCase() : ev.key;
+    if (key === 'w') riderPlay = commitRail(riderPlay, rails, 1);
+    else if (key === 's') riderPlay = commitRail(riderPlay, rails, -1);
+    else if (key === 'f') riderPlay = commitFollow(riderPlay);
+    else if (key === '[') riderPlay = commitLeverage(riderPlay, -1);
+    else if (key === ']') riderPlay = commitLeverage(riderPlay, 1);
+    else if (key === ' ' || key === 'Spacebar') riderPlay = cycleLens(riderPlay);
+    applyPlayDom(riderPlay, rails);
+  },
+  true,
+);
 
 window.addEventListener('hashchange', render);
 if (!window.location.hash) window.location.hash = '#/portfolj';
