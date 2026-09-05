@@ -17,8 +17,11 @@ import {
   cycleLens,
   rideJump,
   reservedRiderKey,
+  handleRiderKey,
+  tempoToLens,
   HOP_WINDOW_MS,
   COAST_PERIOD_MS,
+  LIVE_LOCKED,
 } from './rider.js';
 import { renderRideResult, renderRider, renderPlayArena } from './rider-ui.js';
 
@@ -188,6 +191,25 @@ test('W/S räls commit är steglös i state (ingen delay i funktionen)', () => {
   assert.equal(up.rail, 2);
   const down = commitRail(up, rails, -1);
   assert.equal(down.rail, 1);
+  const keyed = handleRiderKey({ rail: 1, sit: 1, leverage: 1, lens: 1 }, rails, 'w');
+  assert.equal(keyed.rail, 2);
+  assert.equal(keyed.commit, 'rail');
+  const follow = handleRiderKey(keyed, rails, 'f');
+  assert.equal(follow.sit, 2);
+  assert.equal(follow.commit, 'follow');
+});
+
+test('tempo är lins, inte fill; live stannar låst', () => {
+  assert.equal(tempoToLens('2'), 2);
+  assert.equal(tempoToLens(''), null);
+  assert.equal(tempoToLens('snabb fill'), null);
+  const a = computeRide({ entry: 100, maxFel: 2, rr: 2, tempo: '2' });
+  const b = computeRide({ entry: 100, maxFel: 2, rr: 2, tempo: '' });
+  assert.equal(a.ok, true);
+  assert.equal(a.sl, b.sl);
+  assert.equal(a.tp, b.tp);
+  assert.equal(a.live, false);
+  assert.equal(LIVE_LOCKED, true);
 });
 
 test('space/tempo-lins cyklar, ändrar inte fill', () => {

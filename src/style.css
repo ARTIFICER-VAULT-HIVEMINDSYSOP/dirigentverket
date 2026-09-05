@@ -1333,6 +1333,11 @@ body.view-rider .shell-artificer {
   color: var(--ok);
 }
 
+.rider-mark.is-commit .rider-mark-line {
+  background: var(--gold-2);
+  box-shadow: 0 0 14px rgba(224, 196, 138, 0.55);
+}
+
 .rider-arena-field {
   position: relative;
   height: 200px;

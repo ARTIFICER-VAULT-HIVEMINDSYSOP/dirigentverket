@@ -119,6 +119,7 @@ export function renderPlayArena(ride, play = {}) {
     <div class="rider-play-hud">
       <span>hävstång <strong data-rider-leverage-hud>${lev}×</strong></span>
       <span>fart <strong data-rider-speed-hud>${speed}×</strong></span>
+      <span>räls <strong data-rider-rail-hud>${rails[rail] != null ? escapeHtml(String(rails[rail])) : ''}</strong></span>
       <span class="faint">W/S räls · F fäst · [ ] 1–4× · space lins</span>
     </div>
     <div class="rider-arena-field" data-rider-field style="transform:scale(var(--rider-lens));transform-origin:center;">

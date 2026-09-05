@@ -16,6 +16,7 @@ export const LEVERAGE_MIN = 1;
 export const LEVERAGE_MAX = 4;
 export const LENS_STEPS = [1, 1.5, 2];
 export const COAST_PERIOD_MS = 1600;
+export const LIVE_LOCKED = true;
 
 const TEMPLATE_FIELDS = [
   'side',
@@ -344,6 +345,28 @@ export function reservedRiderKey(key) {
   return k === 'w' || k === 's' || k === 'f' || k === '[' || k === ']' || k === ' ' || k === 'Spacebar';
 }
 
+/** Tempo is lens only. Unknown / empty → null (do not invent a fill or RR). */
+export function tempoToLens(tempo) {
+  const n = num(String(tempo || '').replace(',', '.'));
+  if (n === 1 || n === 1.5 || n === 2) return n;
+  return null;
+}
+
+/**
+ * One key → new play state. Synchronous. No timers, no rail delay.
+ * Space is lens, never fill.
+ */
+export function handleRiderKey(play, rails, key) {
+  const k = String(key).length === 1 ? String(key).toLowerCase() : String(key);
+  if (k === 'w') return { ...commitRail(play, rails, 1), commit: 'rail' };
+  if (k === 's') return { ...commitRail(play, rails, -1), commit: 'rail' };
+  if (k === 'f') return { ...commitFollow(play), commit: 'follow' };
+  if (k === '[') return { ...commitLeverage(play, -1), commit: 'leverage' };
+  if (k === ']') return { ...commitLeverage(play, 1), commit: 'leverage' };
+  if (k === ' ' || k === 'Spacebar') return { ...cycleLens(play), commit: 'lens' };
+  return { ...play, commit: '' };
+}
+
 export function applyPlayDom(play, rails, root = globalThis.document) {
   if (!root) return play;
   const host = root.querySelector('[data-rider-play]');
@@ -361,11 +384,23 @@ export function applyPlayDom(play, rails, root = globalThis.document) {
   if (levHud) levHud.textContent = `${play.leverage}×`;
   const speedHud = host.querySelector('[data-rider-speed-hud]');
   if (speedHud) speedHud.textContent = `${speed}×`;
+  const railHud = host.querySelector('[data-rider-rail-hud]');
+  const railPrice = rails[play.rail];
+  if (railHud) railHud.textContent = railPrice != null ? String(railPrice) : '';
   const marks = host.querySelectorAll('[data-rail-index]');
   marks.forEach((el) => {
-    el.classList.toggle('is-rail', Number(el.getAttribute('data-rail-index')) === play.rail);
-    el.classList.toggle('is-sit', Number(el.getAttribute('data-rail-index')) === play.sit);
+    const idx = Number(el.getAttribute('data-rail-index'));
+    el.classList.toggle('is-rail', idx === play.rail);
+    el.classList.toggle('is-sit', idx === play.sit);
+    el.classList.remove('is-commit');
   });
+  if (play.commit === 'rail' || play.commit === 'follow') {
+    const active = host.querySelector(`[data-rail-index="${play.rail}"]`);
+    if (active) {
+      void active.offsetWidth;
+      active.classList.add('is-commit');
+    }
+  }
   const price = rails[play.sit] ?? rails[play.rail];
   const dot = host.querySelector('[data-rider-dot]');
   const mark = host.querySelector(`[data-rail-price="${price}"]`);

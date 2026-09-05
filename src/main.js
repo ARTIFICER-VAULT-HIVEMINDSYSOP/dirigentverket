@@ -29,13 +29,12 @@ import {
   loadRideTemplate,
   emptyPlayState,
   rideRails,
-  commitRail,
-  commitFollow,
-  commitLeverage,
-  cycleLens,
   reservedRiderKey,
   applyPlayDom,
+  handleRiderKey,
+  tempoToLens,
   HOP_WINDOW_MS,
+  LIVE_LOCKED,
 } from './rider.js';
 import { renderRider, readRiderForm, focusRiderCore } from './rider-ui.js';
 import {
@@ -116,7 +115,7 @@ function render() {
   else if (view === 'rider') {
     inner = renderRider(riderDraft, riderResult, riderHopPulse, riderPlay, {
       firstHint: riderFirstHint,
-      liveLocked: true,
+      liveLocked: LIVE_LOCKED,
     });
   }
   else if (view === 'nytt') inner = renderForm(null, c);
@@ -335,6 +334,8 @@ root.addEventListener('submit', (ev) => {
     if (riderResult.ok && riderResult.havstang) {
       riderPlay = { ...riderPlay, leverage: riderResult.havstang };
     }
+    const lens = tempoToLens(riderDraft.tempo);
+    if (lens != null) riderPlay = { ...riderPlay, lens };
     if (riderResult.ok && riderResult.jump && riderResult.jump.jumped && !midAir) {
       riderHopPulse += 1;
       riderPlay = { ...riderPlay, hopping: true, hopUntil: now + HOP_WINDOW_MS };
@@ -389,12 +390,7 @@ window.addEventListener(
     ev.stopPropagation();
     const rails = rideRails(riderResult);
     const key = ev.key.length === 1 ? ev.key.toLowerCase() : ev.key;
-    if (key === 'w') riderPlay = commitRail(riderPlay, rails, 1);
-    else if (key === 's') riderPlay = commitRail(riderPlay, rails, -1);
-    else if (key === 'f') riderPlay = commitFollow(riderPlay);
-    else if (key === '[') riderPlay = commitLeverage(riderPlay, -1);
-    else if (key === ']') riderPlay = commitLeverage(riderPlay, 1);
-    else if (key === ' ' || key === 'Spacebar') riderPlay = cycleLens(riderPlay);
+    riderPlay = handleRiderKey(riderPlay, rails, ev.key);
     applyPlayDom(riderPlay, rails);
   },
   true,
