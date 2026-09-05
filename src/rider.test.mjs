@@ -253,8 +253,16 @@ test('mallar per tillgång: spara/ladda hittar inte på siffror i tomma rutor', 
 test('arena-UI A–E: tom play-rad, kicker inte lampa, hopp from→to', () => {
   const emptyPlay = renderPlayArena(null);
   assert.match(emptyPlay, /rider-play is-empty/);
-  assert.match(emptyPlay, /Fyll pilotvolym · entry · max-fel · RR · grav/);
+  assert.match(
+    emptyPlay,
+    /Fyll pilotvolym · entry · max-fel · RR · grav — sedan Räkna\. Paper\. Inte live\./,
+  );
   assert.ok(!/saknar horisont|saknar kust|saknar hävstång/i.test(emptyPlay));
+  assert.equal((emptyPlay.match(/<p /g) || []).length, 1);
+
+  const blocked = renderPlayArena({ ok: false });
+  assert.match(blocked, /rider-play is-empty/);
+  assert.ok(!/saknar horisont|saknar kust|saknar hävstång/i.test(blocked));
 
   const hop = computeRide({ entry: 100, maxFel: 2, rr: 2, grav: 100, ...bandBounce });
   const hopHtml = renderRideResult(hop);
@@ -268,14 +276,34 @@ test('arena-UI A–E: tom play-rad, kicker inte lampa, hopp from→to', () => {
   assert.match(holdHtml, /Håll/);
   assert.ok(!/saknar_rsi|saknar_bb|saknar_coast|WATCHERS|anden i lampan/i.test(holdHtml));
 
+  const none = renderRideResult(null);
+  assert.match(
+    none,
+    /Minst: tillgång, pilotvolym, entry, max-fel, RR\. Grav ger arenan\. Resten under Avancerat\./,
+  );
+
   const page = renderRider(emptyRideDraft(), null);
   assert.match(page, /Trade Rider · paper/);
   assert.match(page, /PAPER · live=false · ingen mäklare/);
   assert.match(page, /id="rider-core"/);
-  assert.match(page, /id="rider-advanced"/);
+  assert.match(page, /<details id="rider-advanced">/);
+  assert.ok(!/<details id="rider-advanced" open/.test(page));
   assert.match(page, /data-action="rider-first"/);
+  assert.match(page, /aria-describedby="rider-first-hint"/);
   assert.match(page, /Första paper-ride/);
-  assert.match(page, /Minst: tillgång, pilotvolym, entry, max-fel, RR/);
+  for (const name of ['tillgang', 'side', 'pilotVolume', 'entry', 'maxFel', 'rr', 'grav']) {
+    assert.match(page, new RegExp(`id="rider-core"[\\s\\S]*name="${name}"`));
+  }
+  for (const name of ['requested', 'current', 'rsi', 'bbLower', 'bbUpper', 'bounce', 'ovre', 'undre', 'havstang', 'cluster']) {
+    assert.match(page, new RegExp(`id="rider-advanced"[\\s\\S]*name="${name}"`));
+    assert.ok(!new RegExp(`id="rider-core"[\\s\\S]*name="${name}"[\\s\\S]*id="rider-advanced"`).test(page));
+  }
   assert.ok(!/WATCHERS · anden i lampan/.test(page));
   assert.equal(coreIncomplete(emptyRideDraft()), true);
+
+  const filled = renderRider(
+    { ...emptyRideDraft(), pilotVolume: '1', entry: '100', maxFel: '2', rr: '2', grav: '100' },
+    computeRide({ entry: 100, maxFel: 2, rr: 2, grav: 100 }),
+  );
+  assert.ok(!/data-action="rider-first"/.test(filled));
 });

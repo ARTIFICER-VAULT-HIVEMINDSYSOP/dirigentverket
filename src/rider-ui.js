@@ -236,7 +236,7 @@ export function renderRider(draft, ride, hopPulse = 0, play = {}, opts = {}) {
           ${
             incomplete
               ? `<div class="btn-row">
-                  <button class="btn btn-gold" type="button" data-action="rider-first">Första paper-ride</button>
+                  <button class="btn btn-gold" type="button" data-action="rider-first" aria-describedby="rider-first-hint">Första paper-ride</button>
                   <p id="rider-first-hint" class="faint" aria-live="polite">${escapeHtml(firstHint || 'Fokusera kärnan. Tomma rutor fylls inte.')}</p>
                 </div>`
               : ''
