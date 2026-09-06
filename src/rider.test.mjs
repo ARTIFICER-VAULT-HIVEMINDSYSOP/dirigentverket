@@ -341,6 +341,7 @@ test('första-ride-grind: före/efter completed ride låser små belopp', () => 
   assert.equal(openHint.unlocked, true);
   assert.equal(openHint.mode, 'sma-belopp');
   assert.match(openHint.note, /små belopp/i);
+  assert.match(openHint.note, /risken stannar/i);
   assert.match(openHint.note, /robot höjer aldrig/i);
   assert.ok(!/\d+\s*kr/i.test(openHint.note));
 
@@ -418,22 +419,31 @@ test('ROBOT / AIIND / GULDR förblir åtskilda; grind är global', () => {
   assert.equal(hasCompletedFirstRide(store), true);
 });
 
-test('32-bit arena är play-yta: scanlines, pad, sprite-pip, arena före formulär', () => {
+test('32-bit HUD är silhuett, inte textvägg; inga nya play-knappar', () => {
   const emptyPlay = renderPlayArena(null);
   assert.match(emptyPlay, /data-bit="32"/);
   assert.match(emptyPlay, /rider-scanlines/);
-  assert.match(emptyPlay, /data-rider-pad/);
-  assert.match(emptyPlay, /data-action="rider-key"/);
-  assert.match(emptyPlay, /data-rider-key="w"/);
-  assert.match(emptyPlay, /data-rider-key="f"/);
-  assert.match(emptyPlay, /data-rider-key="space"/);
-  assert.ok(!/WATCHERS|anden i lampan/i.test(emptyPlay));
+  assert.match(emptyPlay, /data-rider-sil/);
+  assert.match(emptyPlay, /data-verbs="w s f \[ \] space"/);
+  assert.match(emptyPlay, /data-rider-lev-sil/);
+  assert.ok(!/<button/i.test(emptyPlay));
+  assert.ok(!/data-action="rider-key"|data-rider-pad|rider-rail-pick/i.test(emptyPlay));
+  assert.ok(!/WATCHERS|anden i lampan|grimoire/i.test(emptyPlay));
 
   const ride = computeRide({ entry: 100, maxFel: 2, rr: 2, grav: 100 });
-  const play = renderPlayArena(ride, { leverage: 1, lens: 1, rail: 0, sit: 0 });
+  const play = renderPlayArena(ride, { leverage: 2, lens: 1, rail: 0, sit: 0 });
   assert.match(play, /rider-mark-pip/);
-  assert.match(play, /data-action="rider-rail-pick"/);
-  assert.match(play, /data-rider-pad/);
+  assert.match(play, /data-rider-sil/);
+  assert.match(play, /data-lev="2"/);
+  assert.match(play, /data-lev-bar="4"/);
+  assert.ok(!/<button/i.test(play));
+  assert.ok(!/data-action="rider-rail-pick"|data-rider-pad/i.test(play));
+  assert.ok(!/W\/S räls · F fäst/.test(play));
+
+  const hop = computeRide({ entry: 100, maxFel: 2, rr: 2, grav: 100, ...bandBounce });
+  const hopHtml = renderPlayArena(hop);
+  assert.match(hopHtml, /rider-hop-tell/);
+  assert.match(hopHtml, /data-mode="hop"/);
 
   const page = renderRider(emptyRideDraft(), null);
   const outAt = page.indexOf('id="rider-out"');
@@ -441,5 +451,31 @@ test('32-bit arena är play-yta: scanlines, pad, sprite-pip, arena före formul�
   assert.ok(outAt >= 0 && formAt > outAt);
   assert.match(page, /data-rider-process/);
   assert.match(page, /Process före fart/);
+  assert.match(page, /data-rider-no-wsf/);
   assert.ok(!/WATCHERS · anden i lampan/.test(page));
+});
+
+test('playfeel-verb: W/S/F instant, häv 1–4 ärlig, space=lins, Robban stjäl inte', () => {
+  const rails = [98, 100, 104];
+  const start = { rail: 1, sit: 1, leverage: 1, lens: 1 };
+  const w = handleRiderKey(start, rails, 'w');
+  assert.equal(w.rail, 2);
+  assert.equal(w.commit, 'rail');
+  const s = handleRiderKey(w, rails, 's');
+  assert.equal(s.rail, 1);
+  const f = handleRiderKey(s, rails, 'f');
+  assert.equal(f.sit, 1);
+  assert.equal(f.commit, 'follow');
+  const up = handleRiderKey({ ...start, leverage: 3 }, rails, ']');
+  assert.equal(up.leverage, 4);
+  const cap = handleRiderKey(up, rails, ']');
+  assert.equal(cap.leverage, 4);
+  const lens = handleRiderKey(start, rails, ' ');
+  assert.equal(lens.lens, 1.5);
+  assert.equal(lens.commit, 'lens');
+  for (const k of ['w', 's', 'f', '[', ']', ' ']) assert.equal(reservedRiderKey(k), true);
+  const page = renderRider(emptyRideDraft(), null);
+  assert.match(page, /id="rider-robban"/);
+  assert.match(page, /Menyn tar inte W\/S\/F/);
+  assert.equal(LIVE_LOCKED, true);
 });

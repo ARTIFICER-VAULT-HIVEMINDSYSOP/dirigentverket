@@ -36,27 +36,38 @@ function arenaScale(nums) {
   };
 }
 
-export function renderPlayPad() {
-  return `<div class="rider-play-pad" data-rider-pad>
-    <button type="button" class="rider-pad-key" data-action="rider-key" data-rider-key="w" title="W räls upp">W</button>
-    <button type="button" class="rider-pad-key" data-action="rider-key" data-rider-key="s" title="S räls ner">S</button>
-    <button type="button" class="rider-pad-key" data-action="rider-key" data-rider-key="f" title="F fäst">F</button>
-    <button type="button" class="rider-pad-key" data-action="rider-key" data-rider-key="[" title="hävstång ner">[</button>
-    <button type="button" class="rider-pad-key" data-action="rider-key" data-rider-key="]" title="hävstång upp">]</button>
-    <button type="button" class="rider-pad-key" data-action="rider-key" data-rider-key="space" title="space lins">lins</button>
-  </div>`;
-}
-
 function renderScanlines() {
   return `<div class="rider-scanlines" aria-hidden="true"></div>`;
 }
 
-function renderBitHud(lev, speed, railText) {
-  return `<div class="rider-play-hud rider-bit-hud">
-      <span>hävstång <strong data-rider-leverage-hud>${lev}×</strong></span>
-      <span>fart <strong data-rider-speed-hud>${speed}×</strong></span>
-      <span>räls <strong data-rider-rail-hud>${railText}</strong></span>
-      <span class="faint">W/S räls · F fäst · [ ] 1–4× · space lins</span>
+function renderBitHud(lev, speed, railText, rails = [], play = {}, hopped = false) {
+  const rail = play.rail || 0;
+  const sit = play.sit ?? rail;
+  const levBars = [1, 2, 3, 4]
+    .map((n) => `<span class="rider-sil-bar${n <= lev ? ' is-on' : ''}" data-lev-bar="${n}"></span>`)
+    .join('');
+  const railPips = rails.length
+    ? rails
+        .map(
+          (_, i) =>
+            `<span class="rider-sil-rail-pip${i === rail ? ' is-rail' : ''}${i === sit ? ' is-sit' : ''}" data-rail-sil="${i}"></span>`,
+        )
+        .join('')
+    : '<span class="rider-sil-rail-pip is-empty" data-rail-sil="-1"></span>';
+  return `<div class="rider-play-hud rider-bit-hud" data-rider-sil data-verbs="w s f [ ] space">
+      <div class="rider-sil-mode" data-rider-mode-sil data-mode="${hopped ? 'hop' : 'hold'}">
+        <span class="rider-sil-pip is-paper" data-mode-paper></span>
+        <span class="rider-sil-pip ${hopped ? 'is-hop' : 'is-hold'}" data-hop-sil></span>
+      </div>
+      <div class="rider-sil-lev" data-rider-lev-sil data-lev="${lev}">
+        ${levBars}
+        <strong data-rider-leverage-hud>${lev}×</strong>
+        <strong data-rider-speed-hud>${speed}×</strong>
+      </div>
+      <div class="rider-sil-rail" data-rider-rail-sil>
+        ${railPips}
+        <strong data-rider-rail-hud>${railText}</strong>
+      </div>
     </div>`;
 }
 
@@ -68,12 +79,11 @@ export function renderPlayArena(ride, play = {}) {
       data-leverage="${lev}" data-speed="${speed}" data-lens="${play.lens || 1}"
       style="--rider-speed:${speed};--rider-lens:${play.lens || 1};--rider-coast-ms:${coastPeriodMs(lev)}ms;">
       ${renderScanlines()}
-      ${renderBitHud(lev, speed, '')}
+      ${renderBitHud(lev, speed, '', [], play, false)}
       <div class="rider-arena-field" data-rider-field>
         <div class="rider-speed-scan" aria-hidden="true"></div>
         <div class="rider-dot is-hold" data-rider-dot style="top:50%;"></div>
       </div>
-      ${renderPlayPad()}
       <p class="rider-play-empty">Fyll pilotvolym · entry · max-fel · RR · grav — sedan Räkna. Paper. Inte live.</p>
     </div>`;
   }
@@ -123,7 +133,7 @@ export function renderPlayArena(ride, play = {}) {
       ]
         .filter(Boolean)
         .join(' ');
-      return `<div class="${cls}" ${railAttr} data-top="${top}%" style="top:${top}%"${railIndex >= 0 ? ' data-action="rider-rail-pick"' : ''}>
+      return `<div class="${cls}" ${railAttr} data-top="${top}%" style="top:${top}%">
         <span class="rider-mark-label">${escapeHtml(row.label)}</span>
         <span class="rider-mark-line"><span class="rider-mark-pip" aria-hidden="true"></span></span>
         <span class="rider-mark-px">${escapeHtml(formatPx(row.at))}</span>
@@ -156,13 +166,12 @@ export function renderPlayArena(ride, play = {}) {
       style="--rider-speed:${speed};--rider-lens:${lens};--rider-coast-ms:${coastMs}ms;--hop-window:${HOP_WINDOW_MS}ms;"
       role="img" aria-label="Paper-arena">
     ${renderScanlines()}
-    ${renderBitHud(lev, speed, railText)}
+    ${renderBitHud(lev, speed, railText, rails, play, jumped)}
     <div class="rider-arena-field" data-rider-field style="transform:scale(var(--rider-lens));transform-origin:center;">
       <div class="rider-speed-scan" aria-hidden="true"></div>
       ${markHtml}
       <div class="rider-dot ${jumped ? 'is-jump' : 'is-hold'}" data-rider-dot style="--from:${sitTop}%;--to:${toTop}%;top:${sitTop}%;"></div>
     </div>
-    ${renderPlayPad()}
     ${hop}
     <p class="faint rider-muted-opt">${coastMuted ? 'coast tyst' : ''} · hävstång HUD = fart · max 4×</p>
   </div>`;
@@ -170,7 +179,7 @@ export function renderPlayArena(ride, play = {}) {
 
 function smaHintHtml(unlocked) {
   if (!unlocked) return '';
-  return `<p class="rider-sma" data-sma-belopp="1">Små belopp · pilotvolym får vara mycket liten. Robot höjer aldrig. Paper.</p>`;
+  return `<p class="rider-sma" data-sma-belopp="1">Små belopp · risken stannar. Pilotvolym får vara liten. Robot höjer aldrig. Paper.</p>`;
 }
 
 export function renderRideResult(ride, play = {}, opts = {}) {
@@ -288,7 +297,7 @@ export function renderRider(draft, ride, hopPulse = 0, play = {}, opts = {}) {
               </select></label>
             <label>Pilotvolym
               <input name="pilotVolume" inputmode="decimal" placeholder="piloten sätter" value="${riderVal(draft, 'pilotVolume')}" />
-              ${completed ? `<span class="hint" data-sma-belopp="1">små belopp ok · robot höjer aldrig</span>` : ''}</label>
+              ${completed ? `<span class="hint" data-sma-belopp="1">små belopp · risken stannar · robot höjer aldrig</span>` : ''}</label>
             <label>Entry
               <input name="entry" inputmode="decimal" placeholder="skriv själv" value="${riderVal(draft, 'entry')}" /></label>
             <label>maxFel

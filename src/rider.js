@@ -309,7 +309,7 @@ export function smaBeloppHint(store) {
   return {
     unlocked: true,
     mode: 'sma-belopp',
-    note: 'Små belopp · pilotvolym får vara mycket liten. Robot höjer aldrig. Paper.',
+    note: 'Små belopp · risken stannar. Pilotvolym får vara liten. Robot höjer aldrig. Paper.',
   };
 }
 
@@ -458,6 +458,17 @@ export function applyPlayDom(play, rails, root = globalThis.document) {
   const railHud = host.querySelector('[data-rider-rail-hud]');
   const railPrice = rails[play.rail];
   if (railHud) railHud.textContent = railPrice != null ? String(railPrice) : '';
+  const levSil = host.querySelector('[data-rider-lev-sil]');
+  if (levSil) levSil.dataset.lev = String(play.leverage);
+  host.querySelectorAll('[data-lev-bar]').forEach((el) => {
+    const n = Number(el.getAttribute('data-lev-bar'));
+    el.classList.toggle('is-on', n <= play.leverage);
+  });
+  host.querySelectorAll('[data-rail-sil]').forEach((el) => {
+    const idx = Number(el.getAttribute('data-rail-sil'));
+    el.classList.toggle('is-rail', idx === play.rail);
+    el.classList.toggle('is-sit', idx === play.sit);
+  });
   const marks = host.querySelectorAll('[data-rail-index]');
   marks.forEach((el) => {
     const idx = Number(el.getAttribute('data-rail-index'));
