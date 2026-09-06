@@ -21,6 +21,23 @@ import {
   readRobotForm,
 } from './robot-ui.js';
 import {
+  computeRide,
+  loadRideDraft,
+  saveRideDraft,
+  emptyRideDraft,
+  saveRideTemplate,
+  loadRideTemplate,
+  emptyPlayState,
+  rideRails,
+  reservedRiderKey,
+  applyPlayDom,
+  handleRiderKey,
+  tempoToLens,
+  HOP_WINDOW_MS,
+  LIVE_LOCKED,
+} from './rider.js';
+import { renderRider, readRiderForm, focusRiderCore } from './rider-ui.js';
+import {
   loadNews,
   saveNews,
   fetchRss,
@@ -37,6 +54,11 @@ let state = loadState();
 let portfolioMode = 'cards';
 let robotDraft = loadRobotDraft();
 let robotResult = null;
+let riderDraft = loadRideDraft();
+let riderResult = null;
+let riderHopPulse = 0;
+let riderPlay = emptyPlayState();
+let riderFirstHint = '';
 let news = loadNews();
 
 function persist() {
@@ -90,6 +112,12 @@ function render() {
   else if (view === 'synergier') inner = renderSynergier(c);
   else if (view === 'nyheter') inner = renderNews(news, { selectedModuleId: id });
   else if (view === 'robot') inner = renderRobot(robotDraft, robotResult);
+  else if (view === 'rider') {
+    inner = renderRider(riderDraft, riderResult, riderHopPulse, riderPlay, {
+      firstHint: riderFirstHint,
+      liveLocked: LIVE_LOCKED,
+    });
+  }
   else if (view === 'nytt') inner = renderForm(null, c);
   else if (view === 'redigera') {
     const p = state.projects.find((x) => x.id === id);
@@ -97,8 +125,17 @@ function render() {
   } else inner = renderPortfolio(c);
 
   document.body.classList.toggle('view-artificer', view === 'robot');
-  document.title = view === 'robot' ? 'Artificer AI — WATCHERS' : 'Dirigentverket — klusterbok';
-  root.innerHTML = view === 'robot' ? renderArtificerShell(inner, parseRoute) : renderShell(inner, c);
+  document.body.classList.toggle('view-rider', view === 'rider');
+  document.title =
+    view === 'rider'
+      ? 'Trade Rider — paper'
+      : view === 'robot'
+        ? 'Artificer AI — WATCHERS'
+        : 'Dirigentverket — klusterbok';
+  root.innerHTML =
+    view === 'robot' || view === 'rider'
+      ? renderArtificerShell(inner, parseRoute)
+      : renderShell(inner, c);
 }
 
 function readForm(form) {
@@ -159,6 +196,40 @@ root.addEventListener('click', (ev) => {
     robotResult = null;
     saveRobotDraft(robotDraft);
     render();
+  } else if (action === 'rider-clear') {
+    riderDraft = emptyRideDraft();
+    riderResult = null;
+    riderHopPulse = 0;
+    riderPlay = emptyPlayState();
+    riderFirstHint = '';
+    saveRideDraft(riderDraft);
+    render();
+  } else if (action === 'rider-first') {
+    const form = document.getElementById('rider-form');
+    if (form) riderDraft = readRiderForm(form);
+    saveRideDraft(riderDraft);
+    const name = focusRiderCore(riderDraft);
+    riderFirstHint = name ? `Kärnan: fyll ${name}. Inga påhittade tal.` : '';
+    render();
+    focusRiderCore(riderDraft);
+  } else if (action === 'rider-live-ask') {
+    window.confirm('Live-order är låst. Paper. ÖB godkänner live. Detta stannar paper.');
+    riderPlay = { ...riderPlay, robbanOpen: true };
+    render();
+  } else if (action === 'rider-save-tpl') {
+    const form = document.getElementById('rider-form');
+    if (form) riderDraft = readRiderForm(form);
+    saveRideDraft(riderDraft);
+    saveRideTemplate(riderDraft.tillgang, riderDraft);
+    render();
+  } else if (action === 'rider-load-tpl') {
+    const form = document.getElementById('rider-form');
+    const tillgang = form ? readRiderForm(form).tillgang : riderDraft.tillgang;
+    riderDraft = loadRideTemplate(tillgang);
+    riderResult = null;
+    riderHopPulse = 0;
+    saveRideDraft(riderDraft);
+    render();
   } else if (action === 'news-save-url') {
     const nid = btn.getAttribute('data-id');
     updateModuleUrl(news, nid, nearbyNewsUrl(btn, nid));
@@ -207,10 +278,21 @@ root.addEventListener('click', (ev) => {
 
 root.addEventListener('change', (ev) => {
   const sel = ev.target.closest('[data-action="select-project"]');
-  if (!sel) return;
-  state.selectedId = sel.value;
-  persist();
-  go(`#/verksamhet/${encodeURIComponent(sel.value)}`);
+  if (sel) {
+    state.selectedId = sel.value;
+    persist();
+    go(`#/verksamhet/${encodeURIComponent(sel.value)}`);
+    return;
+  }
+  const tillgangSel = ev.target.closest('#rider-form [name="tillgang"]');
+  if (tillgangSel) {
+    const form = tillgangSel.closest('#rider-form');
+    if (form) {
+      riderDraft = readRiderForm(form);
+      saveRideDraft(riderDraft);
+      render();
+    }
+  }
 });
 
 root.addEventListener('submit', (ev) => {
@@ -241,6 +323,31 @@ root.addEventListener('submit', (ev) => {
     render();
     return;
   }
+  const riderForm = ev.target.closest('#rider-form');
+  if (riderForm) {
+    ev.preventDefault();
+    riderDraft = readRiderForm(riderForm);
+    saveRideDraft(riderDraft);
+    const now = Date.now();
+    const midAir = riderPlay.hopping && now < riderPlay.hopUntil;
+    riderResult = computeRide({ ...riderDraft, midAir });
+    if (riderResult.ok && riderResult.havstang) {
+      riderPlay = { ...riderPlay, leverage: riderResult.havstang };
+    }
+    const lens = tempoToLens(riderDraft.tempo);
+    if (lens != null) riderPlay = { ...riderPlay, lens };
+    if (riderResult.ok && riderResult.jump && riderResult.jump.jumped && !midAir) {
+      riderHopPulse += 1;
+      riderPlay = { ...riderPlay, hopping: true, hopUntil: now + HOP_WINDOW_MS };
+      window.setTimeout(() => {
+        riderPlay = { ...riderPlay, hopping: false, hopUntil: 0 };
+      }, HOP_WINDOW_MS);
+    } else {
+      riderHopPulse = 0;
+    }
+    render();
+    return;
+  }
   const manual = ev.target.closest('#news-manual-form');
   if (manual) {
     ev.preventDefault();
@@ -265,6 +372,29 @@ root.addEventListener('submit', (ev) => {
     render();
   }
 });
+
+function riderTypingTarget(el) {
+  if (!el) return false;
+  const tag = el.tagName;
+  return tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || el.isContentEditable;
+}
+
+window.addEventListener(
+  'keydown',
+  (ev) => {
+    if (parseRoute().view !== 'rider') return;
+    if (!reservedRiderKey(ev.key)) return;
+    const inRobban = Boolean(ev.target && ev.target.closest && ev.target.closest('#rider-robban'));
+    if (riderTypingTarget(ev.target) && !inRobban) return;
+    ev.preventDefault();
+    ev.stopPropagation();
+    const rails = rideRails(riderResult);
+    const key = ev.key.length === 1 ? ev.key.toLowerCase() : ev.key;
+    riderPlay = handleRiderKey(riderPlay, rails, ev.key);
+    applyPlayDom(riderPlay, rails);
+  },
+  true,
+);
 
 window.addEventListener('hashchange', render);
 if (!window.location.hash) window.location.hash = '#/portfolj';

@@ -805,6 +805,12 @@ body.view-artificer #app-root {
   background: rgba(12, 10, 7, 0.55);
   backdrop-filter: blur(6px);
   justify-content: center;
+  flex-wrap: wrap;
+}
+
+body.view-rider .nav-artificer {
+  border-color: rgba(122, 158, 126, 0.28);
+  background: rgba(10, 14, 10, 0.62);
 }
 
 .nav-artificer a {
@@ -1101,4 +1107,410 @@ body.view-artificer #app-root {
   border-color: rgba(201, 166, 107, 0.18);
   background: rgba(16, 12, 8, 0.5);
   color: #8a7a58;
+}
+
+
+/* —— Trade Rider · paper arena (priority over lamp / WATCHERS) —— */
+
+body.view-rider {
+  background-color: #10140f;
+  background-image:
+    radial-gradient(ellipse 50% 40% at 50% 0%, rgba(122, 158, 126, 0.16), transparent 55%),
+    radial-gradient(circle at 88% 80%, rgba(201, 166, 107, 0.08), transparent 42%),
+    linear-gradient(180deg, #141810 0%, #10140f 55%, #0c100c 100%);
+}
+
+body.view-rider .shell-artificer {
+  max-width: 880px;
+}
+
+.rider-stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.rider-hero {
+  text-align: center;
+  margin: 8px 0 12px;
+}
+
+.rider-kicker {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--ok);
+  margin: 0 0 8px;
+}
+
+.rider-title {
+  font-family: var(--serif);
+  font-weight: 600;
+  font-size: clamp(40px, 6vw, 64px);
+  letter-spacing: -0.03em;
+  line-height: 1;
+  margin: 0;
+  color: var(--ink);
+}
+
+.rider-lead {
+  margin: 10px 0 0;
+  color: var(--ink-mute);
+  max-width: 42ch;
+}
+
+.rider-badge-paper {
+  position: sticky;
+  top: 8px;
+  z-index: 2;
+  align-self: stretch;
+  max-width: 720px;
+  width: 100%;
+  margin: 0 auto 12px;
+  padding: 8px 12px;
+  text-align: center;
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #d7ecd8;
+  background: rgba(18, 32, 20, 0.92);
+  border: 1px solid rgba(122, 158, 126, 0.55);
+  border-radius: 999px;
+}
+
+.rider-mode {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  margin: 0 0 12px;
+}
+
+.rider-mode-paper,
+.rider-mode-live {
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  padding: 6px 12px;
+  border-radius: 999px;
+}
+
+.rider-mode-paper {
+  color: #d7ecd8;
+  background: rgba(122, 158, 126, 0.22);
+  border: 1px solid rgba(122, 158, 126, 0.55);
+  box-shadow: 0 0 18px rgba(122, 158, 126, 0.18);
+}
+
+.rider-mode-live {
+  color: #8a8074;
+  background: rgba(18, 16, 12, 0.7);
+  border: 1px dashed rgba(138, 128, 116, 0.45);
+  text-decoration: line-through;
+  text-decoration-color: var(--danger);
+  opacity: 0.72;
+}
+
+.banner-rider {
+  width: 100%;
+  max-width: 720px;
+  margin: 0 0 16px;
+  padding: 12px 16px;
+  text-align: center;
+  background: rgba(20, 28, 20, 0.78);
+  border: 1px solid rgba(122, 158, 126, 0.4);
+  color: #d5e4d4;
+  border-radius: var(--radius);
+}
+
+.rider-tablet {
+  width: 100%;
+  max-width: 720px;
+  padding: 24px 22px 20px;
+  background: linear-gradient(180deg, rgba(24, 28, 22, 0.94) 0%, rgba(14, 16, 13, 0.96) 100%);
+  border: 1px solid rgba(122, 158, 126, 0.28);
+  border-radius: 8px;
+  box-shadow: 0 24px 56px rgba(0, 0, 0, 0.4);
+}
+
+.rider-tablet .form-grid input,
+.rider-tablet .form-grid select {
+  background: #12150f;
+  border-color: #2c3328;
+}
+
+.rider-tpl-row {
+  margin-top: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.rider-out {
+  margin-top: 18px;
+}
+
+.rider-play,
+.rider-arena {
+  position: relative;
+  min-height: 220px;
+  margin: 0 0 18px;
+  padding: 14px 14px 16px;
+  border-radius: 8px;
+  border: 1px solid rgba(122, 158, 126, 0.28);
+  background:
+    linear-gradient(180deg, rgba(18, 24, 18, 0.9) 0%, rgba(10, 12, 10, 0.95) 100%);
+}
+
+.rider-play.is-empty {
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rider-play-empty {
+  margin: 8px 12px;
+  text-align: center;
+  color: var(--ink-mute);
+}
+
+.rider-play-hud {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 18px;
+  margin: 0 0 10px;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--ink-mute);
+}
+
+.rider-play-hud strong {
+  color: var(--ink);
+}
+
+.rider-robban-row {
+  margin: 0 0 12px;
+}
+
+.rider-robban {
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 6px 10px;
+  background: rgba(12, 14, 12, 0.45);
+}
+
+.rider-robban summary {
+  cursor: pointer;
+  font-family: var(--mono);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-size: 12px;
+}
+
+.rider-live-lock {
+  color: var(--ink-faint);
+  font-size: 12px;
+}
+
+#rider-advanced {
+  margin-top: 14px;
+  padding: 8px 0 0;
+}
+
+#rider-advanced summary {
+  cursor: pointer;
+  color: var(--ink-mute);
+}
+
+.rider-mark.is-rail .rider-mark-line {
+  background: var(--gold-2);
+}
+
+.rider-mark.is-sit .rider-mark-label {
+  color: var(--ok);
+}
+
+.rider-mark.is-commit .rider-mark-line {
+  background: var(--gold-2);
+  box-shadow: 0 0 14px rgba(224, 196, 138, 0.55);
+}
+
+.rider-arena-field {
+  position: relative;
+  height: 200px;
+  margin: 0 0 12px;
+}
+
+.rider-mark {
+  position: absolute;
+  left: 0;
+  right: 0;
+  display: grid;
+  grid-template-columns: 110px 1fr 72px;
+  align-items: center;
+  gap: 8px;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.rider-mark-label,
+.rider-mark-px {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--ink-mute);
+}
+
+.rider-mark-px {
+  text-align: right;
+  color: var(--ink);
+}
+
+.rider-mark-line {
+  height: 1px;
+  background: rgba(156, 150, 136, 0.35);
+}
+
+.rider-mark-trend .rider-mark-line {
+  background: rgba(201, 166, 107, 0.7);
+  box-shadow: 0 0 8px rgba(201, 166, 107, 0.35);
+}
+
+.rider-mark-grav .rider-mark-line {
+  height: 2px;
+  background: var(--ok);
+  box-shadow: 0 0 10px rgba(122, 158, 126, 0.45);
+}
+
+.rider-mark-sl .rider-mark-line {
+  background: var(--danger);
+}
+
+.rider-mark-tp .rider-mark-line {
+  background: var(--gold);
+}
+
+.rider-dot {
+  position: absolute;
+  left: 50%;
+  width: 14px;
+  height: 14px;
+  margin-left: -7px;
+  border-radius: 50%;
+  background: var(--ok);
+  box-shadow: 0 0 0 4px rgba(122, 158, 126, 0.2), 0 0 16px rgba(122, 158, 126, 0.45);
+  top: var(--from, 50%);
+  transform: translateY(-50%);
+  transition: none;
+}
+
+.rider-dot.is-jump {
+  animation: rider-hop-dot var(--hop-window, 2s) ease forwards;
+}
+
+.rider-dot.is-hold {
+  outline: 2px solid rgba(201, 166, 107, 0.35);
+  animation: rider-coast-pulse var(--rider-coast-ms, 1600ms) linear infinite;
+}
+
+.rider-speed-scan {
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  height: 16%;
+  pointer-events: none;
+  background: linear-gradient(180deg, transparent, rgba(122, 158, 126, 0.2), transparent);
+  animation: rider-speed-scan var(--rider-coast-ms, 1600ms) linear infinite;
+}
+
+.rider-play.has-hop .rider-speed-scan {
+  animation-play-state: paused;
+}
+
+@keyframes rider-speed-scan {
+  0% { top: 88%; }
+  100% { top: -8%; }
+}
+
+@keyframes rider-coast-pulse {
+  0%,
+  100% { box-shadow: 0 0 0 4px rgba(122, 158, 126, 0.16), 0 0 12px rgba(122, 158, 126, 0.3); }
+  50% { box-shadow: 0 0 0 7px rgba(122, 158, 126, 0.28), 0 0 22px rgba(122, 158, 126, 0.55); }
+}
+
+@keyframes rider-hop-dot {
+  0% { top: var(--from); }
+  100% { top: var(--to); }
+}
+
+.rider-hop {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  font-family: var(--mono);
+  font-size: 13px;
+}
+
+.rider-hop.is-jump {
+  color: var(--gold-2);
+  background: rgba(201, 166, 107, 0.14);
+  border: 1px solid rgba(201, 166, 107, 0.45);
+  animation: rider-hop-flash var(--hop-window, 2s) ease;
+}
+
+.rider-hop.is-hold {
+  color: var(--ink-mute);
+  background: rgba(12, 14, 12, 0.55);
+  border: 1px solid var(--line);
+}
+
+.rider-hop-kicker {
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-size: 10px;
+}
+
+.rider-hop-path {
+  font-size: 15px;
+  color: var(--ink);
+}
+
+@keyframes rider-hop-flash {
+  0% { box-shadow: 0 0 0 0 rgba(201, 166, 107, 0.0); }
+  20% { box-shadow: 0 0 22px rgba(201, 166, 107, 0.35); }
+  100% { box-shadow: 0 0 0 0 rgba(201, 166, 107, 0); }
+}
+
+.rider-arena-hint {
+  margin: 36px 16px;
+  text-align: center;
+  color: var(--ink-mute);
+}
+
+.rider-horizon-card {
+  margin: 12px 0;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: rgba(12, 14, 12, 0.45);
+}
+
+.rider-horizon-list {
+  margin: 8px 0;
+  padding-left: 18px;
+  color: var(--ink);
+}
+
+@media (max-width: 560px) {
+  .rider-tablet {
+    padding: 16px 12px;
+  }
+  .rider-mark {
+    grid-template-columns: 84px 1fr 56px;
+  }
 }

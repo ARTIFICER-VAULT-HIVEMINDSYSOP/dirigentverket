@@ -96,6 +96,7 @@ export function renderShell(inner, ctx) {
         ${nav('#/portfolj', 'Portfölj', 'portfolj')}
         ${nav('#/kalkyl', 'Kalkyl', 'kalkyl')}
         ${nav('#/synergier', 'Synergier', 'synergier')}
+        ${nav('#/rider', 'Trade Rider', 'rider')}
         ${nav('#/robot', 'Artificer AI', 'robot')}
         <span class="spacer"></span>
         <a class="btn btn-gold" href="#/nytt">+ Ny verksamhet</a>
