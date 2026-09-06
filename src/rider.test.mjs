@@ -22,6 +22,14 @@ import {
   HOP_WINDOW_MS,
   COAST_PERIOD_MS,
   LIVE_LOCKED,
+  hasCompletedFirstRide,
+  markFirstRideComplete,
+  smaBeloppUnlocked,
+  smaBeloppHint,
+  inheritPilotVolume,
+  rideImpulse,
+  RIDER_FIRST_RIDE_KEY,
+  TILLGANGAR,
 } from './rider.js';
 import { renderRideResult, renderRider, renderPlayArena } from './rider-ui.js';
 
@@ -309,4 +317,129 @@ test('arena-UI A–E: tom play-rad, kicker inte lampa, hopp from→to', () => {
     computeRide({ entry: 100, maxFel: 2, rr: 2, grav: 100 }),
   );
   assert.ok(!/data-action="rider-first"/.test(filled));
+});
+
+test('första-ride-grind: före/efter completed ride låser små belopp', () => {
+  const store = memStore();
+  assert.equal(hasCompletedFirstRide(store), false);
+  assert.equal(smaBeloppUnlocked(store), false);
+  const lockedHint = smaBeloppHint(store);
+  assert.equal(lockedHint.unlocked, false);
+  assert.equal(lockedHint.mode, '');
+  assert.equal(lockedHint.note, '');
+
+  const lockedPage = renderRider(emptyRideDraft(), null, 0, {}, { hasCompletedFirstRide: false });
+  assert.ok(!/data-sma-belopp/.test(lockedPage));
+  assert.ok(!/små belopp/i.test(lockedPage));
+  assert.match(lockedPage, /data-first-ride="0"/);
+
+  markFirstRideComplete(store);
+  assert.equal(store.getItem(RIDER_FIRST_RIDE_KEY), 'true');
+  assert.equal(hasCompletedFirstRide(store), true);
+  assert.equal(smaBeloppUnlocked(store), true);
+  const openHint = smaBeloppHint(store);
+  assert.equal(openHint.unlocked, true);
+  assert.equal(openHint.mode, 'sma-belopp');
+  assert.match(openHint.note, /små belopp/i);
+  assert.match(openHint.note, /robot höjer aldrig/i);
+  assert.ok(!/\d+\s*kr/i.test(openHint.note));
+
+  const okRide = computeRide({ entry: 100, maxFel: 2, rr: 2, grav: 100, pilotVolume: 0.01, tillgang: 'ROBOT' });
+  const openPage = renderRider(
+    { ...emptyRideDraft(), pilotVolume: '0.01', entry: '100', maxFel: '2', rr: '2', grav: '100' },
+    okRide,
+    0,
+    {},
+    { hasCompletedFirstRide: true, liveLocked: true },
+  );
+  assert.match(openPage, /data-sma-belopp/);
+  assert.match(openPage, /små belopp/i);
+  assert.match(openPage, /data-first-ride="1"/);
+  assert.equal(LIVE_LOCKED, true);
+  assert.equal(okRide.live, false);
+  assert.equal(okRide.paper, true);
+  assert.equal(okRide.pilotVolume, 0.01);
+});
+
+test('LIVE_LOCKED och paper-stämplar oförändrade kring grind och impulse', () => {
+  assert.equal(LIVE_LOCKED, true);
+  const before = computeRide({ entry: 100, maxFel: 2, rr: 2 });
+  const after = computeRide({ entry: 100, maxFel: 2, rr: 2, pilotVolume: 0.25 });
+  assert.equal(before.live, false);
+  assert.equal(before.paper, true);
+  assert.equal(before.advice, false);
+  assert.equal(after.live, false);
+  assert.equal(after.paper, true);
+  assert.equal(after.pilotVolume, 0.25);
+  assert.equal(inheritPilotVolume(0.25, 4), 0.25);
+  assert.equal(inheritPilotVolume(null, 4), null);
+  assert.equal(inheritPilotVolume(2, 1), 1);
+});
+
+test('impulse syns mjukt före process; tyst efter första ride + SL/TP', () => {
+  const rushVol = rideImpulse({ pilotVolume: 1, entry: '', maxFel: '', rr: '' }, { leverage: 1 });
+  assert.equal(rushVol.visible, true);
+  assert.equal(rushVol.kind, 'volym');
+  assert.match(rushVol.note, /process före fart/i);
+
+  const rushLev = rideImpulse({ entry: 100, maxFel: 2, rr: 2 }, { leverage: 4 }, { hasCompletedFirstRide: false });
+  assert.equal(rushLev.visible, true);
+  assert.equal(rushLev.kind, 'fart');
+
+  const calm = rideImpulse(
+    { entry: 100, maxFel: 2, rr: 2, pilotVolume: 1 },
+    { leverage: 1 },
+    { hasCompletedFirstRide: true },
+  );
+  assert.equal(calm.visible, false);
+  assert.equal(calm.note, '');
+
+  const rushPage = renderRider(
+    { ...emptyRideDraft(), pilotVolume: '1' },
+    null,
+    0,
+    { leverage: 1 },
+    { hasCompletedFirstRide: false },
+  );
+  assert.match(rushPage, /data-impulse="1"/);
+  assert.match(rushPage, /data-rider-impulse/);
+  assert.match(rushPage, /Process före fart/);
+});
+
+test('ROBOT / AIIND / GULDR förblir åtskilda; grind är global', () => {
+  assert.deepEqual(TILLGANGAR, ['ROBOT', 'AIIND', 'GULDR']);
+  const store = memStore();
+  saveRideTemplate('ROBOT', { ...emptyRideDraft(), tillgang: 'ROBOT', entry: '10' }, store);
+  saveRideTemplate('AIIND', { ...emptyRideDraft(), tillgang: 'AIIND', entry: '20' }, store);
+  markFirstRideComplete(store);
+  assert.equal(loadRideTemplate('ROBOT', store).entry, '10');
+  assert.equal(loadRideTemplate('AIIND', store).entry, '20');
+  assert.equal(loadRideTemplate('GULDR', store).entry, '');
+  assert.equal(hasCompletedFirstRide(store), true);
+});
+
+test('32-bit arena är play-yta: scanlines, pad, sprite-pip, arena före formulär', () => {
+  const emptyPlay = renderPlayArena(null);
+  assert.match(emptyPlay, /data-bit="32"/);
+  assert.match(emptyPlay, /rider-scanlines/);
+  assert.match(emptyPlay, /data-rider-pad/);
+  assert.match(emptyPlay, /data-action="rider-key"/);
+  assert.match(emptyPlay, /data-rider-key="w"/);
+  assert.match(emptyPlay, /data-rider-key="f"/);
+  assert.match(emptyPlay, /data-rider-key="space"/);
+  assert.ok(!/WATCHERS|anden i lampan/i.test(emptyPlay));
+
+  const ride = computeRide({ entry: 100, maxFel: 2, rr: 2, grav: 100 });
+  const play = renderPlayArena(ride, { leverage: 1, lens: 1, rail: 0, sit: 0 });
+  assert.match(play, /rider-mark-pip/);
+  assert.match(play, /data-action="rider-rail-pick"/);
+  assert.match(play, /data-rider-pad/);
+
+  const page = renderRider(emptyRideDraft(), null);
+  const outAt = page.indexOf('id="rider-out"');
+  const formAt = page.indexOf('id="rider-form"');
+  assert.ok(outAt >= 0 && formAt > outAt);
+  assert.match(page, /data-rider-process/);
+  assert.match(page, /Process före fart/);
+  assert.ok(!/WATCHERS · anden i lampan/.test(page));
 });

@@ -35,6 +35,8 @@ import {
   tempoToLens,
   HOP_WINDOW_MS,
   LIVE_LOCKED,
+  hasCompletedFirstRide,
+  markFirstRideComplete,
 } from './rider.js';
 import { renderRider, readRiderForm, focusRiderCore } from './rider-ui.js';
 import {
@@ -139,6 +141,7 @@ function render() {
     inner = renderRider(riderDraft, riderResult, riderHopPulse, riderPlay, {
       firstHint: riderFirstHint,
       liveLocked: LIVE_LOCKED,
+      hasCompletedFirstRide: hasCompletedFirstRide(),
     });
   }
   else if (view === 'sele') {
@@ -251,6 +254,25 @@ root.addEventListener('click', (ev) => {
     riderFirstHint = name ? `Kärnan: fyll ${name}. Inga påhittade tal.` : '';
     render();
     focusRiderCore(riderDraft);
+  } else if (action === 'rider-key') {
+    const raw = btn.getAttribute('data-rider-key') || '';
+    const key = raw === 'space' ? ' ' : raw;
+    const rails = rideRails(riderResult);
+    riderPlay = handleRiderKey(riderPlay, rails, key);
+    applyPlayDom(riderPlay, rails);
+    return;
+  } else if (action === 'rider-rail-pick') {
+    const rails = rideRails(riderResult);
+    const idx = Number(btn.getAttribute('data-rail-index'));
+    if (Number.isFinite(idx) && rails.length) {
+      riderPlay = {
+        ...riderPlay,
+        rail: Math.min(rails.length - 1, Math.max(0, idx)),
+        commit: 'rail',
+      };
+      applyPlayDom(riderPlay, rails);
+    }
+    return;
   } else if (action === 'rider-live-ask') {
     window.confirm('Live-order är låst. Paper. ÖB godkänner live. Detta stannar paper.');
     riderPlay = { ...riderPlay, robbanOpen: true };
@@ -388,6 +410,7 @@ root.addEventListener('submit', (ev) => {
     const now = Date.now();
     const midAir = riderPlay.hopping && now < riderPlay.hopUntil;
     riderResult = computeRide({ ...riderDraft, midAir });
+    if (riderResult.ok) markFirstRideComplete();
     if (riderResult.ok && riderResult.havstang) {
       riderPlay = { ...riderPlay, leverage: riderResult.havstang };
     }

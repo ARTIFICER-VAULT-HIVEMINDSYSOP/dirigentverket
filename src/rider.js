@@ -11,6 +11,7 @@ export { formatPx };
 export const TILLGANGAR = ['ROBOT', 'AIIND', 'GULDR'];
 export const RIDER_DRAFT_KEY = 'dirigentverket.rider.v1';
 export const RIDER_TEMPLATE_KEY = 'dirigentverket.rider.templates.v1';
+export const RIDER_FIRST_RIDE_KEY = 'dirigentverket.rider.hasCompletedFirstRide';
 export const HOP_WINDOW_MS = 2000;
 export const LEVERAGE_MIN = 1;
 export const LEVERAGE_MAX = 4;
@@ -231,7 +232,7 @@ export function computeRide(raw) {
       havstang: input.havstang,
       jump: { jumped: false, from: null, to: null, windowMs: HOP_WINDOW_MS, tell: false },
       tillgang: input.tillgang,
-      pilotVolume: input.pilotVolume,
+      pilotVolume: inheritPilotVolume(input.pilotVolume, null),
       input,
       structure,
     });
@@ -257,10 +258,80 @@ export function computeRide(raw) {
     havstang: input.havstang,
     jump,
     tillgang: input.tillgang,
-    pilotVolume: input.pilotVolume,
+    pilotVolume: inheritPilotVolume(input.pilotVolume, null),
     input,
     structure,
   });
+}
+
+/**
+ * Pilot volume is never invented. Robot may inherit or cut, never raise.
+ * Empty stays empty.
+ */
+export function inheritPilotVolume(pilot, proposed) {
+  if (pilot === null || pilot === undefined) return null;
+  if (proposed === null || proposed === undefined) return pilot;
+  const guess = Number(proposed);
+  if (!Number.isFinite(guess)) return pilot;
+  return guess > pilot ? pilot : guess;
+}
+
+/**
+ * First successful paper ride unlocks «små belopp» hint mode.
+ * LIVE_LOCKED stays true either way.
+ */
+export function hasCompletedFirstRide(store) {
+  try {
+    const raw = storeApi(store).getItem(RIDER_FIRST_RIDE_KEY);
+    return raw === 'true' || raw === '1';
+  } catch {
+    return false;
+  }
+}
+
+export function markFirstRideComplete(store) {
+  try {
+    storeApi(store).setItem(RIDER_FIRST_RIDE_KEY, 'true');
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export function smaBeloppUnlocked(store) {
+  return hasCompletedFirstRide(store);
+}
+
+export function smaBeloppHint(store) {
+  if (!smaBeloppUnlocked(store)) {
+    return { unlocked: false, mode: '', note: '' };
+  }
+  return {
+    unlocked: true,
+    mode: 'sma-belopp',
+    note: 'Små belopp · pilotvolym får vara mycket liten. Robot höjer aldrig. Paper.',
+  };
+}
+
+/**
+ * Gentle impulse: process before speed. No invented prices.
+ * Visible when volume or leverage arrives before SL/TP / first ride.
+ */
+export function rideImpulse(raw = {}, play = {}, opts = {}) {
+  const input = parseRideInput(raw);
+  const missing = missingRequired(input);
+  const lev = clampLeverage(play.leverage ?? input.havstang ?? 1);
+  const volumeBeforeProcess = input.pilotVolume !== null && missing.length > 0;
+  const speedBeforeProcess = lev > 1 && (!opts.hasCompletedFirstRide || missing.length > 0);
+  const visible = Boolean(volumeBeforeProcess || speedBeforeProcess);
+  let kind = '';
+  if (speedBeforeProcess) kind = 'fart';
+  else if (volumeBeforeProcess) kind = 'volym';
+  return {
+    visible,
+    kind,
+    note: visible ? 'Process före fart. Impulse syns mjukt. Tomma rutor fylls inte.' : '',
+  };
 }
 
 export function emptyRideDraft() {

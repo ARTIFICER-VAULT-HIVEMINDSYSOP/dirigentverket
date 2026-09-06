@@ -7,6 +7,7 @@ import {
   leverageSpeed,
   coastPeriodMs,
   rideRails,
+  rideImpulse,
   HOP_WINDOW_MS,
 } from './rider.js';
 import { escapeHtml, emptyFigure } from './format.js';
@@ -35,9 +36,44 @@ function arenaScale(nums) {
   };
 }
 
+export function renderPlayPad() {
+  return `<div class="rider-play-pad" data-rider-pad>
+    <button type="button" class="rider-pad-key" data-action="rider-key" data-rider-key="w" title="W räls upp">W</button>
+    <button type="button" class="rider-pad-key" data-action="rider-key" data-rider-key="s" title="S räls ner">S</button>
+    <button type="button" class="rider-pad-key" data-action="rider-key" data-rider-key="f" title="F fäst">F</button>
+    <button type="button" class="rider-pad-key" data-action="rider-key" data-rider-key="[" title="hävstång ner">[</button>
+    <button type="button" class="rider-pad-key" data-action="rider-key" data-rider-key="]" title="hävstång upp">]</button>
+    <button type="button" class="rider-pad-key" data-action="rider-key" data-rider-key="space" title="space lins">lins</button>
+  </div>`;
+}
+
+function renderScanlines() {
+  return `<div class="rider-scanlines" aria-hidden="true"></div>`;
+}
+
+function renderBitHud(lev, speed, railText) {
+  return `<div class="rider-play-hud rider-bit-hud">
+      <span>hävstång <strong data-rider-leverage-hud>${lev}×</strong></span>
+      <span>fart <strong data-rider-speed-hud>${speed}×</strong></span>
+      <span>räls <strong data-rider-rail-hud>${railText}</strong></span>
+      <span class="faint">W/S räls · F fäst · [ ] 1–4× · space lins</span>
+    </div>`;
+}
+
 export function renderPlayArena(ride, play = {}) {
   if (!ride || !ride.ok) {
-    return `<div class="rider-play is-empty" data-rider-play role="status">
+    const lev = play.leverage || 1;
+    const speed = leverageSpeed(lev);
+    return `<div class="rider-play is-empty rider-bit" data-rider-play data-bit="32" role="status"
+      data-leverage="${lev}" data-speed="${speed}" data-lens="${play.lens || 1}"
+      style="--rider-speed:${speed};--rider-lens:${play.lens || 1};--rider-coast-ms:${coastPeriodMs(lev)}ms;">
+      ${renderScanlines()}
+      ${renderBitHud(lev, speed, '')}
+      <div class="rider-arena-field" data-rider-field>
+        <div class="rider-speed-scan" aria-hidden="true"></div>
+        <div class="rider-dot is-hold" data-rider-dot style="top:50%;"></div>
+      </div>
+      ${renderPlayPad()}
       <p class="rider-play-empty">Fyll pilotvolym · entry · max-fel · RR · grav — sedan Räkna. Paper. Inte live.</p>
     </div>`;
   }
@@ -87,9 +123,9 @@ export function renderPlayArena(ride, play = {}) {
       ]
         .filter(Boolean)
         .join(' ');
-      return `<div class="${cls}" ${railAttr} data-top="${top}%" style="top:${top}%">
+      return `<div class="${cls}" ${railAttr} data-top="${top}%" style="top:${top}%"${railIndex >= 0 ? ' data-action="rider-rail-pick"' : ''}>
         <span class="rider-mark-label">${escapeHtml(row.label)}</span>
-        <span class="rider-mark-line"></span>
+        <span class="rider-mark-line"><span class="rider-mark-pip" aria-hidden="true"></span></span>
         <span class="rider-mark-px">${escapeHtml(formatPx(row.at))}</span>
       </div>`;
     })
@@ -114,34 +150,37 @@ export function renderPlayArena(ride, play = {}) {
   const coastMuted = ride.coast === null || ride.coast === undefined;
 
   const coastMs = coastPeriodMs(lev);
-  return `<div class="rider-play ${jumped ? 'has-hop' : 'has-hold'}" data-rider-play
+  const railText = rails[rail] != null ? escapeHtml(String(rails[rail])) : '';
+  return `<div class="rider-play rider-bit ${jumped ? 'has-hop' : 'has-hold'}" data-rider-play data-bit="32"
       data-leverage="${lev}" data-speed="${speed}" data-lens="${lens}" data-rail="${rail}" data-sit="${sit}"
       style="--rider-speed:${speed};--rider-lens:${lens};--rider-coast-ms:${coastMs}ms;--hop-window:${HOP_WINDOW_MS}ms;"
       role="img" aria-label="Paper-arena">
-    <div class="rider-play-hud">
-      <span>hävstång <strong data-rider-leverage-hud>${lev}×</strong></span>
-      <span>fart <strong data-rider-speed-hud>${speed}×</strong></span>
-      <span>räls <strong data-rider-rail-hud>${rails[rail] != null ? escapeHtml(String(rails[rail])) : ''}</strong></span>
-      <span class="faint">W/S räls · F fäst · [ ] 1–4× · space lins</span>
-    </div>
+    ${renderScanlines()}
+    ${renderBitHud(lev, speed, railText)}
     <div class="rider-arena-field" data-rider-field style="transform:scale(var(--rider-lens));transform-origin:center;">
       <div class="rider-speed-scan" aria-hidden="true"></div>
       ${markHtml}
       <div class="rider-dot ${jumped ? 'is-jump' : 'is-hold'}" data-rider-dot style="--from:${sitTop}%;--to:${toTop}%;top:${sitTop}%;"></div>
     </div>
+    ${renderPlayPad()}
     ${hop}
     <p class="faint rider-muted-opt">${coastMuted ? 'coast tyst' : ''} · hävstång HUD = fart · max 4×</p>
   </div>`;
 }
 
-export function renderRideResult(ride, play = {}) {
+function smaHintHtml(unlocked) {
+  if (!unlocked) return '';
+  return `<p class="rider-sma" data-sma-belopp="1">Små belopp · pilotvolym får vara mycket liten. Robot höjer aldrig. Paper.</p>`;
+}
+
+export function renderRideResult(ride, play = {}, opts = {}) {
   if (!ride) {
-    return `<p class="muted">Minst: tillgång, pilotvolym, entry, max-fel, RR. Grav ger arenan. Resten under Avancerat.</p>
-      ${renderPlayArena(ride, play)}`;
+    return `${renderPlayArena(ride, play)}
+      <p class="muted">Minst: tillgång, pilotvolym, entry, max-fel, RR. Grav ger arenan. Resten under Avancerat.</p>`;
   }
   if (!ride.ok) {
-    return `<div class="info-banner">saknar_sl_tp — fyll entry, maxFel och RR innan SL/TP kan räknas.</div>
-      ${renderPlayArena(ride, play)}`;
+    return `${renderPlayArena(ride, play)}
+      <div class="info-banner">saknar_sl_tp — fyll entry, maxFel och RR innan SL/TP kan räknas.</div>`;
   }
 
   const volCell =
@@ -162,6 +201,7 @@ export function renderRideResult(ride, play = {}) {
 
   return `
     ${renderPlayArena(ride, play)}
+    ${smaHintHtml(opts.smallAmountUnlocked)}
     <h3 class="section-title">Paper-plan</h3>
     <div class="kalkyl-live">
       <div class="card"><div class="metric-label">SL</div><div class="metric-value">${escapeHtml(formatPx(ride.sl))}</div><div class="faint">entry ± maxFel</div></div>
@@ -188,9 +228,11 @@ export function renderRider(draft, ride, hopPulse = 0, play = {}, opts = {}) {
   const incomplete = coreIncomplete(draft);
   const firstHint = opts.firstHint || '';
   const liveLocked = opts.liveLocked !== false;
+  const completed = opts.hasCompletedFirstRide === true;
+  const impulse = opts.impulse || rideImpulse(draft, play, { hasCompletedFirstRide: completed });
 
   return `
-    <section class="rider-stage" data-hop-pulse="${hopPulse}">
+    <section class="rider-stage ${impulse.visible ? 'has-impulse' : ''}" data-hop-pulse="${hopPulse}" data-impulse="${impulse.visible ? '1' : '0'}" data-first-ride="${completed ? '1' : '0'}">
       <header class="rider-hero">
         <p class="rider-kicker">Trade Rider · paper</p>
         <h2 class="rider-title">Trade Rider</h2>
@@ -203,6 +245,21 @@ export function renderRider(draft, ride, hopPulse = 0, play = {}, opts = {}) {
         <span class="rider-mode-live" aria-hidden="true">live = false</span>
       </div>
       <p class="banner-rider">Paper. live = false. Inga kurser hämtas. Ingen live-order. SL+TP bara när entry, maxFel och RR är ifyllda.</p>
+
+      <div class="rider-process" data-rider-process>
+        <span class="rider-process-kicker">process</span>
+        Process före fart. Tomma rutor stannar tomma.
+      </div>
+      ${
+        impulse.visible
+          ? `<div class="rider-impulse" data-rider-impulse role="status">
+              <span class="rider-impulse-pip" aria-hidden="true"></span>
+              ${escapeHtml(impulse.note)}
+            </div>`
+          : ''
+      }
+
+      <div id="rider-out" class="rider-out">${renderRideResult(ride, play, { smallAmountUnlocked: completed })}</div>
 
       <aside class="rider-magasin-extra" aria-label="Magasinet extra">
         ${renderMagazineHud(magazineView([], emptyHudState(), Date.now()), { extra: true })}
@@ -230,7 +287,8 @@ export function renderRider(draft, ride, hopPulse = 0, play = {}, opts = {}) {
                 <option value="sälj" ${draft.side === 'sälj' ? 'selected' : ''}>Sälj</option>
               </select></label>
             <label>Pilotvolym
-              <input name="pilotVolume" inputmode="decimal" placeholder="piloten sätter" value="${riderVal(draft, 'pilotVolume')}" /></label>
+              <input name="pilotVolume" inputmode="decimal" placeholder="piloten sätter" value="${riderVal(draft, 'pilotVolume')}" />
+              ${completed ? `<span class="hint" data-sma-belopp="1">små belopp ok · robot höjer aldrig</span>` : ''}</label>
             <label>Entry
               <input name="entry" inputmode="decimal" placeholder="skriv själv" value="${riderVal(draft, 'entry')}" /></label>
             <label>maxFel
@@ -291,7 +349,6 @@ export function renderRider(draft, ride, hopPulse = 0, play = {}, opts = {}) {
             <span class="faint">${hasTpl ? 'mall finns lokalt' : 'ingen mall än — tomma rutor fylls inte'}</span>
           </div>
         </form>
-        <div id="rider-out" class="rider-out">${renderRideResult(ride, play)}</div>
       </div>
     </section>
   `;
