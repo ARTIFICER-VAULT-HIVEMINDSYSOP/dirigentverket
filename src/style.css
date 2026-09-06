@@ -1671,6 +1671,37 @@ body.view-rider .shell-artificer {
   .rider-mark {
     grid-template-columns: 84px 1fr 56px;
   }
+  .rider-title {
+    font-size: 32px;
+  }
+  .rider-hero {
+    margin: 4px 0 8px;
+  }
+  .rider-lead {
+    font-size: 13px;
+    margin-top: 6px;
+  }
+  .banner-rider {
+    margin-bottom: 8px;
+    padding: 8px 10px;
+    font-size: 13px;
+  }
+  .rider-process,
+  .rider-impulse {
+    margin-bottom: 8px;
+    padding: 6px 8px;
+  }
+  .rider-play,
+  .rider-play.is-empty {
+    min-height: 220px;
+  }
+  .rider-arena-field {
+    height: 150px;
+  }
+  .rider-pad-key {
+    min-width: 32px;
+    min-height: 32px;
+  }
 }
 
 /* —— Sele · nexus harness (paper, same panel as Rider / Artificer) —— */
