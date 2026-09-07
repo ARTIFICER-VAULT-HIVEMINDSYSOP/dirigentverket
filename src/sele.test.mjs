@@ -214,5 +214,6 @@ test('UI: Sele-formulär, paper-badge, inga ForceX-anrop i ytan', () => {
   assert.match(ok, /Bunden sele/);
   assert.match(ok, /North Investment/);
   assert.match(ok, /EURUSD/);
-  assert.ok(!/saldo|ForceX|200 kr/i.test(ok));
+  assert.match(ok, /ingen ForceX-hämtning/);
+  assert.ok(!/saldo|200 kr|fetch\(|crm\.url/i.test(ok));
 });
