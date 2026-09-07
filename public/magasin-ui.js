@@ -7,8 +7,10 @@ import {
   fireOutcome,
   inRingNow,
   isParkedRetouch,
+  isServedThisRound,
   magazineView,
   mergeNextContactAt,
+  reopenForRound,
   rowId,
 } from '/src/contact-queue.js';
 import { renderMagazineHud } from '/src/magazine-hud.js';
@@ -49,7 +51,14 @@ function loadStore() {
 function saveStore() {
   const nextOverlay = { ...overlay };
   for (const row of rows) {
-    if (row.nextContactAt) nextOverlay[rowId(row)] = row.nextContactAt;
+    const id = rowId(row);
+    if (!id) continue;
+    nextOverlay[id] = {
+      nextContactAt: row.nextContactAt || '',
+      servedAt: row.servedAt || '',
+      servedThisRound: Boolean(row.servedThisRound),
+      reopenRound: Boolean(row.reopenRound),
+    };
   }
   overlay = nextOverlay;
   try {
@@ -100,6 +109,7 @@ function renderWorkCard(row, now) {
           <div class="tel">
             ${tel ? `<code>${escapeHtml(tel)}</code><button type="button" data-copy-tel="${escapeHtml(rowId(row))}">Kopiera nr</button>` : '<span>saknar telefon</span>'}
             <button type="button" data-copy-tpl="${escapeHtml(rowId(row))}">Kopiera mall</button>
+            ${isServedThisRound(row) ? `<button type="button" data-reopen="${escapeHtml(rowId(row))}">Öppna tur igen</button>` : ''}
           </div>
         </div>
         <form class="note" data-save="${escapeHtml(rowId(row))}">
@@ -227,6 +237,18 @@ document.addEventListener('click', (ev) => {
   if (copyTel) {
     ev.preventDefault();
     onCopy(copyTel.getAttribute('data-copy-tel'), 'tel');
+    return;
+  }
+  const reopen = ev.target.closest('[data-reopen]');
+  if (reopen) {
+    ev.preventDefault();
+    const id = reopen.getAttribute('data-reopen');
+    const row = rows.find((r) => rowId(r) === id);
+    if (row) reopenForRound(row);
+    saveStore();
+    touchServer(id, 'reopen');
+    flash('tur öppnad igen');
+    paint();
   }
 });
 

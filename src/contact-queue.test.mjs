@@ -13,10 +13,14 @@ import {
   fireOutcome,
   hasOutcome,
   inRingNow,
+  isServedThisRound,
   litId,
   magazineView,
   markCartridge,
+  markServed,
+  mergeNextContactAt,
   rankClientsToContact,
+  reopenForRound,
   rowId,
 } from './contact-queue.js';
 import { renderMagazineHud } from './magazine-hud.js';
@@ -59,13 +63,13 @@ test('reload med sparad nextContactAt hoppar inte tillbaka till samma namn', () 
   assert.notEqual(rowId(again[0]), 'p-a');
 });
 
-test('default focus är inte ranked[0] om någon annan just kopierades/markerades', () => {
+test('efter copy/arbete: Ring-nu och fokus är nästa osaknad, inte den betjänade', () => {
   const rows = clonePaper();
   const state = emptyHudState();
   afterTouch(state, rows, 'p-a', T0, 'copy');
   assert.equal(cockedId(rows, T0), 'p-b');
-  assert.equal(defaultFocusId(state, rows, T0), 'p-a');
-  assert.notEqual(defaultFocusId(state, rows, T0), cockedId(rows, T0));
+  assert.equal(defaultFocusId(state, rows, T0), 'p-b');
+  assert.equal(litId(state), 'p-a');
 });
 
 test('bara en patron lyser: copy sedan mark byter ljus', () => {
@@ -188,4 +192,50 @@ test('nextContactAt roterar bland nya kort — Recovery blir inte ranked[0]', ()
   const ranked = rankClientsToContact(rows, T0);
   assert.equal(rowId(ranked[0]), 'p-new');
   assert.notEqual(rowId(ranked[0]), 'rec-1');
+});
+
+test('efter arbete på B: Ring-nu är osaknad A/C/D, aldrig B förrän A,C,D fått tur', () => {
+  const rows = clonePaper();
+  const b = rows.find((r) => r.id === 'p-b');
+  b.brand = 'North';
+  b.avtalad_tid = '2026-09-07T09:00:00Z';
+  b.last_contact = '';
+  assert.ok(clientContactScore(b, T0) > clientContactScore(rows[0], T0));
+  assert.equal(cockedId(rows, T0), 'p-b');
+
+  afterTouch(emptyHudState(), rows, 'p-b', T0, 'copy');
+  const later = T0 + ROUND_COOLDOWN_MS + 60_000;
+  const afterB = rankClientsToContact(rows, later);
+  assert.notEqual(rowId(afterB[0]), 'p-b');
+  assert.ok(['p-a', 'p-c', 'p-d'].includes(rowId(afterB[0])));
+  assert.equal(isServedThisRound(b), true);
+
+  for (let i = 0; i < 3; i += 1) {
+    const nowId = cockedId(rows, later + i);
+    assert.notEqual(nowId, 'p-b');
+    assert.ok(['p-a', 'p-c', 'p-d'].includes(nowId));
+    afterTouch(emptyHudState(), rows, nowId, later + i, 'copy');
+  }
+
+  const view = magazineView(rows, emptyHudState(), later + 3);
+  assert.equal(view.cockedId, 'p-b');
+  assert.equal(view.ringNow[0], 'p-b');
+});
+
+test('ÖB reopen släpper in betjänad igen före rundan är slut', () => {
+  const rows = clonePaper();
+  afterTouch(emptyHudState(), rows, 'p-b', T0, 'copy');
+  assert.notEqual(cockedId(rows, T0), 'p-b');
+  reopenForRound(rows.find((r) => r.id === 'p-b'));
+  assert.equal(isServedThisRound(rows.find((r) => r.id === 'p-b')), false);
+});
+
+test('served-flagga överlever overlay-merge även när cooldown gått ut', () => {
+  const rows = clonePaper();
+  markServed(rows[1], T0);
+  const overlay = { 'p-b': { servedThisRound: true, servedAt: rows[1].servedAt } };
+  const fresh = clonePaper();
+  mergeNextContactAt(fresh, overlay);
+  const later = T0 + ROUND_COOLDOWN_MS + 1;
+  assert.notEqual(cockedId(fresh, later), 'p-b');
 });

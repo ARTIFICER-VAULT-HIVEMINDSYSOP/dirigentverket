@@ -90,13 +90,23 @@ def utc_now() -> str:
 
 
 def apply_cooldown(row: dict, at: str, hours: int = 12) -> None:
-    """nextContactAt drives rotation. Score stays. No invented times beyond cooldown."""
+    """Cooldown plus servedThisRound. Score must not recycle ahead of unserved."""
     try:
         when = datetime.fromisoformat(at.replace("Z", "+00:00"))
     except ValueError:
         when = datetime.now(timezone.utc)
     nxt = (when + timedelta(hours=hours)).replace(microsecond=0)
     row["nextContactAt"] = nxt.isoformat().replace("+00:00", "Z")
+    row["servedThisRound"] = True
+    row["servedAt"] = at
+    row["reopenRound"] = False
+
+
+def apply_reopen(row: dict) -> None:
+    row["servedThisRound"] = False
+    row["servedAt"] = ""
+    row["nextContactAt"] = ""
+    row["reopenRound"] = True
 
 
 def to_english(text: str, park: str | None) -> str:
@@ -698,7 +708,7 @@ class Handler(SimpleHTTPRequestHandler):
             return
         if path == "/api/touch":
             reason = str(payload.get("reason") or "").strip().lower()
-            if reason not in ("copy", "mark", "saved"):
+            if reason not in ("copy", "mark", "saved", "reopen"):
                 self._json(400, {"ok": False})
                 return
             at = utc_now()
@@ -712,9 +722,19 @@ class Handler(SimpleHTTPRequestHandler):
                 if row is None:
                     self._json(404, {"ok": False, "fel": "saknar rad"})
                     return
-                apply_cooldown(row, at)
+                if reason == "reopen":
+                    apply_reopen(row)
+                else:
+                    apply_cooldown(row, at)
                 atomic_write_json(path_json, data)
-            self._json(200, {"ok": True, "nextContactAt": row.get("nextContactAt") or ""})
+            self._json(
+                200,
+                {
+                    "ok": True,
+                    "nextContactAt": row.get("nextContactAt") or "",
+                    "servedThisRound": bool(row.get("servedThisRound")),
+                },
+            )
             return
         self._json(404, {"ok": False})
 

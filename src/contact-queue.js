@@ -1,4 +1,4 @@
-/** Magasinet ringkö — scoring stays, rotation via nextContactAt. Paper. Ingen PII. */
+/** Magasinet ringkö — score ranks, servedThisRound gates. Paper. Ingen PII. */
 
 export const ROUND_COOLDOWN_MS = 12 * 60 * 60 * 1000;
 
@@ -92,6 +92,40 @@ export function isDueForContact(row, now) {
   return at == null || at <= now;
 }
 
+export function isReopened(row) {
+  return Boolean(row && row.reopenRound);
+}
+
+/** Already given a slot this round. Score must not override this. */
+export function isServedThisRound(row) {
+  if (!row || typeof row !== 'object') return false;
+  if (isReopened(row)) return false;
+  if (row.servedThisRound === true) return true;
+  return Boolean(String(row.servedAt || '').trim());
+}
+
+export function unservedFresh(rows) {
+  return (Array.isArray(rows) ? rows : []).filter((r) => isFreshUnworked(r) && !isServedThisRound(r));
+}
+
+export function markServed(row, now) {
+  if (!row || typeof row !== 'object') return row;
+  row.servedThisRound = true;
+  row.servedAt = new Date(now).toISOString();
+  row.reopenRound = false;
+  applyCooldown(row, now);
+  return row;
+}
+
+export function reopenForRound(row) {
+  if (!row || typeof row !== 'object') return row;
+  row.servedThisRound = false;
+  row.servedAt = '';
+  row.nextContactAt = '';
+  row.reopenRound = true;
+  return row;
+}
+
 /** Existing Magasinet weights: avtalad tid, North, older last contact. No new case types. */
 export function clientContactScore(row, now) {
   let score = 0;
@@ -110,36 +144,40 @@ function compareRanked(a, b) {
   return rowId(a.row).localeCompare(rowId(b.row));
 }
 
-function rankLane(row, filter) {
+function rankLane(row, filter, unservedCount) {
   const parked = isParkedRetouch(row);
   if (filter === 'recovery') return parked ? 0 : 1;
-  return parked ? 1 : 0;
+  if (parked) return 2;
+  const served = isServedThisRound(row);
+  if (unservedCount > 0 && served) return 1;
+  return 0;
 }
 
 export function rankClientsToContact(rows, now = Date.now(), filter = 'queue') {
   const list = Array.isArray(rows) ? rows.filter((r) => r && typeof r === 'object') : [];
   const ring = list.filter(inRingNow);
+  const waitingUnserved = unservedFresh(ring);
   const scored = ring.map((row) => ({
     row,
     score: clientContactScore(row, now),
     due: isDueForContact(row, now),
-    lane: rankLane(row, filter),
+    lane: rankLane(row, filter, waitingUnserved.length),
   }));
-  const fresh = scored.filter((s) => !isParkedRetouch(s.row));
-  const parked = scored.filter((s) => isParkedRetouch(s.row));
-  const resetLane = filter === 'recovery' ? parked : fresh;
-  if (resetLane.length && !resetLane.some((s) => s.due)) {
-    resetLane.forEach((s) => {
-      s.due = true;
-    });
-  }
   scored.sort(compareRanked);
   return scored.map((s) => s.row);
 }
 
-export function cockedId(rows, now = Date.now(), filter = 'queue') {
+export function frontQueue(rows, now = Date.now(), filter = 'queue') {
   const ranked = rankClientsToContact(rows, now, filter);
-  return ranked.length ? rowId(ranked[0]) : '';
+  if (filter === 'recovery') return ranked.filter(isParkedRetouch);
+  const open = ranked.filter((r) => isFreshUnworked(r) && !isServedThisRound(r));
+  if (open.length) return open;
+  return ranked.filter(isFreshUnworked);
+}
+
+export function cockedId(rows, now = Date.now(), filter = 'queue') {
+  const front = frontQueue(rows, now, filter);
+  return front.length ? rowId(front[0]) : '';
 }
 
 export function applyCooldown(row, now, ms = ROUND_COOLDOWN_MS) {
@@ -156,12 +194,12 @@ export function applyOutcome(row, now, kind = 'saved') {
     row.park = k;
     row.outcome = { kind: row.status, at: new Date(now).toISOString() };
     row.ringNow = true;
-    applyCooldown(row, now);
+    markServed(row, now);
     return row;
   }
   row.outcome = { kind: k, at: new Date(now).toISOString() };
   row.ringNow = false;
-  applyCooldown(row, now);
+  markServed(row, now);
   return row;
 }
 
@@ -175,9 +213,14 @@ export function litId(state) {
 }
 
 export function defaultFocusId(state, rows, now = Date.now(), filter = 'queue') {
+  const next = cockedId(rows, now, filter);
   const lit = litId(state);
-  if (lit) return lit;
-  return cockedId(rows, now, filter);
+  if (!lit) return next;
+  const litRow = (rows || []).find((r) => rowId(r) === lit);
+  if (filter !== 'recovery' && unservedFresh(rows).length && isServedThisRound(litRow)) {
+    return next;
+  }
+  return lit;
 }
 
 export function markCartridge(state, id, at = Date.now()) {
@@ -196,7 +239,7 @@ export function copyFromCartridge(state, id, at = Date.now()) {
 
 export function afterTouch(state, rows, id, now = Date.now(), reason = 'saved') {
   const row = (rows || []).find((r) => rowId(r) === String(id));
-  if (row) applyCooldown(row, now);
+  if (row) markServed(row, now);
   if (reason === 'copy') copyFromCartridge(state, id, now);
   else if (reason === 'mark') markCartridge(state, id, now);
   else {
@@ -220,15 +263,26 @@ export function fireOutcome(state, rows, id, now = Date.now(), kind = 'saved') {
   return next;
 }
 
+function overlayBits(extra) {
+  if (typeof extra === 'string') return { nextContactAt: extra };
+  if (extra && typeof extra === 'object') return extra;
+  return null;
+}
+
 export function mergeNextContactAt(rows, overlay) {
   if (!overlay || typeof overlay !== 'object') return rows;
   for (const row of rows || []) {
     const id = rowId(row);
-    const extra = overlay[id];
+    const extra = overlayBits(overlay[id]);
     if (!extra) continue;
     const have = parseStamp(row.nextContactAt) || 0;
-    const want = parseStamp(extra) || 0;
-    if (want > have) row.nextContactAt = extra;
+    const want = parseStamp(extra.nextContactAt) || 0;
+    if (want > have) row.nextContactAt = extra.nextContactAt;
+    if (extra.servedThisRound === true || extra.servedAt) {
+      row.servedThisRound = true;
+      if (extra.servedAt) row.servedAt = extra.servedAt;
+    }
+    if (extra.reopenRound) reopenForRound(row);
   }
   return rows;
 }
@@ -241,7 +295,8 @@ function cartridgeStatus(row) {
 
 export function magazineView(rows, state, now = Date.now(), magasin = 'daniel', filter = 'queue') {
   const ring = rankClientsToContact(rows, now, filter);
-  const cocked = ring.length ? rowId(ring[0]) : '';
+  const front = frontQueue(rows, now, filter);
+  const cocked = front.length ? rowId(front[0]) : '';
   const lit = litId(state);
   const firing =
     state && state.firingId && now < (Number(state.firingUntil) || 0) ? String(state.firingId) : '';
@@ -269,7 +324,8 @@ export function magazineView(rows, state, now = Date.now(), magasin = 'daniel', 
     firingId: firing,
     focusId: defaultFocusId(state, rows, now, filter),
     filter,
-    ringNow: ring.map(rowId),
+    servedIds: ring.filter(isServedThisRound).map(rowId),
+    ringNow: front.map(rowId),
     cartridges,
     cap: cockedName ? `Ring nu · ${cockedName}` : 'väntar kö',
   };
