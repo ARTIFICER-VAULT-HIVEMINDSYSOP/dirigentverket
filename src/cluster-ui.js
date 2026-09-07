@@ -98,6 +98,7 @@ export function renderShell(inner, ctx) {
         ${nav('#/synergier', 'Synergier', 'synergier')}
         ${nav('#/nyheter', 'Nyheter', 'nyheter')}
         ${nav('#/rider', 'Trade Rider', 'rider')}
+        <a href="/magasin.html">Magasinet</a>
         ${nav('#/sele', 'Pilotsele', 'sele')}
         ${nav('#/robot', 'Artificer AI', 'robot')}
         <span class="spacer"></span>

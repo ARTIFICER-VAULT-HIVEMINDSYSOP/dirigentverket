@@ -299,6 +299,9 @@ test('arena-UI A–E: tom play-rad, kicker inte lampa, hopp from→to', () => {
     assert.ok(!new RegExp(`id="rider-core"[\\s\\S]*name="${name}"[\\s\\S]*id="rider-advanced"`).test(page));
   }
   assert.ok(!/WATCHERS · anden i lampan/.test(page));
+  assert.match(page, /magazine-hud is-extra/);
+  assert.match(page, /Primär yta är Magasinet/);
+  assert.doesNotMatch(page, /PNL|pnl/);
   assert.equal(coreIncomplete(emptyRideDraft()), true);
 
   const filled = renderRider(
