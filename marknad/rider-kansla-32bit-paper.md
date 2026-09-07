@@ -12,12 +12,23 @@
 
 ## Redan i main
 - `fa2384d` — paper-arena, sticky PAPER-badge, kärna A–E, hopp, mallar, LIVE_LOCKED (PR #3).
-- Pilotsele / Nyhetssele (PR #5) + Magasinet kontaktkö/`servedThisRound` (PR #6) ligger på main — Rider-PR #4 måste baseras om.
+- Pilotsele / Nyhetssele (PR #5) + Magasinet kontaktkö/`servedThisRound` (PR #6) ligger på main.
 
 ## Paper-bygge i PR #4 (draft — merge bara efter namngivet ja)
-Branch `cursor/rider-kansla-32bit-0a6e`. Gate `hasCompletedFirstRide` / `RIDER_FIRST_RIDE_KEY`, «små belopp»-hint, impuls (process före fart), 32-bit playfeel (W/S/F/[ ]/Space), silhuett-HUD.
+Branch `cursor/rider-kansla-32bit-0a6e` @ `2e6f3f2`. Gate `hasCompletedFirstRide` / `RIDER_FIRST_RIDE_KEY`, «små belopp»-hint, impuls (process före fart), 32-bit playfeel (W/S/F/[ ]/Space), silhuett-HUD. 81 tester gröna. `LIVE_LOCKED` orörd.
 
-**13:50 Sthlm 7 sep:** auto-update branch mot tip gav merge-konflikt. Cloud-agent kör rebase på tip (draft kvar, ingen merge). Magasin `8765` OK.
+**17:54 Sthlm 7 sep:** rebase klar mot tip `ceadcbf`. Konflikter lösta (rider-ui Magasin-extra behållen; känsla/grind från branchen). **mergeable_state=clean**, draft kvar. **Väntar namngivet merge-ja på PR #4.** Ingen undraft/merge utan ÖB.
+
+https://github.com/ARTIFICER-VAULT-HIVEMINDSYSOP/dirigentverket/pull/4
+
+## Prova-känsla (efter merge — paper)
+När ÖB öppnar `#/rider` ska det kännas så här, i den ordningen:
+1. Arena först — grafen syns innan någon formvägg.
+2. Process-hint syns mjukt (inte skrikig varning).
+3. W/S flyttar räls direkt; F fäster; hävstång 1–4× syns som fart/pip, inte textmur.
+4. Space = lins; hopp har tell; inga nya play-knappar på ytan.
+5. En lyckad paper-ride krävs innan «små belopp» syns/öppnas.
+6. PAPER-badge sticky; live-knapp död.
 
 ## Inte
 - Live-order, mäklare, påhittade P&L
