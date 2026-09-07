@@ -133,19 +133,24 @@ test('applyVolume räknar bara när anroparen skickar saldo', () => {
   assert.deepEqual(r.missing, []);
 });
 
-test('volym överstiger aldrig pilotens %', () => {
-  assert.equal(capVolumePct(5, 1), 1);
-  assert.equal(capVolumePct(1, 1), 1);
-  assert.equal(capVolumePct('', 1), 1);
-  assert.equal(capVolumePct('', ''), '');
-
+test('Pilotsele → ROBOT-kluster: barnvolym ≤ pilot volumePct, höjer aldrig', () => {
   const child = inheritPilotVolume(1, 5, 'ROBOT');
   assert.equal(child.kind, 'pilotsele');
   assert.equal(child.tillgang, 'ROBOT');
   assert.equal(child.volumePct, 1);
+  assert.ok(child.volumePct <= 1);
   assert.equal(child.raised, false);
   assert.equal(child.exceedsPilot, true);
-  assert.ok(child.volumePct <= 1);
+  assert.equal(child.paper, true);
+  assert.equal(child.live, false);
+
+  const same = inheritPilotVolume(1, 1, 'ROBOT');
+  assert.equal(same.volumePct, 1);
+  assert.equal(same.raised, false);
+
+  const inherit = inheritPilotVolume(1, '', 'ROBOT');
+  assert.equal(inherit.volumePct, 1);
+  assert.equal(inherit.raised, false);
 
   const aiind = inheritPilotVolume(1, 0.5, 'AIIND');
   assert.equal(aiind.tillgang, 'AIIND');
@@ -154,7 +159,16 @@ test('volym överstiger aldrig pilotens %', () => {
   const guldr = inheritPilotVolume(1, 8, 'GULDR');
   assert.equal(guldr.tillgang, 'GULDR');
   assert.equal(guldr.volumePct, 1);
+  assert.equal(guldr.raised, false);
   assert.notEqual(aiind.tillgang, guldr.tillgang);
+  assert.notEqual(aiind.tillgang, 'ROBOT');
+});
+
+test('volym överstiger aldrig pilotens %', () => {
+  assert.equal(capVolumePct(5, 1), 1);
+  assert.equal(capVolumePct(1, 1), 1);
+  assert.equal(capVolumePct('', 1), 1);
+  assert.equal(capVolumePct('', ''), '');
 
   const raisedAttempt = applyVolume(200, 5, 1);
   assert.equal(raisedAttempt.appliedPct, 1);

@@ -153,11 +153,8 @@ export function validateSele(raw = {}, tenant = {}) {
 }
 
 /**
- * Älva/robot inherits volume. Never raise above the pilot’s %.
- * Empty stays empty — do not invent a percent.
- */
-/**
  * ROBOT-kluster (älva) ärver Pilotsele. child ≤ pilot. Never raise.
+ * Empty stays empty — do not invent a percent.
  */
 export function inheritPilotVolume(pilotVolumePct, childVolumePct, tillgang = 'ROBOT') {
   const applied = capVolumePct(childVolumePct, pilotVolumePct);
