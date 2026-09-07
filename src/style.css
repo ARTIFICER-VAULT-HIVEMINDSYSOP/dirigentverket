@@ -1,3 +1,5 @@
+@import './magazine-hud.css';
+
 /* Dirigentverket — dark, calm investigation surface */
 
 :root {
@@ -1224,6 +1226,12 @@ body.view-rider .shell-artificer {
   border: 1px solid rgba(122, 158, 126, 0.4);
   color: #d5e4d4;
   border-radius: var(--radius);
+}
+
+.rider-magasin-extra {
+  width: 100%;
+  max-width: 720px;
+  margin: 0 0 1rem;
 }
 
 .rider-tablet {

@@ -89,6 +89,16 @@ def utc_now() -> str:
     )
 
 
+def apply_cooldown(row: dict, at: str, hours: int = 12) -> None:
+    """nextContactAt drives rotation. Score stays. No invented times beyond cooldown."""
+    try:
+        when = datetime.fromisoformat(at.replace("Z", "+00:00"))
+    except ValueError:
+        when = datetime.now(timezone.utc)
+    nxt = (when + timedelta(hours=hours)).replace(microsecond=0)
+    row["nextContactAt"] = nxt.isoformat().replace("+00:00", "Z")
+
+
 def to_english(text: str, park: str | None) -> str:
     raw = (text or "").strip()
     if not raw:
@@ -513,8 +523,34 @@ class Handler(SimpleHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
+    def _serve_src(self, url_path: str) -> bool:
+        if not url_path.startswith("/src/"):
+            return False
+        rel = url_path[1:]
+        if ".." in rel:
+            self.send_error(404)
+            return True
+        src_path = (ROOT / rel).resolve()
+        root_src = (ROOT / "src").resolve()
+        if src_path != root_src and root_src not in src_path.parents:
+            self.send_error(404)
+            return True
+        if not src_path.is_file() or src_path.suffix not in {".js", ".css", ".mjs"}:
+            self.send_error(404)
+            return True
+        data = src_path.read_bytes()
+        ctype = "text/css; charset=utf-8" if src_path.suffix == ".css" else "application/javascript; charset=utf-8"
+        self.send_response(200)
+        self.send_header("Content-Type", ctype)
+        self.send_header("Content-Length", str(len(data)))
+        self.end_headers()
+        self.wfile.write(data)
+        return True
+
     def do_GET(self) -> None:
         parsed = urlparse(self.path)
+        if self._serve_src(parsed.path):
+            return
         if parsed.path == "/api/luckor":
             qs = parse_qs(parsed.query)
             magasin = (qs.get("magasin") or [""])[0]
@@ -529,7 +565,7 @@ class Handler(SimpleHTTPRequestHandler):
             return
         super().do_GET()
 
-    def _save_row(self, magasin: str, row_id: str, text: str, park: str | None, dag: str, tid: str, require_comment: bool):
+    def _save_row(self, magasin: str, row_id: str, text: str, park: str | None, dag: str, tid: str, require_comment: bool, outcome: bool = False):
         booked = parse_tid(dag, tid)
         if tid and booked is None:
             self._json(400, {"ok": False, "fel": "saknar giltig tid"})
@@ -572,7 +608,8 @@ class Handler(SimpleHTTPRequestHandler):
                 row["card_comment"] = english
                 row["card_comment_at"] = at
                 row["pending_forcex"] = True
-            if park in ("NA", "VM", "RECOVERY") or booked:
+            apply_cooldown(row, at)
+            if park in ("NA", "VM", "RECOVERY") or booked or outcome:
                 if park in ("NA", "VM"):
                     row["last_contact"] = at
                     row["status"] = "No answer"
@@ -643,11 +680,41 @@ class Handler(SimpleHTTPRequestHandler):
         if magasin not in MAG_FILES or not row_id:
             self._json(400, {"ok": False})
             return
+        outcome = payload.get("outcome") in (True, "true", "1", 1)
         if path == "/api/kommentar":
-            self._save_row(magasin, row_id, text, park, dag, tid, require_comment=not bool(tid or park))
+            self._save_row(
+                magasin,
+                row_id,
+                text,
+                park,
+                dag,
+                tid,
+                require_comment=not bool(tid or park or outcome),
+                outcome=outcome,
+            )
             return
         if path == "/api/boka":
-            self._save_row(magasin, row_id, text, park, dag, tid, require_comment=False)
+            self._save_row(magasin, row_id, text, park, dag, tid, require_comment=False, outcome=True)
+            return
+        if path == "/api/touch":
+            reason = str(payload.get("reason") or "").strip().lower()
+            if reason not in ("copy", "mark", "saved"):
+                self._json(400, {"ok": False})
+                return
+            at = utc_now()
+            with LOCK:
+                path_json, data = load_mag(magasin)
+                rows = data["rows"]
+                row = next(
+                    (r for r in rows if isinstance(r, dict) and str(r.get("id")) == row_id),
+                    None,
+                )
+                if row is None:
+                    self._json(404, {"ok": False, "fel": "saknar rad"})
+                    return
+                apply_cooldown(row, at)
+                atomic_write_json(path_json, data)
+            self._json(200, {"ok": True, "nextContactAt": row.get("nextContactAt") or ""})
             return
         self._json(404, {"ok": False})
 

@@ -10,6 +10,8 @@ import {
   HOP_WINDOW_MS,
 } from './rider.js';
 import { escapeHtml, emptyFigure } from './format.js';
+import { emptyHudState, magazineView } from './contact-queue.js';
+import { renderMagazineHud } from './magazine-hud.js';
 
 export function riderVal(draft, name) {
   const v = draft[name];
@@ -201,6 +203,11 @@ export function renderRider(draft, ride, hopPulse = 0, play = {}, opts = {}) {
         <span class="rider-mode-live" aria-hidden="true">live = false</span>
       </div>
       <p class="banner-rider">Paper. live = false. Inga kurser hämtas. Ingen live-order. SL+TP bara när entry, maxFel och RR är ifyllda.</p>
+
+      <aside class="rider-magasin-extra" aria-label="Magasinet extra">
+        ${renderMagazineHud(magazineView([], emptyHudState(), Date.now()), { extra: true })}
+        <p class="faint"><a href="/magasin.html">Öppna Magasinet</a> — primär klient/lead-kö.</p>
+      </aside>
 
       <div class="rider-tablet">
         <div class="rider-robban-row">
