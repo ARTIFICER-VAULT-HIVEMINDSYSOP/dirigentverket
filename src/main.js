@@ -38,6 +38,20 @@ import {
 } from './rider.js';
 import { renderRider, readRiderForm, focusRiderCore } from './rider-ui.js';
 import {
+  validateSele,
+  loadSeleDraft,
+  saveSeleDraft,
+  emptySele,
+} from './sele.js';
+import { renderSele, readSeleForm } from './sele-ui.js';
+import {
+  validateNyhetssele,
+  loadNyhetsseleDraft,
+  saveNyhetsseleDraft,
+  emptyNyhetssele,
+} from './nyhetssele.js';
+import { renderNyhetssele, readNyhetsseleForm } from './nyhetssele-ui.js';
+import {
   loadNews,
   saveNews,
   fetchRss,
@@ -59,6 +73,10 @@ let riderResult = null;
 let riderHopPulse = 0;
 let riderPlay = emptyPlayState();
 let riderFirstHint = '';
+let seleDraft = loadSeleDraft();
+let seleResult = null;
+let nyhetsseleDraft = loadNyhetsseleDraft();
+let nyhetsseleResult = null;
 let news = loadNews();
 
 function persist() {
@@ -110,13 +128,21 @@ function render() {
   if (view === 'verksamhet') inner = renderProject(id, c);
   else if (view === 'kalkyl') inner = renderKalkyl(c);
   else if (view === 'synergier') inner = renderSynergier(c);
-  else if (view === 'nyheter') inner = renderNews(news, { selectedModuleId: id });
+  else if (view === 'nyheter') {
+    inner = renderNews(news, {
+      selectedModuleId: id,
+      nyhetsseleHtml: renderNyhetssele(nyhetsseleDraft, nyhetsseleResult),
+    });
+  }
   else if (view === 'robot') inner = renderRobot(robotDraft, robotResult);
   else if (view === 'rider') {
     inner = renderRider(riderDraft, riderResult, riderHopPulse, riderPlay, {
       firstHint: riderFirstHint,
       liveLocked: LIVE_LOCKED,
     });
+  }
+  else if (view === 'sele') {
+    inner = renderSele(seleDraft, seleResult, { liveLocked: LIVE_LOCKED });
   }
   else if (view === 'nytt') inner = renderForm(null, c);
   else if (view === 'redigera') {
@@ -126,14 +152,17 @@ function render() {
 
   document.body.classList.toggle('view-artificer', view === 'robot');
   document.body.classList.toggle('view-rider', view === 'rider');
+  document.body.classList.toggle('view-sele', view === 'sele');
   document.title =
     view === 'rider'
       ? 'Trade Rider — paper'
-      : view === 'robot'
-        ? 'Artificer AI — WATCHERS'
-        : 'Dirigentverket — klusterbok';
+      : view === 'sele'
+        ? 'Pilotsele — paper'
+        : view === 'robot'
+          ? 'Artificer AI — WATCHERS'
+          : 'Dirigentverket — klusterbok';
   root.innerHTML =
-    view === 'robot' || view === 'rider'
+    view === 'robot' || view === 'rider' || view === 'sele'
       ? renderArtificerShell(inner, parseRoute)
       : renderShell(inner, c);
 }
@@ -195,6 +224,16 @@ root.addEventListener('click', (ev) => {
     robotDraft = emptyRobotDraft();
     robotResult = null;
     saveRobotDraft(robotDraft);
+    render();
+  } else if (action === 'nyhetssele-clear') {
+    nyhetsseleDraft = emptyNyhetssele();
+    nyhetsseleResult = null;
+    saveNyhetsseleDraft(nyhetsseleDraft);
+    render();
+  } else if (action === 'sele-clear') {
+    seleDraft = emptySele();
+    seleResult = null;
+    saveSeleDraft(seleDraft);
     render();
   } else if (action === 'rider-clear') {
     riderDraft = emptyRideDraft();
@@ -320,6 +359,24 @@ root.addEventListener('submit', (ev) => {
     robotDraft = readRobotForm(robotForm);
     saveRobotDraft(robotDraft);
     robotResult = computeRobot(robotDraft);
+    render();
+    return;
+  }
+  const nyhetsForm = ev.target.closest('#nyhetssele-form');
+  if (nyhetsForm) {
+    ev.preventDefault();
+    nyhetsseleDraft = readNyhetsseleForm(nyhetsForm);
+    saveNyhetsseleDraft(nyhetsseleDraft);
+    nyhetsseleResult = validateNyhetssele(nyhetsseleDraft);
+    render();
+    return;
+  }
+  const seleForm = ev.target.closest('#sele-form');
+  if (seleForm) {
+    ev.preventDefault();
+    seleDraft = readSeleForm(seleForm);
+    saveSeleDraft(seleDraft);
+    seleResult = validateSele(seleDraft);
     render();
     return;
   }

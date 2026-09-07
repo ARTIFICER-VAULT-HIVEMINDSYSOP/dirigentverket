@@ -96,7 +96,9 @@ export function renderShell(inner, ctx) {
         ${nav('#/portfolj', 'Portfölj', 'portfolj')}
         ${nav('#/kalkyl', 'Kalkyl', 'kalkyl')}
         ${nav('#/synergier', 'Synergier', 'synergier')}
+        ${nav('#/nyheter', 'Nyheter', 'nyheter')}
         ${nav('#/rider', 'Trade Rider', 'rider')}
+        ${nav('#/sele', 'Pilotsele', 'sele')}
         ${nav('#/robot', 'Artificer AI', 'robot')}
         <span class="spacer"></span>
         <a class="btn btn-gold" href="#/nytt">+ Ny verksamhet</a>
@@ -105,7 +107,7 @@ export function renderShell(inner, ctx) {
       <main>${inner}</main>
 
       <footer class="footer-bar">
-        <span>Dirigentverket · klusterbok. Ändringar sparas i webbläsaren. Artificer AI är paper / utredning.</span>
+        <span>Dirigentverket · klusterbok. Ändringar sparas i webbläsaren. Artificer AI, Pilotsele och Nyhetssele är paper.</span>
         <button class="btn btn-ghost" type="button" data-action="reset-seed">Återställ klustret</button>
       </footer>
     </div>
@@ -228,7 +230,7 @@ export function renderProject(routeId, ctx) {
 
   const robotLink =
     p.id === 'tradingskolan' || p.typ === 'utbildning'
-      ? `<p class="page-lead">Artificer AI för Tradingskolan: <a href="#/robot">öppna Artificer AI</a> — föreslår SL/TP, lägger inga ordrar.</p>`
+      ? `<p class="page-lead">Artificer AI för Tradingskolan: <a href="#/robot">öppna Artificer AI</a> — föreslår SL/TP, lägger inga ordrar. Nexus: <a href="#/sele">Pilotsele</a> binder volym och SL/TP till ROBOT-klustret.</p>`
       : '';
 
   const derivedCards = m.hasUtfall

@@ -1514,3 +1514,89 @@ body.view-rider .shell-artificer {
     grid-template-columns: 84px 1fr 56px;
   }
 }
+
+/* —— Sele · nexus harness (paper, same panel as Rider / Artificer) —— */
+
+body.view-sele {
+  background-color: #12110e;
+  background-image:
+    radial-gradient(ellipse 48% 36% at 50% 0%, rgba(201, 166, 107, 0.14), transparent 55%),
+    linear-gradient(180deg, #16140f 0%, #12110e 55%, #100e0b 100%);
+}
+
+body.view-sele .nav-artificer {
+  border-color: rgba(201, 166, 107, 0.28);
+}
+
+body.view-sele .shell-artificer {
+  max-width: 760px;
+}
+
+.sele-stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.sele-hero {
+  text-align: center;
+  margin: 8px 0 12px;
+}
+
+.sele-kicker {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin: 0 0 8px;
+}
+
+.sele-title {
+  font-family: var(--serif);
+  font-weight: 600;
+  font-size: clamp(40px, 6vw, 64px);
+  letter-spacing: -0.03em;
+  line-height: 1;
+  margin: 0;
+  color: var(--ink);
+}
+
+.sele-lead {
+  margin: 10px 0 0;
+  color: var(--ink-mute);
+  max-width: 44ch;
+}
+
+.sele-skip {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+}
+
+.sele-skip input[type="checkbox"] {
+  width: auto;
+  margin: 0;
+}
+
+.sele-symbols {
+  margin: 12px 0;
+}
+
+.sele-out {
+  margin-top: 18px;
+}
+
+.nyhetssele-stub {
+  margin: 0 0 28px;
+  padding: 18px 16px 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--bg-card);
+}
+
+.nyhetssele-stub .rider-badge-paper {
+  max-width: none;
+  margin: 8px 0 14px;
+}
