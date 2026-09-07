@@ -6,18 +6,19 @@
 1. **Tradingpsykologi inbyggd** — process före fart (Steenbarger-spåret). Tomma rutor fylls inte. Impuls syns i UI utan att skrika.
 2. **Känns av på en gång** — första skärmen = arena/spel, inte formulärvägg.
 3. **Prova minst en gång** — minst en avslutad paper-ride innan «små belopp»-läge öppnas (gate i klient; belopp = pilotens tal, aldrig påhittade).
-4. **Små belopp efter prova** — volym får vara väldigt låg efter gate; robot höjer aldrig. Live fortfarande låst.
-5. **Mer spel** — 32-bit stil (inte lamp-läger). Interaktivt **under** tiden man ser grafen: W/S/räls, hopp, lins — grafen är lekytan.
+4. **Små belopp efter prova** — volym får vara väldigt låg efter gate; robot höjer aldrig. Live fortfarande låst. Känslan ljuger inte om risk.
+5. **Mer spel** — 32-bit stil (inte lamp-läger). Silhuett-HUD (läge/räls/hävstång som pip och fart, inte textvägg). Commit bara på reserverade tangenter: W/S räls instant, F fäst, hävstång 1–4× ärlig, hopp-tell, Space = lins. Robban stjäl inte. Grafen är lekytan. Inga nya play-knappar.
 6. **Bygg in bra** — psykologi + gate + playfeel i samma nexus-yta (`#/rider`), inte separat app.
 
 ## Redan i main
 - `fa2384d` — paper-arena, sticky PAPER-badge, kärna A–E, hopp, mallar, LIVE_LOCKED (PR #3).
-- Pilotsele / Nyhetssele (PR #5) + Magasinet kontaktkö/`servedThisRound` (PR #6) ligger på main.
+- Pilotsele / Nyhetssele (PR #5) + Magasinet kontaktkö/`servedThisRound` (PR #6).
+- `cc2946f` — status: rebase klar + prova-känsla-checklista.
 
 ## Paper-bygge i PR #4 (draft — merge bara efter namngivet ja)
-Branch `cursor/rider-kansla-32bit-0a6e` @ `2e6f3f2`. Gate `hasCompletedFirstRide` / `RIDER_FIRST_RIDE_KEY`, «små belopp»-hint, impuls (process före fart), 32-bit playfeel (W/S/F/[ ]/Space), silhuett-HUD. 81 tester gröna. `LIVE_LOCKED` orörd.
+Branch `cursor/rider-kansla-32bit-0a6e` @ `2e6f3f2` (+ denna status-synk). Gate `hasCompletedFirstRide` / `RIDER_FIRST_RIDE_KEY`, «små belopp»-hint, impuls (process före fart), 32-bit playfeel (W/S/F/[ ]/Space), silhuett-HUD. 81 tester gröna. `LIVE_LOCKED` orörd.
 
-**17:54 Sthlm 7 sep:** rebase klar mot tip `ceadcbf`. Konflikter lösta (rider-ui Magasin-extra behållen; känsla/grind från branchen). **mergeable_state=clean**, draft kvar. **Väntar namngivet merge-ja på PR #4.** Ingen undraft/merge utan ÖB.
+**17:54 Sthlm 7 sep:** rebase klar mot tip. Konflikter lösta (rider-ui Magasin-extra behållen; känsla/grind från branchen). Draft kvar. **Väntar namngivet merge-ja på PR #4.** Ingen undraft/merge utan ÖB.
 
 https://github.com/ARTIFICER-VAULT-HIVEMINDSYSOP/dirigentverket/pull/4
 
