@@ -1,11 +1,20 @@
 /**
- * Sele — paper control harness.
- * Binds the pilot’s volume rule + SL/TP template to a client filter.
- * Robots / älvor inherit; they never raise volume.
+ * Pilotsele — paper control harness (ARTIFICER: Sele).
+ * Binds the pilot’s volume + SL/TP to a client filter for the ROBOT cluster.
+ * AIIND and GULDR stay selectable and distinct. Älvor inherit; never raise volume.
  * Never fetches ForceX. Never invents balance, prices, or SL/TP.
  */
 
-export { LIVE_LOCKED } from './rider.js';
+import { normalizeTillgang } from './rider.js';
+
+export { LIVE_LOCKED, TILLGANGAR, normalizeTillgang } from './rider.js';
+
+export const SELE_KIND = 'pilotsele';
+export const DEFAULT_CLUSTER = {
+  ROBOT: 'ROBOT-TRADER',
+  AIIND: '',
+  GULDR: '',
+};
 
 export const SELE_STORAGE_KEY = 'dirigentverket.sele.v1';
 
@@ -63,6 +72,8 @@ export function emptySele() {
     brand: '',
     assigned: '',
     tenantId: '',
+    tillgang: 'ROBOT',
+    cluster: 'ROBOT-TRADER',
     symbols: '',
     volumePct: '',
     side: 'köp',
@@ -81,13 +92,18 @@ export function createSele(raw = {}, tenant = {}) {
   const filter = raw.clientFilter && typeof raw.clientFilter === 'object' ? raw.clientFilter : {};
   const side = raw.side === 'sälj' ? 'sälj' : 'köp';
   const symbols = parseSymbols(raw.symbols);
+  const tillgang = normalizeTillgang(raw.tillgang);
+  const cluster = str(raw.cluster) || DEFAULT_CLUSTER[tillgang] || '';
   return {
+    kind: SELE_KIND,
     name: str(raw.name),
     clientFilter: {
       brand: str(raw.brand ?? filter.brand),
       assigned: str(raw.assigned ?? filter.assigned),
       tenantId: str(raw.tenantId ?? filter.tenantId ?? shape.tenantId),
     },
+    tillgang,
+    cluster,
     volumePct: keepPct(raw.volumePct),
     side,
     symbols,
@@ -140,6 +156,24 @@ export function validateSele(raw = {}, tenant = {}) {
  * Älva/robot inherits volume. Never raise above the pilot’s %.
  * Empty stays empty — do not invent a percent.
  */
+/**
+ * ROBOT-kluster (älva) ärver Pilotsele. child ≤ pilot. Never raise.
+ */
+export function inheritPilotVolume(pilotVolumePct, childVolumePct, tillgang = 'ROBOT') {
+  const applied = capVolumePct(childVolumePct, pilotVolumePct);
+  const child = num(childVolumePct);
+  const pilot = num(pilotVolumePct);
+  return {
+    kind: SELE_KIND,
+    tillgang: normalizeTillgang(tillgang),
+    volumePct: applied,
+    raised: false,
+    exceedsPilot: child !== null && pilot !== null && child > pilot,
+    paper: true,
+    live: false,
+  };
+}
+
 export function capVolumePct(volumePct, pilotVolumePct) {
   const vol = num(volumePct);
   const pilot = num(pilotVolumePct);

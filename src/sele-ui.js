@@ -1,5 +1,5 @@
 import { escapeHtml, emptyFigure } from './format.js';
-import { tenantSeleShape } from './sele.js';
+import { tenantSeleShape, TILLGANGAR } from './sele.js';
 
 export function seleVal(draft, name) {
   const v = draft[name];
@@ -47,7 +47,7 @@ export function renderSeleResult(result) {
   return `
     ${missingBlock}
     <h3 class="section-title">Bunden sele</h3>
-    <p class="muted">${escapeHtml(s.name || '')} · ${s.side} · paper. Älvor ärver volym, höjer aldrig.</p>
+    <p class="muted">${escapeHtml(s.name || 'Pilotsele')} · ${escapeHtml(s.tillgang || 'ROBOT')} · ${escapeHtml(s.cluster || '')} · ${s.side} · paper. Älvor ärver volym, höjer aldrig.</p>
     <div class="kalkyl-live">
       <div class="card"><div class="metric-label">Varumärke</div><div class="metric-value">${brand}</div><div class="faint">clientFilter · tenant</div></div>
       <div class="card"><div class="metric-label">Tilldelad</div><div class="metric-value">${assigned}</div><div class="faint">ingen kund-PII i git</div></div>
@@ -71,16 +71,16 @@ export function renderSele(draft, result, opts = {}) {
   return `
     <section class="sele-stage">
       <header class="sele-hero">
-        <p class="sele-kicker">Nexus · kommando</p>
-        <h2 class="sele-title">Sele</h2>
-        <p class="sele-lead">Binder pilotens volymregel och SL/TP-mall till valt klienturval. Älvor ärver. Paper.</p>
+        <p class="sele-kicker">Nexus · Pilotsele</p>
+        <h2 class="sele-title">Pilotsele</h2>
+        <p class="sele-lead">Pilotens volym + SL/TP ärvs av ROBOT-klustret. AIIND och GULDR är valbara, skilda. Älvor höjer aldrig. Paper.</p>
       </header>
       <div class="rider-badge-paper" role="status">PAPER · live=false · ingen mäklare · ingen ForceX</div>
       <div class="rider-mode" role="status">
         <span class="rider-mode-paper">paper</span>
         <span class="rider-mode-live" aria-hidden="true">live = false</span>
       </div>
-      <p class="banner-rider">Sele är selen. SL+TP krävs. Tom cell = saknas. Volym sätter piloten. Robot höjer aldrig. ${
+      <p class="banner-rider">Pilotsele är selen mot ROBOT-klustret. SL+TP krävs. Tom cell = saknas. Volym sätter piloten. Robot höjer aldrig. ${
         liveLocked ? 'LIVE_LOCKED.' : 'paper.'
       }</p>
 
@@ -88,13 +88,21 @@ export function renderSele(draft, result, opts = {}) {
         <form id="sele-form">
           <div class="form-grid">
             <label>Namn
-              <input name="name" placeholder="selen" value="${seleVal(draft, 'name')}" /></label>
+              <input name="name" placeholder="Pilotsele" value="${seleVal(draft, 'name')}" /></label>
+            <label>Tillgång <span class="hint">ROBOT primär · AIIND/GULDR skilda</span>
+              <select name="tillgang">
+                ${TILLGANGAR.map(
+                  (t) => `<option value="${t}" ${(draft.tillgang || 'ROBOT') === t ? 'selected' : ''}>${t}</option>`,
+                ).join('')}
+              </select></label>
+            <label>Kluster
+              <input name="cluster" placeholder="ROBOT-TRADER" value="${seleVal(draft, 'cluster')}" /></label>
             <label>Varumärke <span class="hint">tenant, t.ex. North Investment</span>
               <input name="brand" placeholder="varumärke" value="${seleVal(draft, 'brand')}"${brandAttr} /></label>
             <label>Tilldelad <span class="hint">stab, t.ex. Daniel</span>
               <input name="assigned" placeholder="tilldelad" value="${seleVal(draft, 'assigned')}"${assignedAttr} /></label>
-            <label class="full">Symboler <span class="hint">flera, kommaseparerat — inte ROBOT/AIIND/GULDR</span>
-              <input name="symbols" placeholder="t.ex. EURUSD, XAUUSD" value="${escapeHtml(symbolsText(draft))}" /></label>
+            <label class="full">Symboler <span class="hint">valfritt, flera — kluster styrs av tillgång</span>
+              <input name="symbols" placeholder="valfritt utöver ROBOT-kluster" value="${escapeHtml(symbolsText(draft))}" /></label>
             <label>Sida
               <select name="side">
                 <option value="köp" ${draft.side !== 'sälj' ? 'selected' : ''}>Köp</option>
@@ -115,7 +123,7 @@ export function renderSele(draft, result, opts = {}) {
           ${brandList}
           ${assignedList}
           <div class="btn-row">
-            <button class="btn btn-gold" type="submit">Bind paper-sele</button>
+            <button class="btn btn-gold" type="submit">Bind Pilotsele</button>
             <button class="btn btn-ghost" type="button" data-action="sele-clear">Rensa</button>
           </div>
         </form>
@@ -129,6 +137,8 @@ export function readSeleForm(form) {
   const fd = new FormData(form);
   return {
     name: String(fd.get('name') || '').trim(),
+    tillgang: String(fd.get('tillgang') || 'ROBOT').trim(),
+    cluster: String(fd.get('cluster') || ''),
     brand: String(fd.get('brand') || '').trim(),
     assigned: String(fd.get('assigned') || '').trim(),
     symbols: String(fd.get('symbols') || ''),

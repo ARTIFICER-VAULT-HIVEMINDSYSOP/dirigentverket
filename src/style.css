@@ -1587,3 +1587,16 @@ body.view-sele .shell-artificer {
 .sele-out {
   margin-top: 18px;
 }
+
+.nyhetssele-stub {
+  margin: 0 0 28px;
+  padding: 18px 16px 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--bg-card);
+}
+
+.nyhetssele-stub .rider-badge-paper {
+  max-width: none;
+  margin: 8px 0 14px;
+}

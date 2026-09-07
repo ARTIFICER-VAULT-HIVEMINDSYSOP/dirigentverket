@@ -79,8 +79,10 @@ export function renderNews(news, opts = {}) {
   const articles = modules.flatMap((m) => (m.items || []).map((it) => itemCard(it, m))).join('');
   const err = news?.error ? `<div class="info-banner">${escapeHtml(news.error)}</div>` : '';
 
+  const nyhetsseleHtml = opts.nyhetsseleHtml || '';
   return `
-    <p class="page-lead">Externa moduler. Klistra in en feed-url eller en artikel. Inga påhittade texter.</p>
+    ${nyhetsseleHtml}
+    <p class="page-lead">Externa moduler. Klistra in en feed-url eller en artikel. Inga påhittade texter. Nyhetssele ovan är paper — den skickar inte.</p>
     <div class="banner-struktur" role="status">Feed-bilder släpps inte igenom. Bara egen eller Unsplash/Pexels/Wikimedia med namn och licens. Inga vattenstämplar.</div>
     ${err}
     <h3 class="section-title">Moduler</h3>

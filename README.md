@@ -24,7 +24,8 @@ Vite lyssnar pa port 5173.
 - Kalkyl: saknar utfall tills budget och kostnad fylls i.
 - Synergier: hypoteser utan paahittade kronor.
 - Robot: paper / utredning under Tradingskolan.
-- Sele: paper-sele som binder pilotens volym + SL/TP till klienturval. Älvor ärver, höjer aldrig.
+- Pilotsele: paper-sele som binder volym + SL/TP till ROBOT-klustret. Älvor ärver, höjer aldrig.
+- Nyhetssele: paper-remmar för vardagsmorgon. Skickar inte.
 
 ## Synergi
 

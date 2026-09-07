@@ -45,6 +45,13 @@ import {
 } from './sele.js';
 import { renderSele, readSeleForm } from './sele-ui.js';
 import {
+  validateNyhetssele,
+  loadNyhetsseleDraft,
+  saveNyhetsseleDraft,
+  emptyNyhetssele,
+} from './nyhetssele.js';
+import { renderNyhetssele, readNyhetsseleForm } from './nyhetssele-ui.js';
+import {
   loadNews,
   saveNews,
   fetchRss,
@@ -68,6 +75,8 @@ let riderPlay = emptyPlayState();
 let riderFirstHint = '';
 let seleDraft = loadSeleDraft();
 let seleResult = null;
+let nyhetsseleDraft = loadNyhetsseleDraft();
+let nyhetsseleResult = null;
 let news = loadNews();
 
 function persist() {
@@ -119,7 +128,12 @@ function render() {
   if (view === 'verksamhet') inner = renderProject(id, c);
   else if (view === 'kalkyl') inner = renderKalkyl(c);
   else if (view === 'synergier') inner = renderSynergier(c);
-  else if (view === 'nyheter') inner = renderNews(news, { selectedModuleId: id });
+  else if (view === 'nyheter') {
+    inner = renderNews(news, {
+      selectedModuleId: id,
+      nyhetsseleHtml: renderNyhetssele(nyhetsseleDraft, nyhetsseleResult),
+    });
+  }
   else if (view === 'robot') inner = renderRobot(robotDraft, robotResult);
   else if (view === 'rider') {
     inner = renderRider(riderDraft, riderResult, riderHopPulse, riderPlay, {
@@ -143,7 +157,7 @@ function render() {
     view === 'rider'
       ? 'Trade Rider — paper'
       : view === 'sele'
-        ? 'Sele — paper'
+        ? 'Pilotsele — paper'
         : view === 'robot'
           ? 'Artificer AI — WATCHERS'
           : 'Dirigentverket — klusterbok';
@@ -210,6 +224,11 @@ root.addEventListener('click', (ev) => {
     robotDraft = emptyRobotDraft();
     robotResult = null;
     saveRobotDraft(robotDraft);
+    render();
+  } else if (action === 'nyhetssele-clear') {
+    nyhetsseleDraft = emptyNyhetssele();
+    nyhetsseleResult = null;
+    saveNyhetsseleDraft(nyhetsseleDraft);
     render();
   } else if (action === 'sele-clear') {
     seleDraft = emptySele();
@@ -340,6 +359,15 @@ root.addEventListener('submit', (ev) => {
     robotDraft = readRobotForm(robotForm);
     saveRobotDraft(robotDraft);
     robotResult = computeRobot(robotDraft);
+    render();
+    return;
+  }
+  const nyhetsForm = ev.target.closest('#nyhetssele-form');
+  if (nyhetsForm) {
+    ev.preventDefault();
+    nyhetsseleDraft = readNyhetsseleForm(nyhetsForm);
+    saveNyhetsseleDraft(nyhetsseleDraft);
+    nyhetsseleResult = validateNyhetssele(nyhetsseleDraft);
     render();
     return;
   }

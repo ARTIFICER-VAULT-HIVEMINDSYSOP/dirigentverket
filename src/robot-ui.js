@@ -93,7 +93,7 @@ export function renderArtificerShell(inner, parseRoute) {
         ${nav('#/synergier', 'Synergier', 'synergier')}
         ${nav('#/nyheter', 'Nyheter', 'nyheter')}
         ${nav('#/rider', 'Trade Rider', 'rider')}
-        ${nav('#/sele', 'Sele', 'sele')}
+        ${nav('#/sele', 'Pilotsele', 'sele')}
         ${nav('#/robot', 'Artificer AI', 'robot')}
       </nav>
       <main>${inner}</main>
@@ -111,7 +111,7 @@ export function renderRobot(robotDraft, robotResult) {
       </header>
       <div class="banner-robot" role="status">Föreslår SL/TP, lägger inga ordrar. Flerårsplan är bara ett förslag. Ingen mäklare, ingen live-exekvering, inga påhittade kurser eller backtest. ÖB godkänner varje drag.</div>
       <div class="stone-tablet">
-        <p class="page-lead stone-lead">Nexus: <a href="#/sele">Sele</a> binder pilotens volym och SL/TP till valt klienturval. Älvor ärver, höjer aldrig. Paper.</p>
+        <p class="page-lead stone-lead">Nexus: <a href="#/sele">Pilotsele</a> binder volym och SL/TP till ROBOT-klustret. Älvor ärver, höjer aldrig. Paper.</p>
         <p class="page-lead stone-lead">Modul under Tradingskolan. Skriv instrument och kurser själv. Positionsstorlek räknas bara om du anger riskbelopp i kronor — kontostorlek gissas inte.</p>
         <form id="robot-form">
           <div class="form-grid">

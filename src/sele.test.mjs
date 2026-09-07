@@ -5,6 +5,7 @@ import {
   validateSele,
   applyVolume,
   capVolumePct,
+  inheritPilotVolume,
   parseSymbols,
   emptySele,
   tenantSeleShape,
@@ -53,6 +54,9 @@ test('tomma fält förblir tomma, inte 0 och inte påhittade', () => {
   assert.equal(s.live, false);
   assert.equal(s.side, 'köp');
   assert.equal(s.skipIfSymbolOpen, true);
+  assert.equal(s.kind, 'pilotsele');
+  assert.equal(s.tillgang, 'ROBOT');
+  assert.equal(s.cluster, 'ROBOT-TRADER');
 });
 
 test('createSele fyller filter och symboler utan att gissa kurser', () => {
@@ -66,6 +70,8 @@ test('createSele fyller filter och symboler utan att gissa kurser', () => {
   assert.equal(s.slPct, 0.5);
   assert.equal(s.tpPct, 1.5);
   assert.equal(s.paper, true);
+  assert.equal(s.kind, 'pilotsele');
+  assert.equal(s.tillgang, 'ROBOT');
 });
 
 test('validateSele: SL+TP krävs för ok; saknade fält listas som saknas', () => {
@@ -133,6 +139,23 @@ test('volym överstiger aldrig pilotens %', () => {
   assert.equal(capVolumePct('', 1), 1);
   assert.equal(capVolumePct('', ''), '');
 
+  const child = inheritPilotVolume(1, 5, 'ROBOT');
+  assert.equal(child.kind, 'pilotsele');
+  assert.equal(child.tillgang, 'ROBOT');
+  assert.equal(child.volumePct, 1);
+  assert.equal(child.raised, false);
+  assert.equal(child.exceedsPilot, true);
+  assert.ok(child.volumePct <= 1);
+
+  const aiind = inheritPilotVolume(1, 0.5, 'AIIND');
+  assert.equal(aiind.tillgang, 'AIIND');
+  assert.equal(aiind.volumePct, 0.5);
+  assert.equal(aiind.raised, false);
+  const guldr = inheritPilotVolume(1, 8, 'GULDR');
+  assert.equal(guldr.tillgang, 'GULDR');
+  assert.equal(guldr.volumePct, 1);
+  assert.notEqual(aiind.tillgang, guldr.tillgang);
+
   const raisedAttempt = applyVolume(200, 5, 1);
   assert.equal(raisedAttempt.appliedPct, 1);
   assert.equal(raisedAttempt.amount, 2);
@@ -196,15 +219,17 @@ test('utkast: tomma rutor fylls inte vid spara/ladda', () => {
 
 test('UI: Sele-formulär, paper-badge, inga ForceX-anrop i ytan', () => {
   const page = renderSele(emptySele(), null);
-  assert.match(page, /<h2 class="sele-title">Sele<\/h2>/);
+  assert.match(page, /<h2 class="sele-title">Pilotsele<\/h2>/);
   assert.match(page, /PAPER · live=false · ingen mäklare · ingen ForceX/);
   assert.match(page, /id="sele-form"/);
-  for (const name of ['name', 'brand', 'assigned', 'symbols', 'side', 'volumePct', 'slPct', 'tpPct']) {
+  for (const name of ['name', 'tillgang', 'cluster', 'brand', 'assigned', 'symbols', 'side', 'volumePct', 'slPct', 'tpPct']) {
     assert.match(page, new RegExp(`name="${name}"`));
   }
   assert.match(page, /name="skipIfSymbolOpen"/);
+  assert.match(page, /option value="ROBOT"/);
+  assert.match(page, /option value="AIIND"/);
+  assert.match(page, /option value="GULDR"/);
   assert.ok(!/forcex\.|crm\.url|fetch\('/i.test(page));
-  assert.ok(!/ROBOT|AIIND|GULDR/.test(page) || /inte ROBOT\/AIIND\/GULDR/.test(page));
 
   const blocked = renderSeleResult(validateSele({}));
   assert.match(blocked, /saknar_sl_tp/);
