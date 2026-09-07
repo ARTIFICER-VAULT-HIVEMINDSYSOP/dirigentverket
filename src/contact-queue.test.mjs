@@ -137,3 +137,55 @@ test('HUD: namn + status, inte symbol/PNL; extra-flagga', () => {
 test('cooldown-längd är rundan, inte noll', () => {
   assert.ok(ROUND_COOLDOWN_MS > 60_000);
 });
+
+function recoveryAheadFixture() {
+  return [
+    {
+      id: 'rec-1',
+      namn: 'R',
+      brand: 'North',
+      status: 'RECOVERY',
+      avtalad_tid: '2026-01-01T09:00:00Z',
+      last_contact: '2025-01-01T00:00:00Z',
+    },
+    { id: 'p-new', namn: 'N', brand: 'KS', status: '', role: 'klient' },
+    { id: 'p-a', namn: 'A', brand: 'North', status: '', role: 'klient' },
+  ];
+}
+
+test('Recovery med North + gammal avtalad tid hamnar bakom nya kort', () => {
+  const rows = recoveryAheadFixture();
+  const ranked = rankClientsToContact(rows, T0);
+  assert.equal(rowId(ranked[0]), 'p-a');
+  assert.notEqual(rowId(ranked[0]), 'rec-1');
+  assert.ok(ranked.findIndex((r) => rowId(r) === 'p-new') < ranked.findIndex((r) => rowId(r) === 'rec-1'));
+  assert.equal(cockedId(rows, T0), 'p-a');
+});
+
+test('filordning Recovery-först speglas inte i HUD-kön', () => {
+  const rows = recoveryAheadFixture();
+  const view = magazineView(rows, emptyHudState(), T0);
+  assert.equal(view.cartridges[0].id, 'p-a');
+  assert.equal(view.cartridges[0].status, 'väntar');
+  assert.equal(view.cartridges.some((c) => c.id === 'rec-1' && c.isCocked), false);
+  const rec = view.cartridges.find((c) => c.id === 'rec-1');
+  assert.equal(rec.status, 'recovery');
+  assert.ok(view.cartridges.findIndex((c) => c.id === 'rec-1') > view.cartridges.findIndex((c) => c.status === 'väntar'));
+});
+
+test('ÖB-filter recovery sätter Recovery först; default gör det inte', () => {
+  const rows = recoveryAheadFixture();
+  assert.equal(rowId(rankClientsToContact(rows, T0, 'queue')[0]), 'p-a');
+  assert.equal(rowId(rankClientsToContact(rows, T0, 'recovery')[0]), 'rec-1');
+  const view = magazineView(rows, emptyHudState(), T0, 'daniel', 'recovery');
+  assert.equal(view.cartridges[0].id, 'rec-1');
+  assert.equal(view.cockedId, 'rec-1');
+});
+
+test('nextContactAt roterar bland nya kort — Recovery blir inte ranked[0]', () => {
+  const rows = recoveryAheadFixture();
+  applyCooldown(rows[2], T0);
+  const ranked = rankClientsToContact(rows, T0);
+  assert.equal(rowId(ranked[0]), 'p-new');
+  assert.notEqual(rowId(ranked[0]), 'rec-1');
+});

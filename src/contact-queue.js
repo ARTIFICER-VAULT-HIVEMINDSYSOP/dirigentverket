@@ -52,12 +52,33 @@ export function hasDueAppointment(row, now) {
   return at <= now;
 }
 
+function statusBits(row) {
+  if (!row || typeof row !== 'object') return '';
+  const kind = row.outcome && typeof row.outcome === 'object' ? row.outcome.kind : '';
+  return [row.status, row.park, kind].map((x) => String(x || '').trim().toUpperCase()).join(' ');
+}
+
+/** Parked re-touch: Recovery and similar. Still in magasinet, not ring-nu first. */
+export function isParkedRetouch(row) {
+  const s = statusBits(row);
+  if (!s) return false;
+  if (/\bRECOVERY\b/.test(s)) return true;
+  if (/\bFLIPPED\b/.test(s)) return true;
+  if (/\bNOT[_ ]?INTEREST\b/.test(s)) return true;
+  return false;
+}
+
+export function isFreshUnworked(row) {
+  return inRingNow(row) && !isParkedRetouch(row);
+}
+
 export function hasOutcome(row) {
   if (!row || typeof row !== 'object') return false;
+  if (row.ringNow === false) return true;
+  if (isParkedRetouch(row)) return false;
   if (row.outcome && typeof row.outcome === 'object' && row.outcome.kind) return true;
-  if (row.ringNow === false) return false;
   const st = String(row.status || '').trim().toUpperCase();
-  return st === 'RECOVERY' || st === 'FLIPPED' || st === 'CLOSED' || st === 'KLAR';
+  return st === 'CLOSED' || st === 'KLAR';
 }
 
 export function inRingNow(row) {
@@ -83,22 +104,32 @@ export function clientContactScore(row, now) {
 }
 
 function compareRanked(a, b) {
+  if (a.lane !== b.lane) return a.lane - b.lane;
   if (a.due !== b.due) return a.due ? -1 : 1;
   if (b.score !== a.score) return b.score - a.score;
   return rowId(a.row).localeCompare(rowId(b.row));
 }
 
-export function rankClientsToContact(rows, now = Date.now()) {
+function rankLane(row, filter) {
+  const parked = isParkedRetouch(row);
+  if (filter === 'recovery') return parked ? 0 : 1;
+  return parked ? 1 : 0;
+}
+
+export function rankClientsToContact(rows, now = Date.now(), filter = 'queue') {
   const list = Array.isArray(rows) ? rows.filter((r) => r && typeof r === 'object') : [];
   const ring = list.filter(inRingNow);
   const scored = ring.map((row) => ({
     row,
     score: clientContactScore(row, now),
     due: isDueForContact(row, now),
+    lane: rankLane(row, filter),
   }));
-  const anyDue = scored.some((s) => s.due);
-  if (!anyDue && scored.length) {
-    scored.forEach((s) => {
+  const fresh = scored.filter((s) => !isParkedRetouch(s.row));
+  const parked = scored.filter((s) => isParkedRetouch(s.row));
+  const resetLane = filter === 'recovery' ? parked : fresh;
+  if (resetLane.length && !resetLane.some((s) => s.due)) {
+    resetLane.forEach((s) => {
       s.due = true;
     });
   }
@@ -106,8 +137,8 @@ export function rankClientsToContact(rows, now = Date.now()) {
   return scored.map((s) => s.row);
 }
 
-export function cockedId(rows, now = Date.now()) {
-  const ranked = rankClientsToContact(rows, now);
+export function cockedId(rows, now = Date.now(), filter = 'queue') {
+  const ranked = rankClientsToContact(rows, now, filter);
   return ranked.length ? rowId(ranked[0]) : '';
 }
 
@@ -119,7 +150,16 @@ export function applyCooldown(row, now, ms = ROUND_COOLDOWN_MS) {
 
 export function applyOutcome(row, now, kind = 'saved') {
   if (!row || typeof row !== 'object') return row;
-  row.outcome = { kind: String(kind || 'saved'), at: new Date(now).toISOString() };
+  const k = String(kind || 'saved');
+  if (isParkedRetouch({ status: k, park: k, outcome: { kind: k } })) {
+    row.status = /\bRECOVERY\b/i.test(k) ? 'RECOVERY' : String(row.status || k).toUpperCase();
+    row.park = k;
+    row.outcome = { kind: row.status, at: new Date(now).toISOString() };
+    row.ringNow = true;
+    applyCooldown(row, now);
+    return row;
+  }
+  row.outcome = { kind: k, at: new Date(now).toISOString() };
   row.ringNow = false;
   applyCooldown(row, now);
   return row;
@@ -134,10 +174,10 @@ export function litId(state) {
   return String(state.copiedId || state.markedId || '');
 }
 
-export function defaultFocusId(state, rows, now = Date.now()) {
+export function defaultFocusId(state, rows, now = Date.now(), filter = 'queue') {
   const lit = litId(state);
   if (lit) return lit;
-  return cockedId(rows, now);
+  return cockedId(rows, now, filter);
 }
 
 export function markCartridge(state, id, at = Date.now()) {
@@ -193,20 +233,29 @@ export function mergeNextContactAt(rows, overlay) {
   return rows;
 }
 
-export function magazineView(rows, state, now = Date.now(), magasin = 'daniel') {
-  const ring = rankClientsToContact(rows, now);
+function cartridgeStatus(row) {
+  if (hasOutcome(row)) return 'utfall';
+  if (isParkedRetouch(row)) return 'recovery';
+  return 'väntar';
+}
+
+export function magazineView(rows, state, now = Date.now(), magasin = 'daniel', filter = 'queue') {
+  const ring = rankClientsToContact(rows, now, filter);
   const cocked = ring.length ? rowId(ring[0]) : '';
   const lit = litId(state);
   const firing =
     state && state.firingId && now < (Number(state.firingUntil) || 0) ? String(state.firingId) : '';
-  const cartridges = (Array.isArray(rows) ? rows : []).filter((r) => r && typeof r === 'object').map((row) => {
+  const seen = new Set(ring.map(rowId));
+  const rest = (Array.isArray(rows) ? rows : []).filter((r) => r && typeof r === 'object' && !seen.has(rowId(r)));
+  const ordered = ring.concat(rest);
+  const cartridges = ordered.map((row) => {
     const id = rowId(row);
     const waiting = inRingNow(row);
     return {
       id,
       name: displayName(row),
       role: rowRole(row, magasin),
-      status: waiting ? 'väntar' : 'utfall',
+      status: cartridgeStatus(row),
       inRing: waiting,
       isLit: Boolean(id && id === lit),
       isCocked: Boolean(id && id === cocked && waiting),
@@ -218,12 +267,22 @@ export function magazineView(rows, state, now = Date.now(), magasin = 'daniel') 
     cockedId: cocked,
     litId: lit,
     firingId: firing,
-    focusId: defaultFocusId(state, rows, now),
+    focusId: defaultFocusId(state, rows, now, filter),
+    filter,
     ringNow: ring.map(rowId),
     cartridges,
     cap: cockedName ? `Ring nu · ${cockedName}` : 'väntar kö',
   };
 }
+
+export const PAPER_RECOVERY = Object.freeze({
+  id: 'p-r',
+  namn: 'R',
+  brand: 'North',
+  status: 'RECOVERY',
+  role: 'klient',
+  avtalad_tid: '2026-01-01T09:00:00Z',
+});
 
 export const PAPER_FIXTURES = Object.freeze([
   { id: 'p-a', namn: 'A', brand: 'North', status: '', role: 'klient' },

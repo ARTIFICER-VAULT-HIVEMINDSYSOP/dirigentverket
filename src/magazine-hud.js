@@ -12,12 +12,13 @@ export function renderMagazineHud(view, opts = {}) {
         c.isLit ? 'is-lit' : '',
         c.isCocked ? 'is-cocked' : '',
         c.isFiring ? 'is-firing' : '',
+        c.status === 'recovery' ? 'is-parked' : '',
         c.inRing ? '' : 'is-spent',
       ]
         .filter(Boolean)
         .join(' ');
       const role = c.role === 'lead' ? 'lead' : 'klient';
-      const status = c.status === 'utfall' ? 'utfall' : 'väntar';
+      const status = c.status === 'utfall' ? 'utfall' : c.status === 'recovery' ? 'recovery' : 'väntar';
       return `<li class="${cls}" data-id="${escapeHtml(c.id)}" style="--i:${i};--n:${n}">
         <button type="button" data-mark="${escapeHtml(c.id)}" aria-pressed="${c.isLit ? 'true' : 'false'}">
           <span class="round-name">${escapeHtml(c.name || 'saknas')}</span>
@@ -51,5 +52,5 @@ export function renderMagazineHud(view, opts = {}) {
 }
 
 export function renderMagazineHudFromRows(rows, state, now, magasin, opts) {
-  return renderMagazineHud(magazineView(rows, state, now, magasin), opts);
+  return renderMagazineHud(magazineView(rows, state, now, magasin, opts?.filter), opts);
 }

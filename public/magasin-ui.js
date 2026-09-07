@@ -1,10 +1,12 @@
 import {
   PAPER_FIXTURES,
+  PAPER_RECOVERY,
   afterTouch,
   defaultFocusId,
   emptyHudState,
   fireOutcome,
   inRingNow,
+  isParkedRetouch,
   magazineView,
   mergeNextContactAt,
   rowId,
@@ -20,10 +22,13 @@ const hudMount = document.getElementById('magasin-hud');
 const listEl = document.getElementById('list');
 const flashEl = document.getElementById('flash');
 const reloadBtn = document.getElementById('reload');
+const filterQueueBtn = document.getElementById('filter-queue');
+const filterRecoveryBtn = document.getElementById('filter-recovery');
 
 let rows = [];
 let state = emptyHudState();
 let overlay = {};
+let filter = new URLSearchParams(location.search).get('recovery') === '1' ? 'recovery' : 'queue';
 
 function paperMode() {
   return new URLSearchParams(location.search).get('paper') === '1';
@@ -67,8 +72,13 @@ function escapeHtml(str) {
 }
 
 function focusedRow(now) {
-  const id = defaultFocusId(state, rows, now);
+  const id = defaultFocusId(state, rows, now, filter);
   return rows.find((r) => rowId(r) === id) || null;
+}
+
+function syncFilterButtons() {
+  if (filterQueueBtn) filterQueueBtn.classList.toggle('on', filter === 'queue');
+  if (filterRecoveryBtn) filterRecoveryBtn.classList.toggle('on', filter === 'recovery');
 }
 
 function renderWorkCard(row, now) {
@@ -79,13 +89,14 @@ function renderWorkCard(row, now) {
   const tel = String(row.telefon || '').trim();
   const existing = String(row.card_comment || '').trim();
   const lucka = String(row.lucka || '').trim();
+  const lane = isParkedRetouch(row) ? 'recovery' : waiting ? 'väntar' : 'utfall';
   return `<article class="row${/north/i.test(String(row.brand || '')) ? ' north' : ''}" data-id="${escapeHtml(rowId(row))}">
-    <div class="when">${escapeHtml(lucka || (waiting ? 'väntar' : 'utfall'))}</div>
+    <div class="when">${escapeHtml(lucka || lane)}</div>
     <div class="body">
       <div class="mainline">
         <div class="who-tel">
           <div class="who"><strong>${escapeHtml(row.namn || 'saknas')}</strong>
-            <span>${escapeHtml(row.brand || 'saknas')} · ${waiting ? 'väntar' : 'utfall'}</span></div>
+            <span>${escapeHtml(row.brand || 'saknas')} · ${escapeHtml(lane)}</span></div>
           <div class="tel">
             ${tel ? `<code>${escapeHtml(tel)}</code><button type="button" data-copy-tel="${escapeHtml(rowId(row))}">Kopiera nr</button>` : '<span>saknar telefon</span>'}
             <button type="button" data-copy-tpl="${escapeHtml(rowId(row))}">Kopiera mall</button>
@@ -107,7 +118,8 @@ function renderWorkCard(row, now) {
 
 function paint() {
   const now = Date.now();
-  const view = magazineView(rows, state, now, MAGASIN);
+  const view = magazineView(rows, state, now, MAGASIN, filter);
+  syncFilterButtons();
   if (hudMount) hudMount.innerHTML = renderMagazineHud(view);
   if (listEl) listEl.innerHTML = renderWorkCard(focusedRow(now), now);
 }
@@ -180,7 +192,7 @@ async function onOutcome(id, payload) {
 async function loadRows() {
   loadStore();
   if (paperMode()) {
-    rows = PAPER_FIXTURES.map((r) => ({ ...r }));
+    rows = [PAPER_RECOVERY, ...PAPER_FIXTURES].map((r) => ({ ...r }));
     mergeNextContactAt(rows, overlay);
     paint();
     return;
@@ -245,6 +257,20 @@ document.addEventListener('submit', (ev) => {
 if (reloadBtn) {
   reloadBtn.addEventListener('click', () => {
     loadRows();
+  });
+}
+
+if (filterQueueBtn) {
+  filterQueueBtn.addEventListener('click', () => {
+    filter = 'queue';
+    paint();
+  });
+}
+
+if (filterRecoveryBtn) {
+  filterRecoveryBtn.addEventListener('click', () => {
+    filter = 'recovery';
+    paint();
   });
 }
 

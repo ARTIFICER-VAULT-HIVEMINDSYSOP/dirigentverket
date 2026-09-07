@@ -115,6 +115,10 @@
   background: #2a2418;
 }
 
+.magazine-round.is-parked button {
+  opacity: 0.62;
+}
+
 .magazine-round.is-spent button {
   opacity: 0.38;
 }
