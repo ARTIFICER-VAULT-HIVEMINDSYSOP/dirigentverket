@@ -71,6 +71,22 @@ test('paper tills namngivet ja och mottagarlista', () => {
   assert.equal(ready.canSendLive, false);
 });
 
+test('källor matchar utan versaler; SVT,DI,Avanza räknas', () => {
+  const s = createNyhetssele({ sources: 'svt,di,avanza' });
+  assert.deepEqual(s.sources, ['SVT', 'DI', 'Avanza']);
+  const v = validateNyhetssele({
+    date: '2026-09-07',
+    subject: 'Morgon',
+    sources: 'SVT,DI,Avanza',
+    disclaimer: 'Inte råd',
+    filePath: 'marknad/utkast.md',
+  });
+  assert.equal(v.ok, true);
+  assert.ok(!v.missing.includes('sources'));
+  assert.ok(v.missing.includes('oil'));
+  assert.ok(v.missing.includes('gold'));
+});
+
 test('okända källor släpps inte in som påhitt; kända remmar finns', () => {
   const s = createNyhetssele({ sources: 'SVT, FakeWire, IPO' });
   assert.deepEqual(s.sources, ['SVT', 'IPO']);

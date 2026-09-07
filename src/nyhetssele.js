@@ -21,9 +21,23 @@ function parseBool(v, fallback) {
 function parseList(raw) {
   if (Array.isArray(raw)) return raw.map(str).filter(Boolean);
   return str(raw)
-    .split(/[,;]+/)
+    .split(/[,;\s]+/)
     .map((s) => s.trim())
     .filter(Boolean);
+}
+
+function canonicalizeSources(list) {
+  const known = [];
+  const unknown = [];
+  for (const token of list) {
+    const hit = NYHETSSELE_SOURCES.find((k) => k.toLowerCase() === token.toLowerCase());
+    if (hit) {
+      if (!known.includes(hit)) known.push(hit);
+    } else {
+      unknown.push(token);
+    }
+  }
+  return { known, unknown };
 }
 
 /** Keep oil/gold as typed text. Empty stays empty — never a price. */
@@ -49,15 +63,14 @@ export function emptyNyhetssele() {
 
 export function createNyhetssele(raw = {}, tenant = {}) {
   const news = tenant.nyhetssele && typeof tenant.nyhetssele === 'object' ? tenant.nyhetssele : {};
-  const sources = parseList(raw.sources);
-  const known = sources.filter((s) => NYHETSSELE_SOURCES.includes(s));
+  const parsed = canonicalizeSources(parseList(raw.sources));
   const recipients = parseList(raw.recipients);
   return {
     kind: 'nyhetssele',
     date: str(raw.date),
     subject: str(raw.subject),
-    sources: known,
-    unknownSources: sources.filter((s) => !NYHETSSELE_SOURCES.includes(s)),
+    sources: parsed.known,
+    unknownSources: parsed.unknown,
     oil: keepQuote(raw.oil),
     gold: keepQuote(raw.gold),
     provaForst: parseBool(raw.provaForst, true),
