@@ -26,6 +26,11 @@
       "sticky_files": []
     }
   ],
+  "sele": {
+    "brands": [],
+    "assignees": [],
+    "paper": true
+  },
   "rules": {
     "one_card_per_customer": true,
     "na_equals_vm": true,

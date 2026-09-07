@@ -11,6 +11,7 @@ Tre system, blanda inte:
 
 Hitta inte på kronor, kurser, SL, TP, saldo eller avkastning. Tom cell = saknas.
 SL+TP krävs, annars saknar_sl_tp. Volym sätter piloten. Robot ärver, höjer aldrig.
+Sele binder volymregel + SL/TP till klienturval. Älvor ärver, höjer aldrig. Paper.
 Inga master/slave-ord. Kommando / stab / älvor.
 
 Se PLAN-GROK-BUILD.md.

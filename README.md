@@ -24,6 +24,7 @@ Vite lyssnar pa port 5173.
 - Kalkyl: saknar utfall tills budget och kostnad fylls i.
 - Synergier: hypoteser utan paahittade kronor.
 - Robot: paper / utredning under Tradingskolan.
+- Sele: paper-sele som binder pilotens volym + SL/TP till klienturval. Älvor ärver, höjer aldrig.
 
 ## Synergi
 
@@ -43,7 +44,7 @@ Flerårsplan för VIP: byt håll på öppen position om ifylld prognos för näs
 
 ## Teknik
 
-Vite. seed.js, calc.js, synergy.js, robot.js.
+Vite. seed.js, calc.js, synergy.js, robot.js, rider.js, sele.js.
 
 ## Nyheter
 

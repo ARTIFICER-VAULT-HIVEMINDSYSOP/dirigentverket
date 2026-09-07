@@ -7,6 +7,7 @@ Maskineriet är Dirigentverket. Ett nytt system är en tenant, inte en fork.
 - Magasin: ringkö, ett kort per kund, NA = VM, kortet bak
 - Varje utfall sparas som CRM-kommentar. Aldrig samma text två gånger
 - Paper-robot: SL+TP krävs, volym från pilot, robot ärver, höjer aldrig
+- Sele: `clientFilter` (brand, assigned, tenantId) i tenant.json. Samma motor. Paper.
 - Stab / kommando / älvor. Aldrig master/slave
 
 ## Följer inte med
