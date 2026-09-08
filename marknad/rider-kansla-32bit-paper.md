@@ -23,6 +23,7 @@ Branch `cursor/rider-kansla-32bit-0a6e`. Gate `hasCompletedFirstRide` / `RIDER_F
 **09:38 Sthlm 8 sep:** tom-arena dry-run landat (`fde2807`).
 **~10:00 Sthlm 8 sep:** mjuk impuls efter Räkna + kolla-grafen (`3dbc025` / `6dbb626`).
 **13:43 Sthlm 8 sep (ständig):** magasin `8765` HTTP 200; main-status synkad; nästa paper-UX = hopp-tell + mjuk första-ride-unlock («små belopp» känns intjänad, ingen modal/inga nya knappar). Merge väntar namngivet ja.
+**13:50 Sthlm 8 sep:** hopp-tell mjuk på arena/silhuett-HUD + «små belopp» soft unlock (intjänad, pilotens tal). Inga nya play-knappar. Draft. Merge väntar namngivet ja.
 
 https://github.com/ARTIFICER-VAULT-HIVEMINDSYSOP/dirigentverket/pull/4
 

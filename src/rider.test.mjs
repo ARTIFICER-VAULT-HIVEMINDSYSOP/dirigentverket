@@ -31,6 +31,8 @@ import {
   markFirstRideComplete,
   smaBeloppUnlocked,
   smaBeloppHint,
+  RIDER_SMA_NOTE,
+  RIDER_SMA_UNLOCK_NOTE,
   inheritPilotVolume,
   rideImpulse,
   RIDER_IMPULSE_NOTE,
@@ -360,8 +362,10 @@ test('första-ride-grind: före/efter completed ride låser små belopp', () => 
     { hasCompletedFirstRide: true, liveLocked: true },
   );
   assert.match(openPage, /data-sma-belopp/);
+  assert.match(openPage, /data-sma-unlock="0"/);
   assert.match(openPage, /små belopp/i);
   assert.match(openPage, /data-first-ride="1"/);
+  assert.match(openPage, /data-sma-fresh="0"/);
   assert.equal(LIVE_LOCKED, true);
   assert.equal(okRide.live, false);
   assert.equal(okRide.paper, true);
@@ -559,6 +563,84 @@ test('fylld arena kolla-grafen: coast/scanlines/silhuett lever med häv=fart', (
   assert.ok(!/data-look="1"/.test(empty));
   assert.ok(!/is-looking/.test(empty));
   assert.match(empty, /data-dry-run="1"/);
+});
+
+test('hopp-tell syns mjukt på arena och silhuett-HUD', () => {
+  const hop = computeRide({ entry: 100, maxFel: 2, rr: 2, grav: 100, ...bandBounce });
+  assert.equal(hop.ok, true);
+  assert.equal(hop.jump.jumped, true);
+  assert.equal(hop.jump.tell, true);
+  assert.equal(hop.jump.from, 100);
+  assert.equal(hop.jump.to, 98);
+
+  const html = renderPlayArena(hop);
+  assert.match(html, /data-hop-tell="1"/);
+  assert.match(html, /data-rider-hop-tell/);
+  assert.match(html, /rider-hop-tell/);
+  assert.match(html, /rider-sil-tell/);
+  assert.match(html, /is-tell/);
+  assert.match(html, /data-mode="hop"/);
+  assert.match(html, /process före fart/);
+  assert.match(html, /100 → 98|100 →/);
+  assert.ok(!/<button/i.test(html));
+  assert.ok(!/<dialog/i.test(html));
+  assert.ok(!/data-rider-pad|data-action="rider-key"/i.test(html));
+  assert.ok(!/WATCHERS|anden i lampan/i.test(html));
+  assert.ok(!/\d+\s*kr/i.test(html));
+  assert.doesNotMatch(html, /P&L|pnl/);
+  assert.equal(LIVE_LOCKED, true);
+
+  const hold = renderPlayArena(computeRide({ entry: 100, maxFel: 2, rr: 2, grav: 100 }));
+  assert.match(hold, /data-hop-tell="0"/);
+  assert.ok(!/data-rider-hop-tell/.test(hold));
+  assert.ok(!/rider-sil-tell/.test(hold));
+});
+
+test('första-ride-unlock: små belopp känns intjänad, inte skrikig', () => {
+  const store = memStore();
+  const locked = smaBeloppHint(store);
+  assert.equal(locked.unlocked, false);
+  assert.equal(locked.fresh, false);
+  assert.equal(locked.note, '');
+
+  markFirstRideComplete(store);
+  const earned = smaBeloppHint(store);
+  assert.equal(earned.unlocked, true);
+  assert.equal(earned.fresh, false);
+  assert.equal(earned.note, RIDER_SMA_NOTE);
+
+  const fresh = smaBeloppHint(store, { fresh: true });
+  assert.equal(fresh.unlocked, true);
+  assert.equal(fresh.fresh, true);
+  assert.equal(fresh.note, RIDER_SMA_UNLOCK_NOTE);
+  assert.match(fresh.note, /intjänad/i);
+  assert.ok(!/\d+\s*kr|P&L|pnl/i.test(fresh.note));
+
+  const emptyVol = computeRide({ entry: 100, maxFel: 2, rr: 2, grav: 100 });
+  assert.equal(emptyVol.ok, true);
+  assert.equal(emptyVol.pilotVolume, null);
+  assert.equal(inheritPilotVolume(null, 4), null);
+  assert.equal(inheritPilotVolume(0.01, 8), 0.01);
+
+  const page = renderRider(
+    { ...emptyRideDraft(), entry: '100', maxFel: '2', rr: '2', grav: '100' },
+    emptyVol,
+    0,
+    {},
+    { hasCompletedFirstRide: true, justUnlocked: true, liveLocked: true },
+  );
+  assert.match(page, /data-sma-fresh="1"/);
+  assert.match(page, /has-sma-unlock/);
+  assert.match(page, /data-sma-unlock="1"/);
+  assert.match(page, /is-unlock/);
+  assert.match(page, /Intjänad/);
+  assert.match(page, /data-sma-belopp/);
+  assert.ok(!/<dialog/i.test(page));
+  assert.ok(!/data-rider-pad|data-action="rider-key"/i.test(page));
+  assert.ok(!/WATCHERS|anden i lampan/i.test(page));
+  assert.ok(!/\d+\s*kr/i.test(page));
+  assert.equal(LIVE_LOCKED, true);
+  assert.equal(emptyVol.live, false);
 });
 
 test('tom-arena dry-run: W/S/F/[ ]/Space flyttar silhuett utan påhittade priser', () => {

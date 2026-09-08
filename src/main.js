@@ -75,6 +75,7 @@ let riderResult = null;
 let riderHopPulse = 0;
 let riderPlay = emptyPlayState();
 let riderFirstHint = '';
+let riderJustUnlocked = false;
 let seleDraft = loadSeleDraft();
 let seleResult = null;
 let nyhetsseleDraft = loadNyhetsseleDraft();
@@ -142,6 +143,7 @@ function render() {
       firstHint: riderFirstHint,
       liveLocked: LIVE_LOCKED,
       hasCompletedFirstRide: hasCompletedFirstRide(),
+      justUnlocked: riderJustUnlocked,
     });
   }
   else if (view === 'sele') {
@@ -391,7 +393,11 @@ root.addEventListener('submit', (ev) => {
     const now = Date.now();
     const midAir = riderPlay.hopping && now < riderPlay.hopUntil;
     riderResult = computeRide({ ...riderDraft, midAir });
-    if (riderResult.ok) markFirstRideComplete();
+    if (riderResult.ok) {
+      const wasDone = hasCompletedFirstRide();
+      markFirstRideComplete();
+      if (!wasDone) riderJustUnlocked = true;
+    }
     if (riderResult.ok && riderResult.havstang) {
       riderPlay = { ...riderPlay, leverage: riderResult.havstang };
     }

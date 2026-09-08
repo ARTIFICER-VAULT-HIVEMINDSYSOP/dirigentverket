@@ -9,6 +9,8 @@ import {
   rideRails,
   rideImpulse,
   RIDER_IMPULSE_NOTE,
+  RIDER_SMA_NOTE,
+  RIDER_SMA_UNLOCK_NOTE,
   playRails,
   dryRunSlotTop,
   HOP_WINDOW_MS,
@@ -58,9 +60,10 @@ function renderBitHud(lev, speed, railText, rails = [], play = {}, hopped = fals
         .join('')
     : '<span class="rider-sil-rail-pip is-empty" data-rail-sil="-1"></span>';
   return `<div class="rider-play-hud rider-bit-hud" data-rider-sil data-verbs="w s f [ ] space">
-      <div class="rider-sil-mode" data-rider-mode-sil data-mode="${hopped ? 'hop' : 'hold'}">
+      <div class="rider-sil-mode" data-rider-mode-sil data-mode="${hopped ? 'hop' : 'hold'}" data-hop-tell="${hopped ? '1' : '0'}">
         <span class="rider-sil-pip is-paper" data-mode-paper></span>
-        <span class="rider-sil-pip ${hopped ? 'is-hop' : 'is-hold'}" data-hop-sil></span>
+        <span class="rider-sil-pip ${hopped ? 'is-hop is-tell' : 'is-hold'}" data-hop-sil></span>
+        ${hopped ? '<span class="rider-sil-tell" data-rider-hop-tell>tell</span>' : ''}
       </div>
       <div class="rider-sil-lev" data-rider-lev-sil data-lev="${lev}">
         ${levBars}
@@ -170,13 +173,15 @@ export function renderPlayArena(ride, play = {}) {
     .join('');
 
   const jumped = Boolean(ride.jump && ride.jump.jumped);
+  const tell = Boolean(ride.jump && ride.jump.tell);
   const hop = jumped
-    ? `<div class="rider-hop is-jump rider-hop-tell" data-hop="1" data-window="${HOP_WINDOW_MS}">
+    ? `<div class="rider-hop is-jump rider-hop-tell" data-hop="1" data-hop-tell="1" data-window="${HOP_WINDOW_MS}" role="status">
         <span class="rider-hop-kicker">Hopp</span>
+        <span class="rider-hop-tell-mark" data-rider-hop-tell>tell</span>
         <span class="rider-hop-path">${escapeHtml(formatPx(ride.jump.from))} → ${escapeHtml(formatPx(ride.jump.to))}</span>
-        <span class="faint">band+studs · ${HOP_WINDOW_MS / 1000}s</span>
+        <span class="faint">process före fart · ${HOP_WINDOW_MS / 1000}s</span>
       </div>`
-    : `<div class="rider-hop is-hold" data-hop="0">
+    : `<div class="rider-hop is-hold" data-hop="0" data-hop-tell="0">
         <span class="rider-hop-kicker">Håll</span>
         <span class="rider-hop-path">ingen hopp — sitta på grav</span>
       </div>`;
@@ -190,6 +195,7 @@ export function renderPlayArena(ride, play = {}) {
   const coastMs = coastPeriodMs(lev);
   const railText = rails[rail] != null ? escapeHtml(String(rails[rail])) : '';
   return `<div class="rider-play rider-bit is-looking ${jumped ? 'has-hop' : 'has-hold'}" data-rider-play data-bit="32" data-look="1"
+      data-hop-tell="${tell ? '1' : '0'}"
       data-leverage="${lev}" data-speed="${speed}" data-lens="${lens}" data-rail="${rail}" data-sit="${sit}"
       style="--rider-speed:${speed};--rider-lens:${lens};--rider-coast-ms:${coastMs}ms;--hop-window:${HOP_WINDOW_MS}ms;"
       role="img" aria-label="Paper-arena">
@@ -205,9 +211,13 @@ export function renderPlayArena(ride, play = {}) {
   </div>`;
 }
 
-function smaHintHtml(unlocked) {
+function smaHintHtml(unlocked, fresh = false) {
   if (!unlocked) return '';
-  return `<p class="rider-sma" data-sma-belopp="1">Små belopp · risken stannar. Pilotvolym får vara liten. Robot höjer aldrig. Paper.</p>`;
+  const note = fresh ? RIDER_SMA_UNLOCK_NOTE : RIDER_SMA_NOTE;
+  return `<p class="rider-sma${fresh ? ' is-unlock' : ''}" data-sma-belopp="1" data-sma-unlock="${fresh ? '1' : '0'}" role="status">
+    <span class="rider-sma-pip" aria-hidden="true"></span>
+    ${escapeHtml(note)}
+  </p>`;
 }
 
 export function renderRideResult(ride, play = {}, opts = {}) {
@@ -238,7 +248,7 @@ export function renderRideResult(ride, play = {}, opts = {}) {
 
   return `
     ${renderPlayArena(ride, play)}
-    ${smaHintHtml(opts.smallAmountUnlocked)}
+    ${smaHintHtml(opts.smallAmountUnlocked, opts.justUnlocked === true)}
     <h3 class="section-title">Paper-plan</h3>
     <div class="kalkyl-live">
       <div class="card"><div class="metric-label">SL</div><div class="metric-value">${escapeHtml(formatPx(ride.sl))}</div><div class="faint">entry ± maxFel</div></div>
@@ -266,10 +276,11 @@ export function renderRider(draft, ride, hopPulse = 0, play = {}, opts = {}) {
   const firstHint = opts.firstHint || '';
   const liveLocked = opts.liveLocked !== false;
   const completed = opts.hasCompletedFirstRide === true;
+  const justUnlocked = opts.justUnlocked === true;
   const impulse = opts.impulse || rideImpulse(draft, play, { hasCompletedFirstRide: completed });
 
   return `
-    <section class="rider-stage ${impulse.visible ? 'has-impulse' : ''}" data-hop-pulse="${hopPulse}" data-impulse="${impulse.visible ? '1' : '0'}" data-first-ride="${completed ? '1' : '0'}">
+    <section class="rider-stage ${impulse.visible ? 'has-impulse' : ''}${justUnlocked ? ' has-sma-unlock' : ''}" data-hop-pulse="${hopPulse}" data-impulse="${impulse.visible ? '1' : '0'}" data-first-ride="${completed ? '1' : '0'}" data-sma-fresh="${justUnlocked ? '1' : '0'}">
       <header class="rider-hero">
         <p class="rider-kicker">Trade Rider · paper</p>
         <h2 class="rider-title">Trade Rider</h2>
@@ -292,7 +303,7 @@ export function renderRider(draft, ride, hopPulse = 0, play = {}, opts = {}) {
         <span data-rider-impulse-note>${escapeHtml(impulse.note || RIDER_IMPULSE_NOTE)}</span>
       </div>
 
-      <div id="rider-out" class="rider-out">${renderRideResult(ride, play, { smallAmountUnlocked: completed })}</div>
+      <div id="rider-out" class="rider-out">${renderRideResult(ride, play, { smallAmountUnlocked: completed, justUnlocked })}</div>
 
       <aside class="rider-magasin-extra" aria-label="Magasinet extra">
         ${renderMagazineHud(magazineView([], emptyHudState(), Date.now()), { extra: true })}

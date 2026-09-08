@@ -304,14 +304,21 @@ export function smaBeloppUnlocked(store) {
   return hasCompletedFirstRide(store);
 }
 
-export function smaBeloppHint(store) {
+export const RIDER_SMA_NOTE =
+  'Små belopp · risken stannar. Pilotvolym får vara liten. Robot höjer aldrig. Paper.';
+export const RIDER_SMA_UNLOCK_NOTE =
+  'Intjänad. Små belopp · risken stannar. Pilotens tal. Robot höjer aldrig.';
+
+export function smaBeloppHint(store, opts = {}) {
   if (!smaBeloppUnlocked(store)) {
-    return { unlocked: false, mode: '', note: '' };
+    return { unlocked: false, fresh: false, mode: '', note: '' };
   }
+  const fresh = opts.fresh === true;
   return {
     unlocked: true,
+    fresh,
     mode: 'sma-belopp',
-    note: 'Små belopp · risken stannar. Pilotvolym får vara liten. Robot höjer aldrig. Paper.',
+    note: fresh ? RIDER_SMA_UNLOCK_NOTE : RIDER_SMA_NOTE,
   };
 }
 
