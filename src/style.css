@@ -1370,6 +1370,20 @@ body.view-rider .shell-artificer {
   font-size: 12px;
 }
 
+.rider-coach {
+  position: relative;
+  z-index: 2;
+  margin: 4px 4px 0;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: #c8d8c4;
+}
+
+.rider-mark-dry .rider-mark-line {
+  background: rgba(122, 158, 126, 0.28);
+}
+
 .rider-play-hud,
 .rider-bit-hud {
   position: relative;

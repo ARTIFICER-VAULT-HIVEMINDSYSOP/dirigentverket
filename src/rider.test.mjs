@@ -18,6 +18,11 @@ import {
   rideJump,
   reservedRiderKey,
   handleRiderKey,
+  rideRails,
+  playRails,
+  dryRunRails,
+  DRY_RUN_SLOTS,
+  emptyPlayState,
   tempoToLens,
   HOP_WINDOW_MS,
   COAST_PERIOD_MS,
@@ -478,4 +483,47 @@ test('playfeel-verb: W/S/F instant, häv 1–4 ärlig, space=lins, Robban stjäl
   assert.match(page, /id="rider-robban"/);
   assert.match(page, /Menyn tar inte W\/S\/F/);
   assert.equal(LIVE_LOCKED, true);
+});
+
+test('tom-arena dry-run: W/S/F/[ ]/Space flyttar silhuett utan påhittade priser', () => {
+  const rails = playRails(null);
+  assert.deepEqual(rails, dryRunRails());
+  assert.equal(rails.length, DRY_RUN_SLOTS);
+  assert.ok(rails.every((p) => p === ''));
+  assert.deepEqual(playRails({ ok: false }), dryRunRails());
+
+  const start = emptyPlayState();
+  const w = handleRiderKey(start, rails, 'w');
+  assert.equal(w.rail, 1);
+  assert.equal(w.commit, 'rail');
+  const f = handleRiderKey(w, rails, 'f');
+  assert.equal(f.sit, 1);
+  assert.equal(f.commit, 'follow');
+  const lev = handleRiderKey(start, rails, ']');
+  assert.equal(lev.leverage, 2);
+  const cap = handleRiderKey({ ...start, leverage: 4 }, rails, ']');
+  assert.equal(cap.leverage, 4);
+  const lens = handleRiderKey(start, rails, ' ');
+  assert.equal(lens.lens, 1.5);
+  assert.equal(lens.commit, 'lens');
+
+  const html = renderPlayArena(null, w);
+  assert.match(html, /data-dry-run="1"/);
+  assert.match(html, /is-dry-run/);
+  assert.match(html, /data-rider-coach/);
+  assert.match(html, /Process före fart/);
+  assert.match(html, /data-rail-index="0"/);
+  assert.match(html, /data-rail-index="2"/);
+  assert.match(html, /data-rail="1"/);
+  assert.match(html, /data-rail-sil="1"/);
+  assert.ok(!/<button/i.test(html));
+  assert.ok(!/data-rider-pad|data-action="rider-key"|rider-rail-pick/i.test(html));
+  assert.ok(!/data-rail-price="\d+/.test(html));
+  assert.ok(!/\d+\s*kr/i.test(html));
+  assert.equal((html.match(/<p /g) || []).length, 1);
+  assert.equal(LIVE_LOCKED, true);
+
+  const ok = computeRide({ entry: 100, maxFel: 2, rr: 2, grav: 100 });
+  assert.deepEqual(playRails(ok), rideRails(ok));
+  assert.ok(playRails(ok).every((p) => p !== ''));
 });

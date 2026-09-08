@@ -8,6 +8,8 @@ import {
   coastPeriodMs,
   rideRails,
   rideImpulse,
+  playRails,
+  dryRunSlotTop,
   HOP_WINDOW_MS,
 } from './rider.js';
 import { escapeHtml, emptyFigure } from './format.js';
@@ -75,15 +77,40 @@ export function renderPlayArena(ride, play = {}) {
   if (!ride || !ride.ok) {
     const lev = play.leverage || 1;
     const speed = leverageSpeed(lev);
-    return `<div class="rider-play is-empty rider-bit" data-rider-play data-bit="32" role="status"
-      data-leverage="${lev}" data-speed="${speed}" data-lens="${play.lens || 1}"
-      style="--rider-speed:${speed};--rider-lens:${play.lens || 1};--rider-coast-ms:${coastPeriodMs(lev)}ms;">
+    const lens = play.lens || 1;
+    const rails = playRails(ride);
+    const rail = Math.min(rails.length - 1, Math.max(0, play.rail || 0));
+    const sit = Math.min(rails.length - 1, Math.max(0, play.sit ?? rail));
+    const sitTop = dryRunSlotTop(sit);
+    const dryMarks = rails
+      .map((_, i) => {
+        const top = dryRunSlotTop(i);
+        const cls = [
+          'rider-mark',
+          'rider-mark-dry',
+          i === rail ? 'is-rail' : '',
+          i === sit ? 'is-sit' : '',
+        ]
+          .filter(Boolean)
+          .join(' ');
+        return `<div class="${cls}" data-rail-index="${i}" data-top="${top}%" style="top:${top}%">
+        <span class="rider-mark-label"></span>
+        <span class="rider-mark-line"><span class="rider-mark-pip" aria-hidden="true"></span></span>
+        <span class="rider-mark-px"></span>
+      </div>`;
+      })
+      .join('');
+    return `<div class="rider-play is-empty rider-bit is-dry-run" data-rider-play data-bit="32" data-dry-run="1" role="status"
+      data-leverage="${lev}" data-speed="${speed}" data-lens="${lens}" data-rail="${rail}" data-sit="${sit}"
+      style="--rider-speed:${speed};--rider-lens:${lens};--rider-coast-ms:${coastPeriodMs(lev)}ms;">
       ${renderScanlines()}
-      ${renderBitHud(lev, speed, '', [], play, false)}
-      <div class="rider-arena-field" data-rider-field>
+      ${renderBitHud(lev, speed, '', rails, { ...play, rail, sit }, false)}
+      <div class="rider-arena-field" data-rider-field style="transform:scale(var(--rider-lens));transform-origin:center;">
         <div class="rider-speed-scan" aria-hidden="true"></div>
-        <div class="rider-dot is-hold" data-rider-dot style="top:50%;"></div>
+        ${dryMarks}
+        <div class="rider-dot is-hold" data-rider-dot style="top:${sitTop}%;"></div>
       </div>
+      <div class="rider-coach" data-rider-coach>Process före fart. Prova räls och lins — sedan Räkna.</div>
       <p class="rider-play-empty">Fyll pilotvolym · entry · max-fel · RR · grav — sedan Räkna. Paper. Inte live.</p>
     </div>`;
   }

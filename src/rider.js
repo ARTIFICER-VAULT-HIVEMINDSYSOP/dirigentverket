@@ -18,6 +18,8 @@ export const LEVERAGE_MAX = 4;
 export const LENS_STEPS = [1, 1.5, 2];
 export const COAST_PERIOD_MS = 1600;
 export const LIVE_LOCKED = true;
+/** Nameless dry-run slots. Not prices — empty cells stay empty. */
+export const DRY_RUN_SLOTS = 3;
 
 const TEMPLATE_FIELDS = [
   'side',
@@ -391,6 +393,25 @@ export function rideRails(ride) {
   return [...prices].sort((a, b) => a - b);
 }
 
+/**
+ * Play rails: real prices after a successful ride, nameless slots before Räkna.
+ * Dry-run never invents kronor or quotes.
+ */
+export function dryRunRails() {
+  return Array.from({ length: DRY_RUN_SLOTS }, () => '');
+}
+
+export function playRails(ride) {
+  if (ride && ride.ok) return rideRails(ride);
+  return dryRunRails();
+}
+
+/** Vertical tops for nameless dry-run slots. Index 0 sits low; W steps up. */
+export function dryRunSlotTop(index) {
+  const i = Math.min(DRY_RUN_SLOTS - 1, Math.max(0, Number(index) || 0));
+  return 78 - i * 24;
+}
+
 export function commitRail(play, rails, dir) {
   if (!rails.length) return { ...play };
   const next = Math.min(rails.length - 1, Math.max(0, (play.rail || 0) + dir));
@@ -457,7 +478,7 @@ export function applyPlayDom(play, rails, root = globalThis.document) {
   if (speedHud) speedHud.textContent = `${speed}×`;
   const railHud = host.querySelector('[data-rider-rail-hud]');
   const railPrice = rails[play.rail];
-  if (railHud) railHud.textContent = railPrice != null ? String(railPrice) : '';
+  if (railHud) railHud.textContent = railPrice !== '' && railPrice != null ? String(railPrice) : '';
   const levSil = host.querySelector('[data-rider-lev-sil]');
   if (levSil) levSil.dataset.lev = String(play.leverage);
   host.querySelectorAll('[data-lev-bar]').forEach((el) => {
@@ -483,9 +504,12 @@ export function applyPlayDom(play, rails, root = globalThis.document) {
       active.classList.add('is-commit');
     }
   }
-  const price = rails[play.sit] ?? rails[play.rail];
+  const sitIdx = play.sit ?? play.rail;
+  const price = rails[sitIdx] ?? rails[play.rail];
   const dot = host.querySelector('[data-rider-dot]');
-  const mark = host.querySelector(`[data-rail-price="${price}"]`);
+  const mark =
+    host.querySelector(`[data-rail-index="${sitIdx}"]`) ||
+    (price !== '' && price != null ? host.querySelector(`[data-rail-price="${price}"]`) : null);
   if (dot && mark) {
     dot.style.transition = 'none';
     dot.style.top = mark.style.top || mark.getAttribute('data-top') || '';

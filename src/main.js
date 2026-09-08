@@ -28,7 +28,7 @@ import {
   saveRideTemplate,
   loadRideTemplate,
   emptyPlayState,
-  rideRails,
+  playRails,
   reservedRiderKey,
   applyPlayDom,
   handleRiderKey,
@@ -449,7 +449,7 @@ window.addEventListener(
     if (riderTypingTarget(ev.target) && !inRobban) return;
     ev.preventDefault();
     ev.stopPropagation();
-    const rails = rideRails(riderResult);
+    const rails = playRails(riderResult);
     const key = ev.key.length === 1 ? ev.key.toLowerCase() : ev.key;
     riderPlay = handleRiderKey(riderPlay, rails, ev.key);
     applyPlayDom(riderPlay, rails);

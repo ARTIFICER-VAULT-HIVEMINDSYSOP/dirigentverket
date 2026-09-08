@@ -21,6 +21,8 @@ Branch `cursor/rider-kansla-32bit-0a6e`. Gate `hasCompletedFirstRide` / `RIDER_F
 **17:54 Sthlm 7 sep:** rebase klar mot tip. Draft kvar.
 **09:35 EEST 8 sep:** PR #4 fortfarande draft + mergeable clean. Magasin `8765` HTTP 200. Tom-arena dry-run (W/S/F före första Räkna) under arbete på samma branch — ingen merge. White-label + IPO-paper stubbar landade på main.
 
+**8 sep 09:35 EEST:** tom-arena dry-run landat (W/S/F/[ ]/Space flyttar silhuett + dot/räls-pips utan påhittade priser). Draft. Merge väntar namngivet ja.
+
 https://github.com/ARTIFICER-VAULT-HIVEMINDSYSOP/dirigentverket/pull/4
 
 ## Prova-känsla (efter merge — paper)
