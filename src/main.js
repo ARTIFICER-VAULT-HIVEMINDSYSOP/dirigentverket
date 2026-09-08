@@ -452,7 +452,10 @@ window.addEventListener(
     const rails = playRails(riderResult);
     const key = ev.key.length === 1 ? ev.key.toLowerCase() : ev.key;
     riderPlay = handleRiderKey(riderPlay, rails, ev.key);
-    applyPlayDom(riderPlay, rails);
+    applyPlayDom(riderPlay, rails, document, {
+      draft: riderDraft,
+      hasCompletedFirstRide: hasCompletedFirstRide(),
+    });
   },
   true,
 );

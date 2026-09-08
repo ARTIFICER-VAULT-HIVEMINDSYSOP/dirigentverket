@@ -33,6 +33,7 @@ import {
   smaBeloppHint,
   inheritPilotVolume,
   rideImpulse,
+  RIDER_IMPULSE_NOTE,
   RIDER_FIRST_RIDE_KEY,
   TILLGANGAR,
 } from './rider.js';
@@ -387,13 +388,15 @@ test('impulse syns mjukt före process; tyst efter första ride + SL/TP', () => 
   assert.equal(rushVol.visible, true);
   assert.equal(rushVol.kind, 'volym');
   assert.match(rushVol.note, /process före fart/i);
+  assert.equal(rushVol.note, RIDER_IMPULSE_NOTE);
+  assert.ok(!/\d+\s*kr/i.test(rushVol.note));
 
   const rushLev = rideImpulse({ entry: 100, maxFel: 2, rr: 2 }, { leverage: 4 }, { hasCompletedFirstRide: false });
   assert.equal(rushLev.visible, true);
   assert.equal(rushLev.kind, 'fart');
 
   const calm = rideImpulse(
-    { entry: 100, maxFel: 2, rr: 2, pilotVolume: 1 },
+    { entry: 100, maxFel: 2, rr: 2, grav: 100, pilotVolume: 1 },
     { leverage: 1 },
     { hasCompletedFirstRide: true },
   );
@@ -410,6 +413,7 @@ test('impulse syns mjukt före process; tyst efter första ride + SL/TP', () => 
   assert.match(rushPage, /data-impulse="1"/);
   assert.match(rushPage, /data-rider-impulse/);
   assert.match(rushPage, /Process före fart/);
+  assert.ok(!/<dialog/i.test(rushPage));
 });
 
 test('ROBOT / AIIND / GULDR förblir åtskilda; grind är global', () => {
@@ -483,6 +487,73 @@ test('playfeel-verb: W/S/F instant, häv 1–4 ärlig, space=lins, Robban stjäl
   assert.match(page, /id="rider-robban"/);
   assert.match(page, /Menyn tar inte W\/S\/F/);
   assert.equal(LIVE_LOCKED, true);
+});
+
+test('mjuk impuls efter Räkna när häv/volym finns men kärna saknas', () => {
+  const afterLevDraft = { ...emptyRideDraft(), entry: '100', maxFel: '2', rr: '2' };
+  const afterLevRide = computeRide(afterLevDraft);
+  assert.equal(afterLevRide.ok, true);
+  const afterLev = rideImpulse(afterLevDraft, { leverage: 3 }, { hasCompletedFirstRide: true });
+  assert.equal(afterLev.visible, true);
+  assert.equal(afterLev.kind, 'fart');
+  assert.equal(afterLev.note, RIDER_IMPULSE_NOTE);
+  assert.ok(!/\d+\s*kr|P&L|pnl/i.test(afterLev.note));
+
+  const afterVolDraft = { ...emptyRideDraft(), entry: '100', maxFel: '2', rr: '2', pilotVolume: '1' };
+  const afterVolRide = computeRide(afterVolDraft);
+  assert.equal(afterVolRide.ok, true);
+  const afterVol = rideImpulse(afterVolDraft, { leverage: 1 }, { hasCompletedFirstRide: true });
+  assert.equal(afterVol.visible, true);
+  assert.equal(afterVol.kind, 'volym');
+
+  const afterPage = renderRider(afterLevDraft, afterLevRide, 0, { leverage: 3 }, { hasCompletedFirstRide: true });
+  assert.match(afterPage, /data-impulse="1"/);
+  assert.match(afterPage, /data-rider-impulse/);
+  assert.doesNotMatch(afterPage, /data-rider-impulse[^>]* hidden/);
+  assert.ok(!/<dialog/i.test(afterPage));
+  assert.ok(!/data-rider-pad|data-action="rider-key"/i.test(afterPage));
+  assert.ok(!/WATCHERS|anden i lampan/i.test(afterPage));
+  assert.equal(LIVE_LOCKED, true);
+
+  const quietDraft = {
+    ...emptyRideDraft(),
+    entry: '100',
+    maxFel: '2',
+    rr: '2',
+    grav: '100',
+    pilotVolume: '1',
+  };
+  const quiet = rideImpulse(quietDraft, { leverage: 4 }, { hasCompletedFirstRide: true });
+  assert.equal(quiet.visible, false);
+  const quietPage = renderRider(quietDraft, computeRide(quietDraft), 0, { leverage: 4 }, { hasCompletedFirstRide: true });
+  assert.match(quietPage, /data-impulse="0"/);
+  assert.match(quietPage, /data-rider-impulse[^>]*\shidden/);
+});
+
+test('fylld arena kolla-grafen: coast/scanlines/silhuett lever med häv=fart', () => {
+  const ride = computeRide({ entry: 100, maxFel: 2, rr: 2, grav: 100 });
+  const html = renderPlayArena(ride, { leverage: 3, lens: 1, rail: 0, sit: 0 });
+  assert.equal(ride.ok, true);
+  assert.match(html, /data-look="1"/);
+  assert.match(html, /is-looking/);
+  assert.match(html, new RegExp(`--rider-coast-ms:${coastPeriodMs(3)}ms`));
+  assert.equal(coastPeriodMs(3) * 3, COAST_PERIOD_MS);
+  assert.match(html, /rider-scanlines/);
+  assert.match(html, /rider-speed-scan/);
+  assert.match(html, /data-rider-sil/);
+  assert.match(html, /data-speed="3"/);
+  assert.match(html, /data-verbs="w s f \[ \] space"/);
+  assert.ok(!/<button/i.test(html));
+  assert.ok(!/data-rider-pad|data-action="rider-key"|rider-rail-pick/i.test(html));
+  assert.ok(!/WATCHERS|anden i lampan|grimoire/i.test(html));
+  assert.ok(!/\d+\s*kr/i.test(html));
+  assert.doesNotMatch(html, /P&L|pnl/);
+  assert.equal(LIVE_LOCKED, true);
+
+  const empty = renderPlayArena(null);
+  assert.ok(!/data-look="1"/.test(empty));
+  assert.ok(!/is-looking/.test(empty));
+  assert.match(empty, /data-dry-run="1"/);
 });
 
 test('tom-arena dry-run: W/S/F/[ ]/Space flyttar silhuett utan påhittade priser', () => {

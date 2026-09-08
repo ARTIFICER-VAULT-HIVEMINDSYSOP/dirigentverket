@@ -8,6 +8,7 @@ import {
   coastPeriodMs,
   rideRails,
   rideImpulse,
+  RIDER_IMPULSE_NOTE,
   playRails,
   dryRunSlotTop,
   HOP_WINDOW_MS,
@@ -188,7 +189,7 @@ export function renderPlayArena(ride, play = {}) {
 
   const coastMs = coastPeriodMs(lev);
   const railText = rails[rail] != null ? escapeHtml(String(rails[rail])) : '';
-  return `<div class="rider-play rider-bit ${jumped ? 'has-hop' : 'has-hold'}" data-rider-play data-bit="32"
+  return `<div class="rider-play rider-bit is-looking ${jumped ? 'has-hop' : 'has-hold'}" data-rider-play data-bit="32" data-look="1"
       data-leverage="${lev}" data-speed="${speed}" data-lens="${lens}" data-rail="${rail}" data-sit="${sit}"
       style="--rider-speed:${speed};--rider-lens:${lens};--rider-coast-ms:${coastMs}ms;--hop-window:${HOP_WINDOW_MS}ms;"
       role="img" aria-label="Paper-arena">
@@ -286,14 +287,10 @@ export function renderRider(draft, ride, hopPulse = 0, play = {}, opts = {}) {
         <span class="rider-process-kicker">process</span>
         Process före fart. Tomma rutor stannar tomma.
       </div>
-      ${
-        impulse.visible
-          ? `<div class="rider-impulse" data-rider-impulse role="status">
-              <span class="rider-impulse-pip" aria-hidden="true"></span>
-              ${escapeHtml(impulse.note)}
-            </div>`
-          : ''
-      }
+      <div class="rider-impulse" data-rider-impulse role="status"${impulse.visible ? '' : ' hidden'}>
+        <span class="rider-impulse-pip" aria-hidden="true"></span>
+        <span data-rider-impulse-note>${escapeHtml(impulse.note || RIDER_IMPULSE_NOTE)}</span>
+      </div>
 
       <div id="rider-out" class="rider-out">${renderRideResult(ride, play, { smallAmountUnlocked: completed })}</div>
 

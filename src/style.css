@@ -1347,12 +1347,41 @@ body.view-rider .shell-artificer {
   inset: 0;
   pointer-events: none;
   z-index: 4;
-  background: repeating-linear-gradient(
+  background-image: repeating-linear-gradient(
     0deg,
     rgba(0, 0, 0, 0.18) 0 1px,
     transparent 1px 3px
   );
+  background-size: 100% 4px;
 }
+
+.rider-play.is-looking .rider-scanlines {
+  animation: rider-scan-drift var(--rider-coast-ms, 1600ms) linear infinite;
+}
+
+@keyframes rider-scan-drift {
+  0% { background-position: 0 0; }
+  100% { background-position: 0 4px; }
+}
+
+.rider-play.is-looking .rider-sil-bar.is-on,
+.rider-play.is-looking .rider-sil-pip.is-paper {
+  animation: rider-sil-breathe var(--rider-coast-ms, 1600ms) ease-in-out infinite;
+}
+
+@keyframes rider-sil-breathe {
+  0%,
+  100% { opacity: 0.7; }
+  50% { opacity: 1; }
+}
+
+.rider-play.is-looking .rider-speed-scan {
+  opacity: 0.5;
+}
+
+.rider-play.is-looking[data-speed="2"] .rider-speed-scan { opacity: 0.68; }
+.rider-play.is-looking[data-speed="3"] .rider-speed-scan { opacity: 0.84; }
+.rider-play.is-looking[data-speed="4"] .rider-speed-scan { opacity: 1; }
 
 .rider-play.is-empty {
   min-height: 280px;

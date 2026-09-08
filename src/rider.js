@@ -315,16 +315,21 @@ export function smaBeloppHint(store) {
   };
 }
 
+export const RIDER_IMPULSE_NOTE =
+  'Process före fart. Impulse syns mjukt. Tomma rutor fylls inte.';
+
 /**
  * Gentle impulse: process before speed. No invented prices.
- * Visible when volume or leverage arrives before SL/TP / first ride.
+ * Visible when leverage >1× or volume exists but kärna/SL+TP is still missing —
+ * before and after Räkna. Empty cells stay empty.
  */
 export function rideImpulse(raw = {}, play = {}, opts = {}) {
   const input = parseRideInput(raw);
   const missing = missingRequired(input);
+  const processMissing = missing.length > 0 || coreIncomplete(raw);
   const lev = clampLeverage(play.leverage ?? input.havstang ?? 1);
-  const volumeBeforeProcess = input.pilotVolume !== null && missing.length > 0;
-  const speedBeforeProcess = lev > 1 && (!opts.hasCompletedFirstRide || missing.length > 0);
+  const volumeBeforeProcess = input.pilotVolume !== null && processMissing;
+  const speedBeforeProcess = lev > 1 && processMissing;
   const visible = Boolean(volumeBeforeProcess || speedBeforeProcess);
   let kind = '';
   if (speedBeforeProcess) kind = 'fart';
@@ -332,8 +337,26 @@ export function rideImpulse(raw = {}, play = {}, opts = {}) {
   return {
     visible,
     kind,
-    note: visible ? 'Process före fart. Impulse syns mjukt. Tomma rutor fylls inte.' : '',
+    note: visible ? RIDER_IMPULSE_NOTE : '',
   };
+}
+
+/** Keep the soft impulse strip in sync when leverage/volume changes without a full render. */
+export function applyImpulseDom(impulse, root = globalThis.document) {
+  if (!root) return impulse;
+  const stage = root.querySelector('[data-impulse]');
+  if (stage) {
+    stage.dataset.impulse = impulse.visible ? '1' : '0';
+    stage.classList.toggle('has-impulse', Boolean(impulse.visible));
+  }
+  const el = root.querySelector('[data-rider-impulse]');
+  if (el) {
+    if (impulse.visible) el.removeAttribute('hidden');
+    else el.setAttribute('hidden', '');
+    const note = el.querySelector('[data-rider-impulse-note]');
+    if (note) note.textContent = impulse.note || '';
+  }
+  return impulse;
 }
 
 export function emptyRideDraft() {
@@ -459,8 +482,14 @@ export function handleRiderKey(play, rails, key) {
   return { ...play, commit: '' };
 }
 
-export function applyPlayDom(play, rails, root = globalThis.document) {
+export function applyPlayDom(play, rails, root = globalThis.document, ctx = {}) {
   if (!root) return play;
+  if (ctx && ctx.draft) {
+    applyImpulseDom(
+      rideImpulse(ctx.draft, play, { hasCompletedFirstRide: ctx.hasCompletedFirstRide }),
+      root,
+    );
+  }
   const host = root.querySelector('[data-rider-play]');
   if (!host) return play;
   const speed = leverageSpeed(play.leverage);

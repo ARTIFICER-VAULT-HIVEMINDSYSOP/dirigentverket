@@ -22,6 +22,7 @@ Branch `cursor/rider-kansla-32bit-0a6e`. Gate `hasCompletedFirstRide` / `RIDER_F
 **17:54 Sthlm 7 sep:** rebase klar mot tip. Draft kvar.
 **09:38 EEST 8 sep:** tom-arena dry-run landat (`fde2807`) — W/S/F/[ ]/Space flyttar silhuett + dot/räls-pips utan påhittade priser. Draft kvar. Merge väntar namngivet ja.
 **09:35 Sthlm 8 sep (ständig):** main-status synkad; magasin `8765` HTTP 200; nästa paper-UX = mjuk impuls + kolla-grafen-känsla på fylld arena (samma draft, ingen merge).
+**10:43 EEST 8 sep:** mjuk impuls efter Räkna (häv >1× eller volym, kärna saknas) + kolla-grafen på fylld arena (coast/scanlines/silhuett lever med häv=fart). Inga nya play-knappar. Draft. Merge väntar namngivet ja.
 
 https://github.com/ARTIFICER-VAULT-HIVEMINDSYSOP/dirigentverket/pull/4
 
