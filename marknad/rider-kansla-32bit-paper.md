@@ -14,12 +14,14 @@
 - `fa2384d` — paper-arena, sticky PAPER-badge, kärna A–E, hopp, mallar, LIVE_LOCKED (PR #3).
 - Pilotsele / Nyhetssele (PR #5) + Magasinet kontaktkö/`servedThisRound` (PR #6).
 - `cc2946f` — status: rebase klar + prova-känsla-checklista.
+- White-label + IPO-paper stubbar (`91d4d4d`).
 
 ## Paper-bygge i PR #4 (draft — merge bara efter namngivet ja)
-Branch `cursor/rider-kansla-32bit-0a6e`. Gate `hasCompletedFirstRide` / `RIDER_FIRST_RIDE_KEY`, «små belopp»-hint, impuls (process före fart), 32-bit playfeel (W/S/F/[ ]/Space), silhuett-HUD. Tester gröna. `LIVE_LOCKED` orörd.
+Branch `cursor/rider-kansla-32bit-0a6e`. Gate `hasCompletedFirstRide` / `RIDER_FIRST_RIDE_KEY`, «små belopp»-hint, impuls (process före fart), 32-bit playfeel (W/S/F/[ ]/Space), silhuett-HUD, tom-arena dry-run (`fde2807`). Tester gröna. `LIVE_LOCKED` orörd.
 
 **17:54 Sthlm 7 sep:** rebase klar mot tip. Draft kvar.
-**09:35 EEST 8 sep:** PR #4 fortfarande draft + mergeable clean. Magasin `8765` HTTP 200. Tom-arena dry-run (W/S/F före första Räkna) under arbete på samma branch — ingen merge. White-label + IPO-paper stubbar landade på main.
+**09:38 Sthlm 8 sep:** tom-arena dry-run landat — W/S/F/[ ]/Space flyttar silhuett + dot/räls-pips utan påhittade priser. Draft kvar. Merge väntar namngivet ja.
+**09:35 Sthlm 8 sep (ständig):** main-status synkad; magasin `8765` HTTP 200; nästa paper-UX = mjuk impuls + kolla-grafen-känsla på fylld arena (samma draft, ingen merge).
 
 https://github.com/ARTIFICER-VAULT-HIVEMINDSYSOP/dirigentverket/pull/4
 
@@ -31,6 +33,7 @@ När ÖB öppnar `#/rider` ska det kännas så här, i den ordningen:
 4. Space = lins; hopp har tell; inga nya play-knappar på ytan.
 5. En lyckad paper-ride krävs innan «små belopp» syns/öppnas.
 6. PAPER-badge sticky; live-knapp död.
+7. Tom arena = dry-run: silhuett rör sig före Räkna; tomma rutor stannar tomma.
 
 ## Inte
 - Live-order, mäklare, påhittade P&L
