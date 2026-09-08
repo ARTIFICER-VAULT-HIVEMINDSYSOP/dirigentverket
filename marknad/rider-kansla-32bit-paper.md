@@ -14,12 +14,14 @@
 - `fa2384d` — paper-arena, sticky PAPER-badge, kärna A–E, hopp, mallar, LIVE_LOCKED (PR #3).
 - Pilotsele / Nyhetssele (PR #5) + Magasinet kontaktkö/`servedThisRound` (PR #6).
 - `cc2946f` — status: rebase klar + prova-känsla-checklista.
+- White-label + IPO-paper stubbar (`91d4d4d`).
 
 ## Paper-bygge i PR #4 (draft — merge bara efter namngivet ja)
-Branch `cursor/rider-kansla-32bit-0a6e`. Gate `hasCompletedFirstRide` / `RIDER_FIRST_RIDE_KEY`, «små belopp»-hint, impuls (process före fart), 32-bit playfeel (W/S/F/[ ]/Space), silhuett-HUD, tom-arena dry-run. Tester gröna. `LIVE_LOCKED` orörd.
+Branch `cursor/rider-kansla-32bit-0a6e`. Gate `hasCompletedFirstRide` / `RIDER_FIRST_RIDE_KEY`, «små belopp»-hint, impuls (process före fart), 32-bit playfeel (W/S/F/[ ]/Space), silhuett-HUD, tom-arena dry-run (`fde2807`). Tester gröna. `LIVE_LOCKED` orörd.
 
 **17:54 Sthlm 7 sep:** rebase klar mot tip. Draft kvar.
-**09:38 EEST 8 sep:** tom-arena dry-run landat (`fde2807`) — W/S/F/[ ]/Space flyttar silhuett + dot/räls-pips utan påhittade priser. Draft kvar. Merge väntar namngivet ja. White-label + IPO-paper stubbar ligger på main.
+**09:38 EEST 8 sep:** tom-arena dry-run landat (`fde2807`) — W/S/F/[ ]/Space flyttar silhuett + dot/räls-pips utan påhittade priser. Draft kvar. Merge väntar namngivet ja.
+**09:35 Sthlm 8 sep (ständig):** main-status synkad; magasin `8765` HTTP 200; nästa paper-UX = mjuk impuls + kolla-grafen-känsla på fylld arena (samma draft, ingen merge).
 
 https://github.com/ARTIFICER-VAULT-HIVEMINDSYSOP/dirigentverket/pull/4
 
