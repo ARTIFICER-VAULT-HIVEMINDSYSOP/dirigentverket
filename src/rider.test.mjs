@@ -16,6 +16,7 @@ import {
   commitLeverage,
   cycleLens,
   rideJump,
+  rideTrail,
   reservedRiderKey,
   handleRiderKey,
   rideRails,
@@ -641,6 +642,97 @@ test('första-ride-unlock: små belopp känns intjänad, inte skrikig', () => {
   assert.ok(!/\d+\s*kr/i.test(page));
   assert.equal(LIVE_LOCKED, true);
   assert.equal(emptyVol.live, false);
+});
+
+test('struktur-trail: SL krymper bara när RSI+BB+budstuds; annars orörd', () => {
+  const shrink = computeRide({
+    entry: 98,
+    maxFel: 2,
+    rr: 2,
+    grav: 98,
+    current: 99,
+    rsi: 28,
+    bbLower: 98,
+    bbUpper: 106,
+    bounce: 'nedre',
+    side: 'köp',
+    pilotVolume: 0.25,
+  });
+  assert.equal(shrink.ok, true);
+  assert.equal(shrink.structure.trail, true);
+  assert.equal(shrink.trail.trailed, true);
+  assert.equal(shrink.trail.tell, true);
+  assert.equal(shrink.sl0, 96);
+  assert.equal(shrink.sl, 97);
+  assert.ok(shrink.sl > shrink.sl0);
+  assert.equal(shrink.pilotVolume, 0.25);
+  assert.equal(inheritPilotVolume(0.25, 4), 0.25);
+  assert.equal(LIVE_LOCKED, true);
+  assert.equal(shrink.live, false);
+
+  const held = computeRide({
+    entry: 98,
+    maxFel: 2,
+    rr: 2,
+    grav: 98,
+    current: 99,
+    rsi: 28,
+    bbLower: 98,
+    bbUpper: 106,
+    bounce: 'nej',
+    side: 'köp',
+  });
+  assert.equal(held.structure.trail, false);
+  assert.equal(held.trail.trailed, false);
+  assert.equal(held.trail.tell, false);
+  assert.equal(held.sl, 96);
+  assert.equal(held.sl0, 96);
+
+  const blank = computeRide({ entry: 98, maxFel: 2, rr: 2, grav: 98, rsi: 28, bbLower: 98, bbUpper: 106, bounce: 'nedre' });
+  assert.equal(blank.trail.trailed, false);
+  assert.equal(blank.sl, 96);
+  assert.equal(blank.input.current, null);
+
+  const hopOnly = computeRide({ entry: 100, maxFel: 2, rr: 2, grav: 100, ...bandBounce });
+  assert.equal(hopOnly.jump.tell, true);
+  assert.equal(hopOnly.trail.trailed, false);
+  assert.equal(hopOnly.sl, 98);
+
+  const levels = { sl: 96, dist: 2, side: 'köp', entry: 98 };
+  const widen = rideTrail({ current: 99 }, levels, { trail: true });
+  assert.ok(widen.sl >= 96);
+});
+
+test('struktur-trail-tell syns mjukt på arena och silhuett-HUD', () => {
+  const ride = computeRide({
+    entry: 98,
+    maxFel: 2,
+    rr: 2,
+    grav: 98,
+    current: 99,
+    rsi: 28,
+    bbLower: 98,
+    bbUpper: 106,
+    bounce: 'nedre',
+    side: 'köp',
+  });
+  const html = renderPlayArena(ride);
+  assert.match(html, /data-trail-tell="1"/);
+  assert.match(html, /data-rider-trail-tell/);
+  assert.match(html, /data-trail="1"/);
+  assert.match(html, /SL krymper/);
+  assert.match(html, /process före fart/);
+  assert.ok(!/<button/i.test(html));
+  assert.ok(!/<dialog/i.test(html));
+  assert.ok(!/data-rider-pad|data-action="rider-key"/i.test(html));
+  assert.ok(!/WATCHERS|anden i lampan/i.test(html));
+  assert.ok(!/\d+\s*kr/i.test(html));
+  assert.doesNotMatch(html, /P&L|pnl/);
+  assert.equal(LIVE_LOCKED, true);
+
+  const quiet = renderPlayArena(computeRide({ entry: 100, maxFel: 2, rr: 2, grav: 100 }));
+  assert.match(quiet, /data-trail-tell="0"/);
+  assert.ok(!/data-rider-trail-tell/.test(quiet));
 });
 
 test('tom-arena dry-run: W/S/F/[ ]/Space flyttar silhuett utan påhittade priser', () => {

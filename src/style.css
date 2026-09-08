@@ -1505,6 +1505,10 @@ body.view-rider .shell-artificer {
   background: #e0c48a;
 }
 
+.rider-sil-pip.is-trail {
+  background: #8fce8a;
+}
+
 .rider-sil-pip.is-hop.is-tell {
   animation: rider-hop-tell-pip var(--hop-window, 2s) ease-in-out infinite;
 }
@@ -1782,6 +1786,30 @@ body.view-rider .shell-artificer {
   text-transform: uppercase;
   font-size: 10px;
   color: #e0c48a;
+}
+
+.rider-trail {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 10px;
+  margin-top: 6px;
+  font-family: var(--mono);
+  font-size: 13px;
+  color: #c8d8c4;
+  background: rgba(20, 32, 20, 0.72);
+  border: 1px solid rgba(122, 158, 126, 0.4);
+}
+
+.rider-play[data-trail-tell="1"] .rider-bit-hud {
+  box-shadow: inset 0 0 0 1px rgba(143, 206, 138, 0.32);
+}
+
+.rider-play[data-trail-tell="1"] .rider-mark-sl .rider-mark-line {
+  animation: rider-hop-tell-line var(--hop-window, 2s) ease-in-out;
 }
 
 .rider-hop-path {

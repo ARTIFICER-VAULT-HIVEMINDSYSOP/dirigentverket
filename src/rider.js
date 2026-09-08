@@ -189,6 +189,65 @@ export function rideJump(input, grav, structure) {
   };
 }
 
+function emptyRideTrail(sl = null) {
+  return {
+    trailed: false,
+    tell: false,
+    sl,
+    sl0: sl,
+    from: sl,
+    to: sl,
+    note: '',
+  };
+}
+
+/**
+ * Structure trail: same Artificer lock (RSI + Bollinger + budstuds).
+ * SL may only shrink. Never invents current/RSI/BB. No volume raise.
+ */
+export function rideTrail(input, levels, structure) {
+  const sl0 = levels?.sl ?? null;
+  const hold = emptyRideTrail(sl0);
+  if (!levels || sl0 === null) return hold;
+  if (!structure || !structure.trail) {
+    return { ...hold, note: 'ingen trail — struktur saknas.' };
+  }
+  const current = input.current;
+  if (current === null || current === undefined) {
+    return { ...hold, note: 'aktuell kurs saknas.' };
+  }
+  const { dist, side, entry } = levels;
+  if (dist === null || dist <= 0 || entry === null) return hold;
+  const long = side !== 'sälj';
+  if (long && current <= sl0) return { ...hold, note: 'vid initial SL.' };
+  if (!long && current >= sl0) return { ...hold, note: 'vid initial SL.' };
+
+  const openR = long ? (current - entry) / dist : (entry - current) / dist;
+  let sl = sl0;
+  if (openR > 0 && openR < 1) {
+    sl = long ? sl0 + (entry - sl0) * openR : sl0 - (sl0 - entry) * openR;
+  } else if (openR >= 1) {
+    const lock = (openR - 1) * 0.5;
+    sl = long ? entry + lock * dist : entry - lock * dist;
+  }
+  if (long) sl = Math.max(sl, sl0);
+  else sl = Math.min(sl, sl0);
+
+  const shrunk = long ? sl > sl0 : sl < sl0;
+  if (!shrunk) {
+    return { ...hold, note: 'struktur ja, SL ligger kvar.' };
+  }
+  return {
+    trailed: true,
+    tell: true,
+    sl,
+    sl0,
+    from: sl0,
+    to: sl,
+    note: 'struktur-trail · SL krymper. Process före fart.',
+  };
+}
+
 function rideStructure(input) {
   const s = structureSignal({
     rsi: input.rsi,
@@ -233,6 +292,7 @@ export function computeRide(raw) {
       coast: null,
       havstang: input.havstang,
       jump: { jumped: false, from: null, to: null, windowMs: HOP_WINDOW_MS, tell: false },
+      trail: emptyRideTrail(null),
       tillgang: input.tillgang,
       pilotVolume: inheritPilotVolume(input.pilotVolume, null),
       input,
@@ -243,6 +303,7 @@ export function computeRide(raw) {
   const grav = input.grav !== null ? input.grav : input.entry;
   const horizon = rideHorizon(input);
   const jump = rideJump(input, grav, structure);
+  const trail = rideTrail(input, levels, structure);
   const coast = input.coast;
 
   return paperStamp({
@@ -250,7 +311,8 @@ export function computeRide(raw) {
     saknar_sl_tp: false,
     missing: [],
     errors: [],
-    sl: levels.sl,
+    sl: trail.trailed ? trail.sl : levels.sl,
+    sl0: levels.sl,
     tp: levels.tp,
     dist: levels.dist,
     rr: levels.rr,
@@ -259,6 +321,7 @@ export function computeRide(raw) {
     coast,
     havstang: input.havstang,
     jump,
+    trail,
     tillgang: input.tillgang,
     pilotVolume: inheritPilotVolume(input.pilotVolume, null),
     input,

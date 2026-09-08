@@ -45,9 +45,10 @@ function renderScanlines() {
   return `<div class="rider-scanlines" aria-hidden="true"></div>`;
 }
 
-function renderBitHud(lev, speed, railText, rails = [], play = {}, hopped = false) {
+function renderBitHud(lev, speed, railText, rails = [], play = {}, hopped = false, trailed = false) {
   const rail = play.rail || 0;
   const sit = play.sit ?? rail;
+  const mode = hopped ? 'hop' : trailed ? 'trail' : 'hold';
   const levBars = [1, 2, 3, 4]
     .map((n) => `<span class="rider-sil-bar${n <= lev ? ' is-on' : ''}" data-lev-bar="${n}"></span>`)
     .join('');
@@ -60,10 +61,11 @@ function renderBitHud(lev, speed, railText, rails = [], play = {}, hopped = fals
         .join('')
     : '<span class="rider-sil-rail-pip is-empty" data-rail-sil="-1"></span>';
   return `<div class="rider-play-hud rider-bit-hud" data-rider-sil data-verbs="w s f [ ] space">
-      <div class="rider-sil-mode" data-rider-mode-sil data-mode="${hopped ? 'hop' : 'hold'}" data-hop-tell="${hopped ? '1' : '0'}">
+      <div class="rider-sil-mode" data-rider-mode-sil data-mode="${mode}" data-hop-tell="${hopped ? '1' : '0'}" data-trail-tell="${trailed ? '1' : '0'}">
         <span class="rider-sil-pip is-paper" data-mode-paper></span>
-        <span class="rider-sil-pip ${hopped ? 'is-hop is-tell' : 'is-hold'}" data-hop-sil></span>
+        <span class="rider-sil-pip ${hopped ? 'is-hop is-tell' : trailed ? 'is-trail is-tell' : 'is-hold'}" data-hop-sil></span>
         ${hopped ? '<span class="rider-sil-tell" data-rider-hop-tell>tell</span>' : ''}
+        ${trailed ? '<span class="rider-sil-tell" data-rider-trail-tell>tell</span>' : ''}
       </div>
       <div class="rider-sil-lev" data-rider-lev-sil data-lev="${lev}">
         ${levBars}
@@ -174,6 +176,7 @@ export function renderPlayArena(ride, play = {}) {
 
   const jumped = Boolean(ride.jump && ride.jump.jumped);
   const tell = Boolean(ride.jump && ride.jump.tell);
+  const trailed = Boolean(ride.trail && ride.trail.tell);
   const hop = jumped
     ? `<div class="rider-hop is-jump rider-hop-tell" data-hop="1" data-hop-tell="1" data-window="${HOP_WINDOW_MS}" role="status">
         <span class="rider-hop-kicker">Hopp</span>
@@ -185,6 +188,14 @@ export function renderPlayArena(ride, play = {}) {
         <span class="rider-hop-kicker">Håll</span>
         <span class="rider-hop-path">ingen hopp — sitta på grav</span>
       </div>`;
+  const trail = trailed
+    ? `<div class="rider-trail rider-hop-tell is-trail" data-trail="1" data-trail-tell="1" role="status">
+        <span class="rider-hop-kicker">Trail</span>
+        <span class="rider-hop-tell-mark" data-rider-trail-tell>tell</span>
+        <span class="rider-hop-path">${escapeHtml(formatPx(ride.trail.from))} → ${escapeHtml(formatPx(ride.trail.to))}</span>
+        <span class="faint">process före fart · SL krymper</span>
+      </div>`
+    : '';
 
   const sitPrice = rails[sit] ?? ride.grav;
   const toPrice = jumped ? ride.jump.to : sitPrice;
@@ -194,19 +205,20 @@ export function renderPlayArena(ride, play = {}) {
 
   const coastMs = coastPeriodMs(lev);
   const railText = rails[rail] != null ? escapeHtml(String(rails[rail])) : '';
-  return `<div class="rider-play rider-bit is-looking ${jumped ? 'has-hop' : 'has-hold'}" data-rider-play data-bit="32" data-look="1"
-      data-hop-tell="${tell ? '1' : '0'}"
+  return `<div class="rider-play rider-bit is-looking ${jumped ? 'has-hop' : 'has-hold'}${trailed ? ' has-trail' : ''}" data-rider-play data-bit="32" data-look="1"
+      data-hop-tell="${tell ? '1' : '0'}" data-trail-tell="${trailed ? '1' : '0'}"
       data-leverage="${lev}" data-speed="${speed}" data-lens="${lens}" data-rail="${rail}" data-sit="${sit}"
       style="--rider-speed:${speed};--rider-lens:${lens};--rider-coast-ms:${coastMs}ms;--hop-window:${HOP_WINDOW_MS}ms;"
       role="img" aria-label="Paper-arena">
     ${renderScanlines()}
-    ${renderBitHud(lev, speed, railText, rails, play, jumped)}
+    ${renderBitHud(lev, speed, railText, rails, play, jumped, trailed)}
     <div class="rider-arena-field" data-rider-field style="transform:scale(var(--rider-lens));transform-origin:center;">
       <div class="rider-speed-scan" aria-hidden="true"></div>
       ${markHtml}
       <div class="rider-dot ${jumped ? 'is-jump' : 'is-hold'}" data-rider-dot style="--from:${sitTop}%;--to:${toTop}%;top:${sitTop}%;"></div>
     </div>
     ${hop}
+    ${trail}
     <p class="faint rider-muted-opt">${coastMuted ? 'coast tyst' : ''} · hävstång HUD = fart · max 4×</p>
   </div>`;
 }
