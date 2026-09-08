@@ -17,12 +17,14 @@
 - White-label + IPO-paper stubbar (`91d4d4d`).
 
 ## Paper-bygge i PR #4 (draft — merge bara efter namngivet ja)
-Branch `cursor/rider-kansla-32bit-0a6e`. Gate `hasCompletedFirstRide` / `RIDER_FIRST_RIDE_KEY`, «små belopp»-hint, impuls (process före fart), 32-bit playfeel (W/S/F/[ ]/Space), silhuett-HUD, tom-arena dry-run (`fde2807`), mjuk impuls + kolla-grafen på fylld arena (`3dbc025` / `6dbb626`). Tester gröna. `LIVE_LOCKED` orörd. Head `6dbb626`. Draft/clean.
+Branch `cursor/rider-kansla-32bit-0a6e`. Gate `hasCompletedFirstRide` / `RIDER_FIRST_RIDE_KEY`, «små belopp»-hint, impuls (process före fart), 32-bit playfeel (W/S/F/[ ]/Space), silhuett-HUD, tom-arena dry-run (`fde2807`), mjuk impuls + kolla-grafen på fylld arena (`3dbc025` / `6dbb626`), hopp-tell + soft unlock (`b90b3c0`). Tester gröna. `LIVE_LOCKED` orörd. Head `0ac338b`. Draft/clean.
 
 **17:54 Sthlm 7 sep:** rebase klar mot tip. Draft kvar.
 **09:38 Sthlm 8 sep:** tom-arena dry-run landat.
 **~10:00 Sthlm 8 sep:** mjuk impuls efter Räkna + kolla-grafen (coast/scanlines/silhuett lever med häv=fart); CSS-fix så `hidden` inte slås ut av flex.
-**13:43 Sthlm 8 sep (ständig):** magasin `8765` HTTP 200; main-status synkad; nästa paper-UX = hopp-tell + mjuk första-ride-unlock («små belopp» känns intjänad, ingen modal/inga nya knappar). Merge väntar namngivet ja.
+**13:43 Sthlm 8 sep (ständig):** magasin `8765` HTTP 200; main-status synkad; nästa paper-UX = hopp-tell + mjuk första-ride-unlock.
+**13:50 Sthlm 8 sep:** hopp-tell mjuk på arena/silhuett-HUD + «små belopp» soft unlock (intjänad, pilotens tal). Inga nya play-knappar.
+**17:38 Sthlm 8 sep (ständig):** magasin `8765` HTTP 200; hopp-tell redan landat på PR #4 (`0ac338b`); nästa paper-UX = mjuk struktur-trail-tell (SL bara krymper; trail bara på struktur RSI/Bollinger+budstuds; syns på arena/silhuett utan modal/nya knappar). Merge väntar namngivet ja. Lamp/WATCHERS fortfarande efter playfeel.
 
 https://github.com/ARTIFICER-VAULT-HIVEMINDSYSOP/dirigentverket/pull/4
 
