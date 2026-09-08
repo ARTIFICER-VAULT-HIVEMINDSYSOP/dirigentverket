@@ -16,9 +16,10 @@
 - `cc2946f` — status: rebase klar + prova-känsla-checklista.
 
 ## Paper-bygge i PR #4 (draft — merge bara efter namngivet ja)
-Branch `cursor/rider-kansla-32bit-0a6e` @ `2e6f3f2` (+ denna status-synk). Gate `hasCompletedFirstRide` / `RIDER_FIRST_RIDE_KEY`, «små belopp»-hint, impuls (process före fart), 32-bit playfeel (W/S/F/[ ]/Space), silhuett-HUD. 81 tester gröna. `LIVE_LOCKED` orörd.
+Branch `cursor/rider-kansla-32bit-0a6e`. Gate `hasCompletedFirstRide` / `RIDER_FIRST_RIDE_KEY`, «små belopp»-hint, impuls (process före fart), 32-bit playfeel (W/S/F/[ ]/Space), silhuett-HUD. Tester gröna. `LIVE_LOCKED` orörd.
 
-**17:54 Sthlm 7 sep:** rebase klar mot tip. Konflikter lösta (rider-ui Magasin-extra behållen; känsla/grind från branchen). Draft kvar. **Väntar namngivet merge-ja på PR #4.** Ingen undraft/merge utan ÖB.
+**17:54 Sthlm 7 sep:** rebase klar mot tip. Draft kvar.
+**09:35 EEST 8 sep:** PR #4 fortfarande draft + mergeable clean. Magasin `8765` HTTP 200. Tom-arena dry-run (W/S/F före första Räkna) under arbete på samma branch — ingen merge. White-label + IPO-paper stubbar landade på main.
 
 https://github.com/ARTIFICER-VAULT-HIVEMINDSYSOP/dirigentverket/pull/4
 
