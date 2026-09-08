@@ -412,8 +412,13 @@ test('impulse syns mjukt före process; tyst efter första ride + SL/TP', () => 
   );
   assert.match(rushPage, /data-impulse="1"/);
   assert.match(rushPage, /data-rider-impulse/);
+  assert.doesNotMatch(rushPage, /data-rider-impulse[^>]*\shidden/);
   assert.match(rushPage, /Process före fart/);
   assert.ok(!/<dialog/i.test(rushPage));
+
+  const idlePage = renderRider(emptyRideDraft(), null, 0, { leverage: 1 }, { hasCompletedFirstRide: false });
+  assert.match(idlePage, /data-impulse="0"/);
+  assert.match(idlePage, /data-rider-impulse[^>]*\shidden/);
 });
 
 test('ROBOT / AIIND / GULDR förblir åtskilda; grind är global', () => {

@@ -1299,6 +1299,10 @@ body.view-rider .shell-artificer {
   border: 2px solid rgba(196, 160, 74, 0.45);
 }
 
+.rider-impulse[hidden] {
+  display: none;
+}
+
 .rider-impulse-pip {
   width: 8px;
   height: 8px;
