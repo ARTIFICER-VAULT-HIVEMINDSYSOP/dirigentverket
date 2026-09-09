@@ -18,7 +18,7 @@ Uppdaterad 2026-09-09. Bocka av när bevis finns. Lampan = **kvällstid**.
 - [ ] Magasin-genväg på KS `/admin`
 - [ ] ForceX: visa kommentarer, rensa rena dubbletter; saldo tom=saknas
 - [ ] ForceX retro: magasin-utfall utan kortkommentar
-- [ ] ConnectPoint: portal HTML (kö Godkänn/Avvisa) — API saknas i agent-UI
+- [x] ConnectPoint: portal HTML-stub (kö Godkänn/Ändra/Avvisa) — `public/connectpoint-godkannande.html`; live Create kräver ÖB-ja
 - [x] WhatsApp: flödes-JSON v1 + ingress-stub (paper smoke OK)
 - [ ] WhatsApp live: Meta WABA/nummer + namngivet ja
 - [ ] UnSpun 020 MKULTRA transcript (efter live-prio)
