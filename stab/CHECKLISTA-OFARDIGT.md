@@ -18,6 +18,8 @@ Uppdaterad 2026-09-09. Bocka av när bevis finns. Lampan = **kvällstid**.
 - [ ] ForceX: visa kommentarer, rensa rena dubbletter; saldo tom=saknas
 - [ ] ForceX retro: magasin-utfall utan kortkommentar
 - [ ] ConnectPoint: portal HTML (kö Godkänn/Avvisa) — API saknas i agent-UI
+- [x] WhatsApp: flödes-JSON v1 + ingress-stub (paper smoke OK)
+- [ ] WhatsApp live: Meta WABA/nummer + namngivet ja
 - [ ] UnSpun 020 MKULTRA transcript (efter live-prio)
 
 ## Kväll (lampan)
@@ -28,3 +30,4 @@ Uppdaterad 2026-09-09. Bocka av när bevis finns. Lampan = **kvällstid**.
 
 - [x] RT-tråd 126619 → `marknad/rad-arv-stor-summa-rt-126619.md`
 - [x] ConnectPoint paper → `marknad/voip/PAPER-connectpoint-forcex-godkannande.md`
+
