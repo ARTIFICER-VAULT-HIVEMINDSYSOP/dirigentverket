@@ -82,7 +82,7 @@ function renderGoldBlock(gold) {
       <div class="structure-banner structure-wait">
         <div class="metric-label">Guld</div>
         <p>${escapeHtml(gold.note)}</p>
-        <p class="faint">Väntan ca ${escapeHtml(String(gold.delayedMonths))} månader. Tom historik = ingen uppmätt avkastning.</p>
+        <p class="faint">25 % motsatt nu; vänta ca ${escapeHtml(String(gold.delayedMonths))} månader på den längre horisonten. Tom historik = ingen uppmätt avkastning.</p>
       </div>`;
 }
 

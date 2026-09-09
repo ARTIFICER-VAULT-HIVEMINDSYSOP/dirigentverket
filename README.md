@@ -48,7 +48,7 @@ Flerårsplan för VIP: byt håll på öppen position om ifylld prognos för näs
 
 **Minus-rokad (paper, egen knopp):** byt till motsatt sida bara om återhämtning är mätbar (prognos-RR, struktur mot motsatt håll, eller återtagennivå + kurs). Volym = **25 %** av ifylld storlek (`ROKAD_MOTSATT_FAKTOR = 0.25`). Inte samma knopp som säsongens −25 % (0,75). Tom mätning = ingen rokad.
 
-**GULDR / guld / gold:** tillåten rokad-tillgång. Regeln är vänta ca 8 månader (konfigurerbar). Tom historik = ingen påstådd avkastning.
+**GULDR / guld / gold:** primär rokad-tillgång. Premiss (regel, inte uppmätt bevis): historisk uppåtbias. Snabbare utfall via motsatt sida på 25 %; längre horisont väntar ca 8 månader (konfigurerbar). Tom historik = ingen påstådd avkastning. Ingen OHLC hittas på.
 
 ## Teknik
 

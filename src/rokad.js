@@ -16,13 +16,18 @@ function paperStamp(obj) {
   return { ...obj, paper: true, advice: false };
 }
 
-/** Stated rule, not a measured return. Empty history must not claim avkastning. */
+export const ROKAD_MOTSATT_FAKTOR = 0.25;
+
+/**
+ * Stated gold rokad lock — not a measured return, not OHLC proof.
+ * Quicker outcome = 1/4 opposite size. Longer harvest = wait ~delayedMonths.
+ */
 export const GULD_ROKAD = {
   symbols: ['guldr', 'guld', 'gold'],
   delayedMonths: 8,
+  premise: 'historisk_uppatbias',
+  quarterSize: ROKAD_MOTSATT_FAKTOR,
 };
-
-export const ROKAD_MOTSATT_FAKTOR = 0.25;
 
 export function isGuldRokadAsset(instrument) {
   const s = String(instrument || '').trim().toLowerCase();
@@ -50,8 +55,12 @@ export function guldRokadRule(input) {
   if (!allowed) {
     return paperStamp({
       allowed: false,
+      primary: false,
       delayedMonths: null,
       historikSaknas: true,
+      claimReturns: false,
+      premise: null,
+      quarterSize: null,
       note: 'inte guld — ingen guld-rokadregel.',
     });
   }
@@ -59,13 +68,17 @@ export function guldRokadRule(input) {
   const wait = delayedMonths === null ? GULD_ROKAD.delayedMonths : delayedMonths;
   const histNote = historikSaknas
     ? 'Historik saknas — vi påstår inte uppmätt avkastning.'
-    : 'Historik är ifylld text, inte ett bevis vi räknat fram.';
+    : 'Historik är ifylld text, inte ett OHLC-bevis vi räknat fram.';
 
   return paperStamp({
     allowed: true,
+    primary: true,
     delayedMonths: wait,
     historikSaknas,
-    note: `Guld (${instrument}): tillåten för rokad. Regeln är att vänta ca ${wait} månader (fördröjd belöning). ${histNote} Ingen order läggs.`,
+    claimReturns: false,
+    premise: GULD_ROKAD.premise,
+    quarterSize: GULD_ROKAD.quarterSize,
+    note: `Guld (${instrument}): tillåten för rokad. Premiss: historisk uppåtbias — inte ett uppmätt bevis. Snabbare utfall via motsatt sida på 25 % av ifylld volym; längre horisont väntar ca ${wait} månader (fördröjd belöning). ${histNote} Ingen order läggs.`,
   });
 }
 

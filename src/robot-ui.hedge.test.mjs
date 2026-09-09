@@ -65,4 +65,6 @@ test('renderRobotResult: GULDR visar väntan utan påstådd avkastning', () => {
   );
   assert.match(html, /Guld/);
   assert.match(html, /påstår inte uppmätt avkastning/);
+  assert.match(html, /historisk uppåtbias/);
+  assert.match(html, /25 % motsatt nu/);
 });

@@ -113,9 +113,15 @@ test('GULDR är tillåten rokad-tillgång; tom historik påstår inte avkastning
   assert.equal(isGuldRokadAsset('OMXS30'), false);
   const g = guldRokadRule({ instrument: 'GULDR', guldHistorik: '' });
   assert.equal(g.allowed, true);
+  assert.equal(g.primary, true);
   assert.equal(g.delayedMonths, 8);
   assert.equal(g.historikSaknas, true);
+  assert.equal(g.claimReturns, false);
+  assert.equal(g.premise, 'historisk_uppatbias');
+  assert.equal(g.quarterSize, 0.25);
   assert.match(g.note, /8 månader/);
+  assert.match(g.note, /historisk uppåtbias/);
+  assert.match(g.note, /25 %/);
   assert.match(g.note, /påstår inte uppmätt avkastning/);
   assert.equal(g.paper, true);
 });
