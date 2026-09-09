@@ -69,3 +69,8 @@ Flödesfil per tenant, t.ex. `tenants/fastigheterutomlands/flows/intake.json`:
 - Denna paper i Dirigentverket
 - Byggare Bob har uppdraget
 - Nästa: flödes-JSON v1 + ingress-stub (paper)
+
+## Leverans v1 (Byggare Bob)
+- Flöde: `tenants/fastigheterutomlands/flows/intake.json`
+- Meta-steg ÖB: `marknad/whatsapp/META-steg-ob.md`
+- Status: paper. Ingress-stub nästa.

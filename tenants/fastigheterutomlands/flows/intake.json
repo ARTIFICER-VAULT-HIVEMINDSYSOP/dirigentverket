@@ -1,1 +1,138 @@
-PLACEHOLDER
+{
+  "id": "intake",
+  "version": "1",
+  "tenant": "fastigheterutomlands",
+  "lang": "sv",
+  "mode": "paper",
+  "entry": "start",
+  "meta": {
+    "brand": "Fastigheterutomlands.com",
+    "channel": "whatsapp_cloud_api",
+    "notes": "Paper. Inga live-skick. Brand/nummer/WABA i tenant-config, inte här. Inga kronor eller telefonnummer i bot-svar."
+  },
+  "nodes": {
+    "start": {
+      "type": "choice",
+      "wa": "list",
+      "header": "Fastigheterutomlands",
+      "body": "Hej! Vad vill du göra?",
+      "footer": "Svar inom 24 h-fönster",
+      "button_label": "Välj",
+      "options": [
+        { "id": "intresse", "title": "Intresse", "description": "Kort om hur det funkar", "next": "intresse_info" },
+        { "id": "fraga", "title": "Fråga", "description": "Ställ en fråga", "next": "fraga_typ" },
+        { "id": "boka", "title": "Boka samtal", "description": "Lämna uppgifter, vi återkommer", "next": "boka_flow" },
+        { "id": "manniska", "title": "Människa", "description": "Prata med någon direkt", "next": "handoff_manniska" }
+      ],
+      "fallback": "handoff_timeout"
+    },
+    "intresse_info": {
+      "type": "message",
+      "wa": "text",
+      "body": "Vi hjälper dig hitta och jämföra fastigheter utomlands. På sajten finns länder, objekttyper och nästa steg. Mer: https://fastigheterutomlands.com",
+      "next": "intresse_vidare"
+    },
+    "intresse_vidare": {
+      "type": "choice",
+      "wa": "buttons",
+      "body": "Vill du gå vidare?",
+      "options": [
+        { "id": "boka_nu", "title": "Boka samtal", "next": "boka_flow" },
+        { "id": "fraga_nu", "title": "Ställ fråga", "next": "fraga_typ" },
+        { "id": "manniska_nu", "title": "Människa", "next": "handoff_manniska" }
+      ],
+      "fallback": "handoff_timeout"
+    },
+    "fraga_typ": {
+      "type": "choice",
+      "wa": "list",
+      "header": "Fråga",
+      "body": "Vad gäller din fråga?",
+      "button_label": "Ämne",
+      "options": [
+        { "id": "land", "title": "Land / område", "next": "fraga_prompt" },
+        { "id": "process", "title": "Köpprocess", "next": "fraga_prompt" },
+        { "id": "finans", "title": "Finansiering", "next": "fraga_prompt" },
+        { "id": "annat", "title": "Annat", "next": "fraga_prompt" },
+        { "id": "manniska_fraga", "title": "Människa", "next": "handoff_manniska" }
+      ],
+      "capture": { "field": "fraga_amne", "from": "option_id" },
+      "fallback": "handoff_timeout"
+    },
+    "fraga_prompt": {
+      "type": "message",
+      "wa": "text",
+      "body": "Skriv din fråga i ett meddelande. En människa svarar snart.",
+      "expect": "free_text",
+      "capture": { "field": "fraga_text", "from": "user_text" },
+      "next": "handoff_fraga"
+    },
+    "boka_flow": {
+      "type": "form",
+      "wa": "flow",
+      "flow_id": "paper_lead_boka_v1",
+      "body": "Fyll i formuläret så bokar vi in dig.",
+      "fields": [
+        { "id": "namn", "label": "Namn", "required": true },
+        { "id": "land_intresse", "label": "Land / område", "required": true },
+        { "id": "budget_band", "label": "Budget-band", "required": false, "hint": "Inget belopp i bot-svar; band endast om ifyllt" },
+        { "id": "kontaktpreferens", "label": "Hur vill du bli kontaktad?", "required": true, "options": ["WhatsApp", "Telefon", "Mejl"] }
+      ],
+      "on_complete": "boka_bekraftelse",
+      "on_cancel": "start"
+    },
+    "boka_bekraftelse": {
+      "type": "message",
+      "wa": "text",
+      "body": "Tack. Vi har mottagit dina uppgifter och återkommer för att boka tid. Ingen tid är låst ännu.",
+      "persist": {
+        "kind": "lead",
+        "adapter": "tenant_crm",
+        "paper_only": true,
+        "fields_from_session": ["namn", "land_intresse", "budget_band", "kontaktpreferens"]
+      },
+      "next": "handoff_boka"
+    },
+    "handoff_fraga": {
+      "type": "handoff",
+      "tag": "fraga",
+      "queue": "sälj",
+      "summary_template": "Fråga ({fraga_amne}): {fraga_text}",
+      "user_message": "Tack. En kollega tar över härifrån.",
+      "bot": "silent"
+    },
+    "handoff_boka": {
+      "type": "handoff",
+      "tag": "boka",
+      "queue": "mötesbokare",
+      "summary_template": "Boka-samtal: {namn}, land={land_intresse}, preferens={kontaktpreferens}",
+      "user_message": "En kollega hör av dig snart för tid.",
+      "bot": "silent"
+    },
+    "handoff_manniska": {
+      "type": "handoff",
+      "tag": "manniska",
+      "queue": "sälj",
+      "summary_template": "Kunden bad om människa från intake.",
+      "user_message": "Absolut — en människa tar över nu.",
+      "bot": "silent"
+    },
+    "handoff_timeout": {
+      "type": "handoff",
+      "tag": "timeout",
+      "queue": "sälj",
+      "summary_template": "Timeout / oklart svar i intake. Senaste state: {last_node}",
+      "user_message": "Jag kopplar dig till en människa.",
+      "bot": "silent"
+    }
+  },
+  "rules": {
+    "buttons_max": 3,
+    "list_max": 10,
+    "outside_24h": "approved_template_only",
+    "no_invented_amounts": true,
+    "no_phone_in_replies": true,
+    "pii_stays_in_brand": true,
+    "live_send_requires": "named_yes_from_OB"
+  }
+}
