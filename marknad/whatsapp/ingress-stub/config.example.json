@@ -1,0 +1,8 @@
+{
+  "port": 8787,
+  "verify_token": "paper-verify-fu-change-me",
+  "app_secret": "paper-app-secret-not-for-live",
+  "mode": "paper",
+  "flow_path": "../../../tenants/fastigheterutomlands/flows/intake.json",
+  "require_signature": false
+}
