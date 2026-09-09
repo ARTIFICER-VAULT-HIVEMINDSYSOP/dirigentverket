@@ -14,10 +14,16 @@
 1. Läs magasin-utfall utan telefon/saldo i logg.
 2. Bygg ID-lista (ForceX-id + utfall + föreslagen engelsk rad) — bara lokalt, aldrig till GitHub.
 3. För varje kort: öppna exakt user-detail-URL → namnmatch på skärm → Create/Save → bekräfta att rad syns i listan → stäng. Hoppa om samma text redan finns.
-4. Magasin kan köa lokalt (`pending-forcex-comments.json`) — det räknas inte som ForceX-sparat. Flush = Create synlig i ForceX.
+4. Magasin kan köa lokalt (`pending-forcex-comments.json`) — det räknas **inte** som ForceX-sparat. Flush = Create synlig i ForceX. (Lokal kö kan ha många rader; antal ≠ sparat.)
 5. Stoppa före Create/Save om ÖB inte gett ja för backfill-passet.
+
+## Create-väg (påminnelse)
+- Öppna via **detalj**/user-detail, aldrig Call/Mail.
+- Skriv engelsk kort rad → Create/Save → bekräfta i kommentarslista.
+- Samma text två gånger = hoppa (eller rensa dubblett, behåll äldsta).
 
 ## Inte
 - Live-order, mejl, ring, merge, radera annat än exakta dubblettkommentarer
 - Kundregister eller telefon i repo/backup
 - «Klart» innan Create syns i ForceX-listan
+- Att räkna lokal pending-kö som sparad
