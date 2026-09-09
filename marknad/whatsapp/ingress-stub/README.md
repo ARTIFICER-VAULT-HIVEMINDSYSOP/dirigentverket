@@ -29,3 +29,8 @@ npm run test:verify
 | POST | `/mock/reset` | nollställ session |
 
 `verify_token` i `config.json` måste matcha det du sätter i Meta senare. Live kräver ÖB namngivet ja.
+
+## Full branch smoke
+```bash
+npm run test:all   # verify + Interest/Question/Book/Human
+```
