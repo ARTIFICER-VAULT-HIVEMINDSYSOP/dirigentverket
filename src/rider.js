@@ -4,19 +4,22 @@
  * Optional grav / övre / coast stay empty honestly; they are not invent-filled.
  */
 
-import { formatPx, structureSignal } from './robot.js';
+import { formatPx, structureSignal, seasonPlan } from './robot.js';
 
 export { formatPx };
 
 export const TILLGANGAR = ['ROBOT', 'AIIND', 'GULDR'];
 export const RIDER_DRAFT_KEY = 'dirigentverket.rider.v1';
 export const RIDER_TEMPLATE_KEY = 'dirigentverket.rider.templates.v1';
+export const RIDER_FIRST_RIDE_KEY = 'dirigentverket.rider.hasCompletedFirstRide';
 export const HOP_WINDOW_MS = 2000;
 export const LEVERAGE_MIN = 1;
 export const LEVERAGE_MAX = 4;
 export const LENS_STEPS = [1, 1.5, 2];
 export const COAST_PERIOD_MS = 1600;
 export const LIVE_LOCKED = true;
+/** Nameless dry-run slots. Not prices — empty cells stay empty. */
+export const DRY_RUN_SLOTS = 3;
 
 const TEMPLATE_FIELDS = [
   'side',
@@ -37,6 +40,10 @@ const TEMPLATE_FIELDS = [
   'havstang',
   'cluster',
   'tempo',
+  'prognos',
+  'prognosRr',
+  'hallaRr',
+  'nastaSasong',
 ];
 
 function num(v) {
@@ -104,6 +111,10 @@ export function parseRideInput(raw) {
     havstang: clampLeverage(raw.havstang),
     cluster: String(raw.cluster || '').trim(),
     tempo: String(raw.tempo || '').trim(),
+    prognos: String(raw.prognos || '').trim(),
+    prognosRr: num(raw.prognosRr),
+    hallaRr: num(raw.hallaRr),
+    nastaSasong: String(raw.nastaSasong || '').trim(),
     midAir: Boolean(raw.midAir),
   };
 }
@@ -186,6 +197,65 @@ export function rideJump(input, grav, structure) {
   };
 }
 
+function emptyRideTrail(sl = null) {
+  return {
+    trailed: false,
+    tell: false,
+    sl,
+    sl0: sl,
+    from: sl,
+    to: sl,
+    note: '',
+  };
+}
+
+/**
+ * Structure trail: same Artificer lock (RSI + Bollinger + budstuds).
+ * SL may only shrink. Never invents current/RSI/BB. No volume raise.
+ */
+export function rideTrail(input, levels, structure) {
+  const sl0 = levels?.sl ?? null;
+  const hold = emptyRideTrail(sl0);
+  if (!levels || sl0 === null) return hold;
+  if (!structure || !structure.trail) {
+    return { ...hold, note: 'ingen trail — struktur saknas.' };
+  }
+  const current = input.current;
+  if (current === null || current === undefined) {
+    return { ...hold, note: 'aktuell kurs saknas.' };
+  }
+  const { dist, side, entry } = levels;
+  if (dist === null || dist <= 0 || entry === null) return hold;
+  const long = side !== 'sälj';
+  if (long && current <= sl0) return { ...hold, note: 'vid initial SL.' };
+  if (!long && current >= sl0) return { ...hold, note: 'vid initial SL.' };
+
+  const openR = long ? (current - entry) / dist : (entry - current) / dist;
+  let sl = sl0;
+  if (openR > 0 && openR < 1) {
+    sl = long ? sl0 + (entry - sl0) * openR : sl0 - (sl0 - entry) * openR;
+  } else if (openR >= 1) {
+    const lock = (openR - 1) * 0.5;
+    sl = long ? entry + lock * dist : entry - lock * dist;
+  }
+  if (long) sl = Math.max(sl, sl0);
+  else sl = Math.min(sl, sl0);
+
+  const shrunk = long ? sl > sl0 : sl < sl0;
+  if (!shrunk) {
+    return { ...hold, note: 'struktur ja, SL ligger kvar.' };
+  }
+  return {
+    trailed: true,
+    tell: true,
+    sl,
+    sl0,
+    from: sl0,
+    to: sl,
+    note: 'struktur-trail · SL krymper. Process före fart.',
+  };
+}
+
 function rideStructure(input) {
   const s = structureSignal({
     rsi: input.rsi,
@@ -230,8 +300,10 @@ export function computeRide(raw) {
       coast: null,
       havstang: input.havstang,
       jump: { jumped: false, from: null, to: null, windowMs: HOP_WINDOW_MS, tell: false },
+      trail: emptyRideTrail(null),
+      rokad: rideRokad(raw),
       tillgang: input.tillgang,
-      pilotVolume: input.pilotVolume,
+      pilotVolume: inheritPilotVolume(input.pilotVolume, null),
       input,
       structure,
     });
@@ -240,6 +312,8 @@ export function computeRide(raw) {
   const grav = input.grav !== null ? input.grav : input.entry;
   const horizon = rideHorizon(input);
   const jump = rideJump(input, grav, structure);
+  const trail = rideTrail(input, levels, structure);
+  const rokad = rideRokad(raw);
   const coast = input.coast;
 
   return paperStamp({
@@ -247,7 +321,8 @@ export function computeRide(raw) {
     saknar_sl_tp: false,
     missing: [],
     errors: [],
-    sl: levels.sl,
+    sl: trail.trailed ? trail.sl : levels.sl,
+    sl0: levels.sl,
     tp: levels.tp,
     dist: levels.dist,
     rr: levels.rr,
@@ -256,11 +331,184 @@ export function computeRide(raw) {
     coast,
     havstang: input.havstang,
     jump,
+    trail,
+    rokad,
     tillgang: input.tillgang,
-    pilotVolume: input.pilotVolume,
+    pilotVolume: inheritPilotVolume(input.pilotVolume, null),
     input,
     structure,
   });
+}
+
+/**
+ * Pilot volume is never invented. Robot may inherit or cut, never raise.
+ * Empty stays empty.
+ */
+export function inheritPilotVolume(pilot, proposed) {
+  if (pilot === null || pilot === undefined) return null;
+  if (proposed === null || proposed === undefined) return pilot;
+  const guess = Number(proposed);
+  if (!Number.isFinite(guess)) return pilot;
+  return guess > pilot ? pilot : guess;
+}
+
+export const RIDER_ROKAD_NOTE =
+  'rokadläge: byt håll, volym −25 %. ÖB godkänner. Ingen order lagd.';
+export const RIDER_ROKAD_GATE = 'ÖB godkänner. Paper. Ingen order.';
+
+/** −25 % of pilot volume. Empty stays empty. Never raises. */
+export function rokadVolume(pilot) {
+  if (pilot === null || pilot === undefined) return null;
+  const n = Number(pilot);
+  if (!Number.isFinite(n) || n <= 0) return null;
+  return inheritPilotVolume(n, n * 0.75);
+}
+
+export function emptyRideRokad(side = 'köp') {
+  const from = side === 'sälj' ? 'sälj' : 'köp';
+  return {
+    available: false,
+    tell: false,
+    rokad: false,
+    action: 'ingen',
+    reverseTo: null,
+    from,
+    to: from,
+    volymFaktor: null,
+    nyVolym: null,
+    flattenNow: false,
+    note: '',
+    gate: '',
+    paper: true,
+    live: false,
+  };
+}
+
+/**
+ * Artificer-locked paper rokad: reverse side, volume −25 %.
+ * Decision point — ÖB godkänner. Does not place an order. Empty volume stays empty.
+ */
+export function rideRokad(raw = {}) {
+  const input = parseRideInput(raw);
+  const from = input.side;
+  const hold = emptyRideRokad(from);
+  const season = seasonPlan({
+    side: from,
+    prognos: input.prognos,
+    prognosRr: input.prognosRr,
+    hallaRr: input.hallaRr,
+    nastaSasong: input.nastaSasong,
+    openSize: input.pilotVolume,
+    volym: input.pilotVolume,
+  });
+  if (!season.rokad) {
+    return { ...hold, action: season.action || 'ingen' };
+  }
+  const to = season.reverseTo === 'sälj' || season.reverseTo === 'köp' ? season.reverseTo : from;
+  return {
+    available: true,
+    tell: true,
+    rokad: true,
+    action: season.action,
+    reverseTo: to,
+    from,
+    to,
+    volymFaktor: 0.75,
+    nyVolym: rokadVolume(input.pilotVolume),
+    flattenNow: Boolean(season.flattenNow),
+    note: RIDER_ROKAD_NOTE,
+    gate: RIDER_ROKAD_GATE,
+    paper: true,
+    live: false,
+  };
+}
+
+/**
+ * First successful paper ride unlocks «små belopp» hint mode.
+ * LIVE_LOCKED stays true either way.
+ */
+export function hasCompletedFirstRide(store) {
+  try {
+    const raw = storeApi(store).getItem(RIDER_FIRST_RIDE_KEY);
+    return raw === 'true' || raw === '1';
+  } catch {
+    return false;
+  }
+}
+
+export function markFirstRideComplete(store) {
+  try {
+    storeApi(store).setItem(RIDER_FIRST_RIDE_KEY, 'true');
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export function smaBeloppUnlocked(store) {
+  return hasCompletedFirstRide(store);
+}
+
+export const RIDER_SMA_NOTE =
+  'Små belopp · risken stannar. Pilotvolym får vara liten. Robot höjer aldrig. Paper.';
+export const RIDER_SMA_UNLOCK_NOTE =
+  'Intjänad. Små belopp · risken stannar. Pilotens tal. Robot höjer aldrig.';
+
+export function smaBeloppHint(store, opts = {}) {
+  if (!smaBeloppUnlocked(store)) {
+    return { unlocked: false, fresh: false, mode: '', note: '' };
+  }
+  const fresh = opts.fresh === true;
+  return {
+    unlocked: true,
+    fresh,
+    mode: 'sma-belopp',
+    note: fresh ? RIDER_SMA_UNLOCK_NOTE : RIDER_SMA_NOTE,
+  };
+}
+
+export const RIDER_IMPULSE_NOTE =
+  'Process före fart. Impulse syns mjukt. Tomma rutor fylls inte.';
+
+/**
+ * Gentle impulse: process before speed. No invented prices.
+ * Visible when leverage >1× or volume exists but kärna/SL+TP is still missing —
+ * before and after Räkna. Empty cells stay empty.
+ */
+export function rideImpulse(raw = {}, play = {}, opts = {}) {
+  const input = parseRideInput(raw);
+  const missing = missingRequired(input);
+  const processMissing = missing.length > 0 || coreIncomplete(raw);
+  const lev = clampLeverage(play.leverage ?? input.havstang ?? 1);
+  const volumeBeforeProcess = input.pilotVolume !== null && processMissing;
+  const speedBeforeProcess = lev > 1 && processMissing;
+  const visible = Boolean(volumeBeforeProcess || speedBeforeProcess);
+  let kind = '';
+  if (speedBeforeProcess) kind = 'fart';
+  else if (volumeBeforeProcess) kind = 'volym';
+  return {
+    visible,
+    kind,
+    note: visible ? RIDER_IMPULSE_NOTE : '',
+  };
+}
+
+/** Keep the soft impulse strip in sync when leverage/volume changes without a full render. */
+export function applyImpulseDom(impulse, root = globalThis.document) {
+  if (!root) return impulse;
+  const stage = root.querySelector('[data-impulse]');
+  if (stage) {
+    stage.dataset.impulse = impulse.visible ? '1' : '0';
+    stage.classList.toggle('has-impulse', Boolean(impulse.visible));
+  }
+  const el = root.querySelector('[data-rider-impulse]');
+  if (el) {
+    if (impulse.visible) el.removeAttribute('hidden');
+    else el.setAttribute('hidden', '');
+    const note = el.querySelector('[data-rider-impulse-note]');
+    if (note) note.textContent = impulse.note || '';
+  }
+  return impulse;
 }
 
 export function emptyRideDraft() {
@@ -284,6 +532,10 @@ export function emptyRideDraft() {
     havstang: '',
     cluster: '',
     tempo: '',
+    prognos: '',
+    prognosRr: '',
+    hallaRr: '',
+    nastaSasong: '',
   };
 }
 
@@ -318,6 +570,25 @@ export function rideRails(ride) {
     if (ride.grav != null) prices.add(ride.grav);
   }
   return [...prices].sort((a, b) => a - b);
+}
+
+/**
+ * Play rails: real prices after a successful ride, nameless slots before Räkna.
+ * Dry-run never invents kronor or quotes.
+ */
+export function dryRunRails() {
+  return Array.from({ length: DRY_RUN_SLOTS }, () => '');
+}
+
+export function playRails(ride) {
+  if (ride && ride.ok) return rideRails(ride);
+  return dryRunRails();
+}
+
+/** Vertical tops for nameless dry-run slots. Index 0 sits low; W steps up. */
+export function dryRunSlotTop(index) {
+  const i = Math.min(DRY_RUN_SLOTS - 1, Math.max(0, Number(index) || 0));
+  return 78 - i * 24;
 }
 
 export function commitRail(play, rails, dir) {
@@ -367,8 +638,14 @@ export function handleRiderKey(play, rails, key) {
   return { ...play, commit: '' };
 }
 
-export function applyPlayDom(play, rails, root = globalThis.document) {
+export function applyPlayDom(play, rails, root = globalThis.document, ctx = {}) {
   if (!root) return play;
+  if (ctx && ctx.draft) {
+    applyImpulseDom(
+      rideImpulse(ctx.draft, play, { hasCompletedFirstRide: ctx.hasCompletedFirstRide }),
+      root,
+    );
+  }
   const host = root.querySelector('[data-rider-play]');
   if (!host) return play;
   const speed = leverageSpeed(play.leverage);
@@ -386,7 +663,18 @@ export function applyPlayDom(play, rails, root = globalThis.document) {
   if (speedHud) speedHud.textContent = `${speed}×`;
   const railHud = host.querySelector('[data-rider-rail-hud]');
   const railPrice = rails[play.rail];
-  if (railHud) railHud.textContent = railPrice != null ? String(railPrice) : '';
+  if (railHud) railHud.textContent = railPrice !== '' && railPrice != null ? String(railPrice) : '';
+  const levSil = host.querySelector('[data-rider-lev-sil]');
+  if (levSil) levSil.dataset.lev = String(play.leverage);
+  host.querySelectorAll('[data-lev-bar]').forEach((el) => {
+    const n = Number(el.getAttribute('data-lev-bar'));
+    el.classList.toggle('is-on', n <= play.leverage);
+  });
+  host.querySelectorAll('[data-rail-sil]').forEach((el) => {
+    const idx = Number(el.getAttribute('data-rail-sil'));
+    el.classList.toggle('is-rail', idx === play.rail);
+    el.classList.toggle('is-sit', idx === play.sit);
+  });
   const marks = host.querySelectorAll('[data-rail-index]');
   marks.forEach((el) => {
     const idx = Number(el.getAttribute('data-rail-index'));
@@ -401,9 +689,12 @@ export function applyPlayDom(play, rails, root = globalThis.document) {
       active.classList.add('is-commit');
     }
   }
-  const price = rails[play.sit] ?? rails[play.rail];
+  const sitIdx = play.sit ?? play.rail;
+  const price = rails[sitIdx] ?? rails[play.rail];
   const dot = host.querySelector('[data-rider-dot]');
-  const mark = host.querySelector(`[data-rail-price="${price}"]`);
+  const mark =
+    host.querySelector(`[data-rail-index="${sitIdx}"]`) ||
+    (price !== '' && price != null ? host.querySelector(`[data-rail-price="${price}"]`) : null);
   if (dot && mark) {
     dot.style.transition = 'none';
     dot.style.top = mark.style.top || mark.getAttribute('data-top') || '';
