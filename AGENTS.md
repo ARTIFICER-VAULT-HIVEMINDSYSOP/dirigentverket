@@ -15,6 +15,8 @@ Pilotsele binder volym + SL/TP till ROBOT-klustret. Älvor ärver, höjer aldrig
 Nyhetssele binder nyhetsremmar. Skickar inte. Tom olja/guld = saknas.
 Inga master/slave-ord. Kommando / stab / älvor.
 
+Rokad: två knoppar. Säsongsvändning behåller −25 % (faktor 0,75). Minus-rokad är motsatt sida på 25 % av ifylld volym (0,25) — bara vid mätbar återhämtning. Mitt-hedge: paper-plan köp+sälj i mitten när inklistrad kursserie når minsta svängfrekvens. GULDR tillåten; vänta ca 8 mån; tom historik = ingen påstådd avkastning. Ingen order. Ingen kurs-hämtning.
+
 Se PLAN-GROK-BUILD.md.
 
 White-label: ny tenant via tenant.json. Samma motor. Ingen kund-PII i git.
