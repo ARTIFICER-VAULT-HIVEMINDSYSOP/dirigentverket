@@ -38,4 +38,4 @@ När ÖB öppnar `#/rider` ska det kännas så här, i den ordningen:
 - Live-order, mäklare, påhittade P&L
 - Sidapp utanför Dirigentverket-nexus
 - Merge utan ÖB-ja på namngiven PR-rad
-- Lamp-/WATCHERS-skin — bara kvällstid (ÖB 9 sep); inte startad här
+- Lamp-/WATCHERS-skin — kväll; paper-status i `marknad/lamp-watchers-paper.md`

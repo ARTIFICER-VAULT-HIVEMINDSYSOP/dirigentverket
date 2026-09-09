@@ -6,7 +6,9 @@ import {
   loadRobotDraft,
   saveRobotDraft,
   emptyRobotDraft,
+  LIVE_LOCKED as ROBOT_LIVE_LOCKED,
 } from './robot.js';
+import { resolveWatchersSkin, applyWatchersChamber } from './tenant.js';
 import {
   renderShell,
   renderPortfolio,
@@ -81,6 +83,7 @@ let seleResult = null;
 let nyhetsseleDraft = loadNyhetsseleDraft();
 let nyhetsseleResult = null;
 let news = loadNews();
+let tenant = {};
 
 function persist() {
   saveState(state);
@@ -137,7 +140,12 @@ function render() {
       nyhetsseleHtml: renderNyhetssele(nyhetsseleDraft, nyhetsseleResult),
     });
   }
-  else if (view === 'robot') inner = renderRobot(robotDraft, robotResult);
+  else if (view === 'robot') {
+    inner = renderRobot(robotDraft, robotResult, {
+      liveLocked: ROBOT_LIVE_LOCKED,
+      tenant,
+    });
+  }
   else if (view === 'rider') {
     inner = renderRider(riderDraft, riderResult, riderHopPulse, riderPlay, {
       firstHint: riderFirstHint,
@@ -158,6 +166,11 @@ function render() {
   document.body.classList.toggle('view-artificer', view === 'robot');
   document.body.classList.toggle('view-rider', view === 'rider');
   document.body.classList.toggle('view-sele', view === 'sele');
+  if (view === 'robot') {
+    applyWatchersChamber(document.documentElement, resolveWatchersSkin(tenant).chamber);
+  } else {
+    applyWatchersChamber(document.documentElement, '');
+  }
   document.title =
     view === 'rider'
       ? 'Trade Rider — paper'
@@ -469,3 +482,12 @@ window.addEventListener(
 window.addEventListener('hashchange', render);
 if (!window.location.hash) window.location.hash = '#/portfolj';
 render();
+
+fetch('./tenant.json', { cache: 'no-store' })
+  .then((r) => (r.ok ? r.json() : null))
+  .then((t) => {
+    if (!t || typeof t !== 'object') return;
+    tenant = t;
+    render();
+  })
+  .catch(() => {});

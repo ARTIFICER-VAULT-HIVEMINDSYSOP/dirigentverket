@@ -1,5 +1,14 @@
-import { computeRobot, formatPx, formatSize } from './robot.js';
+import { formatPx, formatSize, LIVE_LOCKED } from './robot.js';
 import { emptyFigure, escapeHtml } from './format.js';
+import { resolveWatchersSkin } from './tenant.js';
+
+/** Light chamber tell. Idle until a paper-plan exists. No invented glow from empty cells. */
+export function lampTell(result) {
+  if (!result) return 'idle';
+  if (!result.ok || result.saknar_sl_tp) return 'wait';
+  if (result.structure && result.structure.trail) return 'trail';
+  return 'lit';
+}
 
 export function val(robotDraft, name) {
   const v = robotDraft[name];
@@ -102,15 +111,44 @@ export function renderArtificerShell(inner, parseRoute) {
   `;
 }
 
-export function renderRobot(robotDraft, robotResult) {
+function renderLampVessel() {
   return `
-    <section class="artificer-stage">
+        <div class="artificer-seal" aria-hidden="true">
+          <div class="artificer-ring"></div>
+          <div class="lamp-vessel">
+            <span class="lamp-haze"></span>
+            <span class="lamp-flame"></span>
+            <span class="lamp-wick"></span>
+            <span class="lamp-bowl"></span>
+            <span class="lamp-handle"></span>
+            <span class="lamp-foot"></span>
+          </div>
+        </div>`;
+}
+
+export function renderRobot(robotDraft, robotResult, opts = {}) {
+  const liveLocked = LIVE_LOCKED === true;
+  const skin = resolveWatchersSkin(opts.tenant);
+  const tell = lampTell(robotResult);
+  const mark = skin.logo
+    ? `<img class="artificer-mark" src="${escapeHtml(skin.logo)}" alt="${escapeHtml(skin.markAlt)}" />`
+    : '';
+  return `
+    <section class="artificer-stage" data-lamp="${tell}">
       <header class="artificer-hero">
-        <p class="artificer-kicker">WATCHERS · anden i lampan</p>
+        <p class="artificer-kicker">${escapeHtml(skin.kicker)}</p>
         <h2 class="artificer-title">Artificer AI</h2>
-        <div class="artificer-ring" aria-hidden="true"></div>
+        ${mark}
+        ${renderLampVessel()}
       </header>
-      <div class="banner-robot" role="status">Föreslår SL/TP, lägger inga ordrar. Flerårsplan är bara ett förslag. Ingen mäklare, ingen live-exekvering, inga påhittade kurser eller backtest. ÖB godkänner varje drag.</div>
+      <div class="lamp-badge-paper" role="status">PAPER · live=false · LIVE_LOCKED · ingen mäklare</div>
+      <div class="lamp-mode" role="status">
+        <span class="lamp-mode-paper">paper</span>
+        <span class="lamp-mode-live" aria-hidden="true">live = false</span>
+      </div>
+      <div class="banner-robot" role="status">Föreslår SL/TP, lägger inga ordrar. Flerårsplan är bara ett förslag. Ingen mäklare, ingen live-exekvering, inga påhittade kurser eller backtest. ${
+        liveLocked ? 'LIVE_LOCKED.' : 'paper.'
+      } ÖB godkänner varje drag.</div>
       <div class="stone-tablet">
         <p class="page-lead stone-lead">Nexus: <a href="#/sele">Pilotsele</a> binder volym och SL/TP till ROBOT-klustret. Älvor ärver, höjer aldrig. Paper.</p>
         <p class="page-lead stone-lead">Modul under Tradingskolan. Skriv instrument och kurser själv. Positionsstorlek räknas bara om du anger riskbelopp i kronor — kontostorlek gissas inte.</p>
