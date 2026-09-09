@@ -1,0 +1,12 @@
+{
+  "name": "fu-whatsapp-ingress-stub",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Paper ingress + mock webhook for Fastigheterutomlands WhatsApp bot. No live send.",
+  "scripts": {
+    "start": "node server.js",
+    "test:verify": "node test-smoke.js",
+    "test:all": "node test-smoke-all.js"
+  }
+}

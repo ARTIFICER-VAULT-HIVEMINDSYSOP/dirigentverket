@@ -28,13 +28,15 @@ import {
   saveRideTemplate,
   loadRideTemplate,
   emptyPlayState,
-  rideRails,
+  playRails,
   reservedRiderKey,
   applyPlayDom,
   handleRiderKey,
   tempoToLens,
   HOP_WINDOW_MS,
   LIVE_LOCKED,
+  hasCompletedFirstRide,
+  markFirstRideComplete,
 } from './rider.js';
 import { renderRider, readRiderForm, focusRiderCore } from './rider-ui.js';
 import {
@@ -73,6 +75,7 @@ let riderResult = null;
 let riderHopPulse = 0;
 let riderPlay = emptyPlayState();
 let riderFirstHint = '';
+let riderJustUnlocked = false;
 let seleDraft = loadSeleDraft();
 let seleResult = null;
 let nyhetsseleDraft = loadNyhetsseleDraft();
@@ -139,6 +142,8 @@ function render() {
     inner = renderRider(riderDraft, riderResult, riderHopPulse, riderPlay, {
       firstHint: riderFirstHint,
       liveLocked: LIVE_LOCKED,
+      hasCompletedFirstRide: hasCompletedFirstRide(),
+      justUnlocked: riderJustUnlocked,
     });
   }
   else if (view === 'sele') {
@@ -388,6 +393,11 @@ root.addEventListener('submit', (ev) => {
     const now = Date.now();
     const midAir = riderPlay.hopping && now < riderPlay.hopUntil;
     riderResult = computeRide({ ...riderDraft, midAir });
+    if (riderResult.ok) {
+      const wasDone = hasCompletedFirstRide();
+      markFirstRideComplete();
+      if (!wasDone) riderJustUnlocked = true;
+    }
     if (riderResult.ok && riderResult.havstang) {
       riderPlay = { ...riderPlay, leverage: riderResult.havstang };
     }
@@ -445,10 +455,13 @@ window.addEventListener(
     if (riderTypingTarget(ev.target) && !inRobban) return;
     ev.preventDefault();
     ev.stopPropagation();
-    const rails = rideRails(riderResult);
+    const rails = playRails(riderResult);
     const key = ev.key.length === 1 ? ev.key.toLowerCase() : ev.key;
     riderPlay = handleRiderKey(riderPlay, rails, ev.key);
-    applyPlayDom(riderPlay, rails);
+    applyPlayDom(riderPlay, rails, document, {
+      draft: riderDraft,
+      hasCompletedFirstRide: hasCompletedFirstRide(),
+    });
   },
   true,
 );
