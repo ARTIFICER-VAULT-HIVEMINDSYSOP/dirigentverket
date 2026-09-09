@@ -3,6 +3,8 @@
  * Computes SL, TP and optional size. Never fetches quotes. Never places orders.
  */
 
+import { measureFrequency, parsePriceSeries, proposeMittHedge } from './hedge.js';
+
 function num(v) {
   if (v === '' || v === null || v === undefined) return null;
   const x = Number(String(v).replace(',', '.').replace(/\s/g, ''));
@@ -51,6 +53,8 @@ export function parseRobotInput(raw) {
     prognosRr: num(raw.prognosRr),
     hallaRr: num(raw.hallaRr),
     openSize: num(raw.openSize != null && raw.openSize !== '' ? raw.openSize : raw.volym),
+    priceSeries: parsePriceSeries(raw.priceSeries),
+    minFrequency: raw.minFrequency,
   };
 }
 
@@ -371,9 +375,22 @@ function resolveDynamic(input, initial, structure) {
   return heldInitialDynamic(input, initial, structure);
 }
 
+function attachHedge(input) {
+  const frequency = measureFrequency(input.priceSeries, input.bbLower, input.bbUpper);
+  const stopDist = slDistance({
+    entry: frequency.mid,
+    risk: input.risk,
+    riskMode: input.riskMode,
+    atr: input.atr,
+  });
+  const hedge = proposeMittHedge(frequency, { minFrequency: input.minFrequency, stopDist });
+  return { frequency, hedge };
+}
+
 export function computeRobot(raw) {
   const input = parseRobotInput(raw);
   const structure = structureSignal(input);
+  const { frequency, hedge } = attachHedge(input);
   const errors = [];
   if (!input.instrument) errors.push('Ange instrument.');
   if (input.entry === null || input.entry <= 0) errors.push('Ange entry (kurs).');
@@ -381,12 +398,35 @@ export function computeRobot(raw) {
   const dist = slDistance(input);
   if (dist === null) errors.push('Ange riskavstånd (pris eller %) eller ATR.');
   if (errors.length) {
-    return { ok: false, errors, input, initial: null, dynamic: null, size: null, structure, season: seasonPlan(input) };
+    return {
+      ok: false,
+      errors,
+      input,
+      initial: null,
+      dynamic: null,
+      size: null,
+      structure,
+      season: seasonPlan(input),
+      frequency,
+      hedge,
+    };
   }
   const initial = initialLevels(input);
   const dynamic = resolveDynamic(input, initial, structure);
   const size = positionSize(input, dist);
-  return { ok: true, errors: [], input, initial, dynamic, size, dist, structure, season: seasonPlan(input) };
+  return {
+    ok: true,
+    errors: [],
+    input,
+    initial,
+    dynamic,
+    size,
+    dist,
+    structure,
+    season: seasonPlan(input),
+    frequency,
+    hedge,
+  };
 }
 
 export function formatPx(n) {
@@ -430,6 +470,8 @@ export function emptyRobotDraft() {
     hallaRr: '',
     openSize: '',
     volym: '',
+    priceSeries: '',
+    minFrequency: '',
   };
 }
 
