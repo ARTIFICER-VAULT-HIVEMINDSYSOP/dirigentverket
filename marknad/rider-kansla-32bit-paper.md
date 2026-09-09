@@ -15,24 +15,16 @@
 - Pilotsele / Nyhetssele (PR #5) + Magasinet kontaktkö/`servedThisRound` (PR #6).
 - `cc2946f` — status: rebase klar + prova-känsla-checklista.
 - White-label + IPO-paper stubbar (`91d4d4d`).
+- **PR #4 mergad** `a8ea411` (15:31 Sthlm 9 sep) — 32-bit playfeel, första-ride-grind, dry-run, impuls, hopp-tell + soft unlock, struktur-trail-tell, rokad-tell. `LIVE_LOCKED` true.
 
-## Paper-bygge i PR #4 (draft — merge bara efter namngivet ja)
-Branch `cursor/rider-kansla-32bit-0a6e`. Gate `hasCompletedFirstRide` / `RIDER_FIRST_RIDE_KEY`, «små belopp»-hint, impuls (process före fart), 32-bit playfeel (W/S/F/[ ]/Space), silhuett-HUD, tom-arena dry-run (`fde2807`), mjuk impuls + kolla-grafen på fylld arena (`3dbc025` / `6dbb626`), hopp-tell + soft unlock (`b90b3c0`), struktur-trail-tell (`c8b83e4`: trail bara på RSI/Bollinger+budstuds; SL krymper bara, aldrig breddas; mjuk tell på arena/silhuett-HUD), rokad-tell (`ba97064` / `b99e062`: vänd sida syns i silhuett, volym −25 % av aktuell pilotvolym, mjuk tell + ÖB-gate i paper; ingen live-väg). Tester gröna. `LIVE_LOCKED` orörd. Synkad mot main `81c61fd`. Draft.
+## PR #4 — landat (inte draft)
+Gate `hasCompletedFirstRide` / `RIDER_FIRST_RIDE_KEY`, «små belopp»-hint, impuls (process före fart), 32-bit playfeel (W/S/F/[ ]/Space), silhuett-HUD, tom-arena dry-run (`fde2807`), mjuk impuls + kolla-grafen på fylld arena (`3dbc025` / `6dbb626`), hopp-tell + soft unlock (`b90b3c0`), struktur-trail-tell (`c8b83e4`), rokad-tell (`ba97064` / `b99e062`). Tester gröna. Merge-commit `a8ea411`.
 
-**17:54 Sthlm 7 sep:** rebase klar mot tip. Draft kvar.
-**09:38 Sthlm 8 sep:** tom-arena dry-run landat.
-**~10:00 Sthlm 8 sep:** mjuk impuls efter Räkna + kolla-grafen (coast/scanlines/silhuett lever med häv=fart); CSS-fix så `hidden` inte slås ut av flex.
-**13:43 Sthlm 8 sep (ständig):** magasin `8765` HTTP 200; main-status synkad; nästa paper-UX = hopp-tell + mjuk första-ride-unlock.
-**13:50 Sthlm 8 sep:** hopp-tell mjuk på arena/silhuett-HUD + «små belopp» soft unlock (intjänad, pilotens tal). Inga nya play-knappar.
-**17:38 Sthlm 8 sep (ständig):** magasin `8765` HTTP 200; hopp-tell redan landat; nästa = struktur-trail-tell.
-**17:45 Sthlm 8 sep:** mjuk struktur-trail-tell landat (`c8b83e4`) — SL krymper bara på RSI/Bollinger+budstuds. Draft. Merge väntar namngivet ja.
-**09:38 Sthlm 9 sep (ständig):** magasin `8765` var nere → omstartad, HTTP 200. Main-status synkad. Nästa paper-UX = rokad-tell.
-**09:47 Sthlm 9 sep:** rokad-tell landat (`b99e062`). Merge väntar namngivet ja.
-**13:49 Sthlm 9 sep (ständig):** PR #4 synkad mot main `81c61fd` (via `74d22f6`: WhatsApp Fastigheterutomlands paper, ConnectPoint paper, CHECKLISTA-OFARDIGT, rider-status `662ed37`; plus white-label/ForceX paper). Landade slices kvar: dry-run, impuls, hopp-tell, struktur-trail, rokad-tell. `LIVE_LOCKED` true. Nästa paper-UX = **Lamp/WATCHERS-skin** — bara kvällstid per ÖB 9 sep; implementeras inte i denna synk. Draft PR #8 mitt-hedge ligger separat. Merge väntar namngivet ja.
+**15:31 Sthlm 9 sep:** PR #4 mergad till main. Statusfil synkad. Nästa paper-UX = **Lamp/WATCHERS-skin** — bara kvällstid per ÖB 9 sep. Draft PR #8 mitt-hedge ligger separat (väntar namngivet merge-ja).
 
 https://github.com/ARTIFICER-VAULT-HIVEMINDSYSOP/dirigentverket/pull/4
 
-## Prova-känsla (efter merge — paper)
+## Prova-känsla (nu på main — paper)
 När ÖB öppnar `#/rider` ska det kännas så här, i den ordningen:
 1. Arena först — grafen syns innan någon formvägg.
 2. Process-hint syns mjukt (inte skrikig varning).
@@ -46,4 +38,4 @@ När ÖB öppnar `#/rider` ska det kännas så här, i den ordningen:
 - Live-order, mäklare, påhittade P&L
 - Sidapp utanför Dirigentverket-nexus
 - Merge utan ÖB-ja på namngiven PR-rad
-- Lamp-/WATCHERS-skin före playfeel/gate — och bara kvällstid (ÖB 9 sep); inte i denna PR-synk
+- Lamp-/WATCHERS-skin — bara kvällstid (ÖB 9 sep); inte startad här
