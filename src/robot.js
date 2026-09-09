@@ -4,6 +4,7 @@
  */
 
 import { measureFrequency, parsePriceSeries, proposeMittHedge } from './hedge.js';
+import { guldRokadRule, losingRokad, recoveryMeasure } from './rokad.js';
 
 function num(v) {
   if (v === '' || v === null || v === undefined) return null;
@@ -55,6 +56,9 @@ export function parseRobotInput(raw) {
     openSize: num(raw.openSize != null && raw.openSize !== '' ? raw.openSize : raw.volym),
     priceSeries: parsePriceSeries(raw.priceSeries),
     minFrequency: raw.minFrequency,
+    reclaim: num(raw.reclaim),
+    guldHistorik: String(raw.guldHistorik || '').trim(),
+    guldVantanManader: raw.guldVantanManader,
   };
 }
 
@@ -85,6 +89,7 @@ export function seasonPlan(input) {
   const prognosRr = num(input.prognosRr);
   const hallaRr = num(input.hallaRr);
   const seasonLabel = String(input.nastaSasong || '').trim() || 'nästa säsong';
+  const recovery = recoveryMeasure(input, structureSignal(input));
 
   if (!prognos) {
     return paperStamp({ action: 'ingen', rokad: false, note: 'prognos saknas — ingen vändning föreslås.' });
@@ -107,21 +112,29 @@ export function seasonPlan(input) {
     return paperStamp({ action: 'halla', rokad: false, note: 'prognos-RR slår inte att sitta kvar. Behåll öppen sida.' });
   }
   if (tempo === 'snabbare') {
+    const cut = recovery.known ? rokadCut(input) : { rokad: false };
     return paperStamp({
       action: 'radda',
       reverseTo: prognos,
       flattenNow: true,
-      ...rokadCut(input),
-      note: `räddning, snabbare tempo: stäng den öppna (paper) och föreslå vändning till ${prognos}. Vänta inte in nästa säsong. ${ROKAD_NOTE}`,
+      recovery,
+      ...cut,
+      note: `räddning, snabbare tempo: stäng den öppna (paper) och föreslå vändning till ${prognos}. Vänta inte in nästa säsong. ${
+        recovery.known ? ROKAD_NOTE : recovery.note
+      }`,
     });
   }
+  const cut = recovery.known ? rokadCut(input) : { rokad: false };
   return paperStamp({
     action: 'byt_hall',
     reverseTo: prognos,
     flattenNow: false,
     season: seasonLabel,
-    ...rokadCut(input),
-    note: `flerår: byt håll till ${prognos} när ${seasonLabel} börjar, om prognos-RR ${prognosRr} håller. ${ROKAD_NOTE}`,
+    recovery,
+    ...cut,
+    note: `flerår: byt håll till ${prognos} när ${seasonLabel} börjar, om prognos-RR ${prognosRr} håller. ${
+      recovery.known ? ROKAD_NOTE : recovery.note
+    }`,
   });
 }
 
@@ -391,6 +404,8 @@ export function computeRobot(raw) {
   const input = parseRobotInput(raw);
   const structure = structureSignal(input);
   const { frequency, hedge } = attachHedge(input);
+  const rokad = losingRokad(input, structure);
+  const gold = guldRokadRule(input);
   const errors = [];
   if (!input.instrument) errors.push('Ange instrument.');
   if (input.entry === null || input.entry <= 0) errors.push('Ange entry (kurs).');
@@ -409,6 +424,8 @@ export function computeRobot(raw) {
       season: seasonPlan(input),
       frequency,
       hedge,
+      rokad,
+      gold,
     };
   }
   const initial = initialLevels(input);
@@ -426,6 +443,8 @@ export function computeRobot(raw) {
     season: seasonPlan(input),
     frequency,
     hedge,
+    rokad,
+    gold,
   };
 }
 
@@ -472,6 +491,9 @@ export function emptyRobotDraft() {
     volym: '',
     priceSeries: '',
     minFrequency: '',
+    reclaim: '',
+    guldHistorik: '',
+    guldVantanManader: '',
   };
 }
 

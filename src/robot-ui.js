@@ -55,6 +55,37 @@ function renderHedgeBlock(hedge, frequency) {
       </div>`;
 }
 
+function renderRokadBlock(rokad) {
+  if (!rokad) return '';
+  const show = rokad.rokad || rokad.losing === true;
+  if (!show) return '';
+  const vol =
+    rokad.nyVolym !== null && rokad.nyVolym !== undefined
+      ? escapeHtml(formatSize(rokad.nyVolym) || String(rokad.nyVolym))
+      : 'fyll i volym';
+  return `
+      <div class="structure-banner ${rokad.rokad ? 'structure-ok' : 'structure-wait'}">
+        <div class="metric-label">Rokad</div>
+        <p>${escapeHtml(rokad.note)}</p>
+        ${
+          rokad.rokad
+            ? `<p>Motsatt sida: ${escapeHtml(rokad.reverseTo || '')}. Ny volym: ${vol} (25 % av ifylld).</p>`
+            : ''
+        }
+        <p class="faint">Ingen order läggs. Återhämtning måste vara ifylld och mätbar.</p>
+      </div>`;
+}
+
+function renderGoldBlock(gold) {
+  if (!gold || !gold.allowed) return '';
+  return `
+      <div class="structure-banner structure-wait">
+        <div class="metric-label">Guld</div>
+        <p>${escapeHtml(gold.note)}</p>
+        <p class="faint">Väntan ca ${escapeHtml(String(gold.delayedMonths))} månader. Tom historik = ingen uppmätt avkastning.</p>
+      </div>`;
+}
+
 export function val(robotDraft, name) {
   const v = robotDraft[name];
   return v === undefined || v === null ? '' : escapeHtml(String(v));
@@ -91,7 +122,7 @@ export function renderRobotResult(robotResult) {
   if (!r) {
     return `<p class="muted">Fyll i instrument, sida, entry, risk och RR. Kurs hämtas inte — skriv den själv. SL flyttas bara vid RSI+Bollinger+budstuds. Klistra in en kursserie mot banden för att mäta svängfrekvens och eventuellt få en mitt-hedge.</p>`;
   }
-  const freqHedge = `${renderFrequencyBlock(r.frequency)}${renderHedgeBlock(r.hedge, r.frequency)}`;
+  const freqHedge = `${renderFrequencyBlock(r.frequency)}${renderHedgeBlock(r.hedge, r.frequency)}${renderRokadBlock(r.rokad)}${renderGoldBlock(r.gold)}`;
   if (!r.ok) {
     return `<div class="info-banner">${r.errors.map((e) => escapeHtml(e)).join(' ')}</div>${freqHedge}${renderSeasonBanner(r.season)}`;
   }
@@ -226,8 +257,14 @@ export function renderRobot(robotDraft, robotResult) {
               <input name="prognosRr" inputmode="decimal" placeholder="förväntat RR nästa säsong" value="${val(robotDraft, 'prognosRr')}" /></label>
             <label>RR om vi sitter kvar <span class="hint">valfritt</span>
               <input name="hallaRr" inputmode="decimal" placeholder="valfritt" value="${val(robotDraft, 'hallaRr')}" /></label>
-            <label>Öppen volym <span class="hint">valfritt — rokad −25 % vid vändning, gissas inte</span>
+            <label>Öppen volym <span class="hint">valfritt — säsong −25 %; rokad vid minus = 25 % motsatt. Gissas inte</span>
               <input name="openSize" inputmode="decimal" placeholder="fyll i volym" value="${val(robotDraft, 'openSize')}" /></label>
+            <label>Återtagennivå <span class="hint">valfritt — mätbar återhämtning, gissas inte</span>
+              <input name="reclaim" inputmode="decimal" placeholder="kurs" value="${val(robotDraft, 'reclaim')}" /></label>
+            <label>Guld, väntan (mån) <span class="hint">valfritt, standard 8 — bara regel, inte avkastning</span>
+              <input name="guldVantanManader" inputmode="numeric" placeholder="8" value="${val(robotDraft, 'guldVantanManader')}" /></label>
+            <label class="full">Guldhistorik <span class="hint">valfritt — tom = saknas, vi påstår inte uppmätt avkastning</span>
+              <textarea name="guldHistorik" rows="2" placeholder="tom = saknas">${val(robotDraft, 'guldHistorik')}</textarea></label>
             <label class="full">Kursserie <span class="hint">en kurs per rad eller kommaseparerat — skriv själv, hämtas inte</span>
               <textarea name="priceSeries" rows="5" placeholder="t.ex. 98&#10;102&#10;99&#10;105">${val(robotDraft, 'priceSeries')}</textarea></label>
             <label>Minsta svängfrekvens <span class="hint">valfritt, standard 3</span>
@@ -270,5 +307,8 @@ export function readRobotForm(form) {
     volym: String(fd.get('volym') || fd.get('openSize') || ''),
     priceSeries: String(fd.get('priceSeries') || ''),
     minFrequency: String(fd.get('minFrequency') || ''),
+    reclaim: String(fd.get('reclaim') || ''),
+    guldHistorik: String(fd.get('guldHistorik') || ''),
+    guldVantanManader: String(fd.get('guldVantanManader') || ''),
   };
 }

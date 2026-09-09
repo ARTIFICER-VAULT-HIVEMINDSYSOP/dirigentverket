@@ -38,3 +38,31 @@ test('renderRobot visar kursserie-fält', () => {
   assert.match(html, /Minsta svängfrekvens/);
   assert.match(html, /name="minFrequency"/);
 });
+
+test('renderRobotResult: minus utan återhämtning → rokad blockerad', () => {
+  const html = renderRobotResult(
+    computeRobot({
+      instrument: 'OMXS30',
+      entry: 100,
+      current: 95,
+      risk: 2,
+      rr: 2,
+    }),
+  );
+  assert.match(html, /Rokad/);
+  assert.match(html, /återhämtning saknas/);
+  assert.equal(html.includes('25 % av ifylld'), false);
+});
+
+test('renderRobotResult: GULDR visar väntan utan påstådd avkastning', () => {
+  const html = renderRobotResult(
+    computeRobot({
+      instrument: 'GULDR',
+      entry: 100,
+      risk: 2,
+      rr: 2,
+    }),
+  );
+  assert.match(html, /Guld/);
+  assert.match(html, /påstår inte uppmätt avkastning/);
+});
