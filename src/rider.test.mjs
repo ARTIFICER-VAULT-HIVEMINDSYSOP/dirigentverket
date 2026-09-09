@@ -35,6 +35,9 @@ import {
   RIDER_SMA_NOTE,
   RIDER_SMA_UNLOCK_NOTE,
   inheritPilotVolume,
+  rokadVolume,
+  rideRokad,
+  RIDER_ROKAD_GATE,
   rideImpulse,
   RIDER_IMPULSE_NOTE,
   RIDER_FIRST_RIDE_KEY,
@@ -311,7 +314,7 @@ test('arena-UI A–E: tom play-rad, kicker inte lampa, hopp from→to', () => {
   for (const name of ['tillgang', 'side', 'pilotVolume', 'entry', 'maxFel', 'rr', 'grav']) {
     assert.match(page, new RegExp(`id="rider-core"[\\s\\S]*name="${name}"`));
   }
-  for (const name of ['requested', 'current', 'rsi', 'bbLower', 'bbUpper', 'bounce', 'ovre', 'undre', 'havstang', 'cluster']) {
+  for (const name of ['requested', 'current', 'rsi', 'bbLower', 'bbUpper', 'bounce', 'ovre', 'undre', 'havstang', 'cluster', 'prognos', 'prognosRr', 'hallaRr']) {
     assert.match(page, new RegExp(`id="rider-advanced"[\\s\\S]*name="${name}"`));
     assert.ok(!new RegExp(`id="rider-core"[\\s\\S]*name="${name}"[\\s\\S]*id="rider-advanced"`).test(page));
   }
@@ -733,6 +736,171 @@ test('struktur-trail-tell syns mjukt på arena och silhuett-HUD', () => {
   const quiet = renderPlayArena(computeRide({ entry: 100, maxFel: 2, rr: 2, grav: 100 }));
   assert.match(quiet, /data-trail-tell="0"/);
   assert.ok(!/data-rider-trail-tell/.test(quiet));
+});
+
+test('rokad-tell: vänd sida, volym −25 % av pilot, tom volym stannar tom', () => {
+  const cut = computeRide({
+    entry: 100,
+    maxFel: 2,
+    rr: 2,
+    grav: 100,
+    side: 'köp',
+    prognos: 'sälj',
+    prognosRr: 2,
+    pilotVolume: 1,
+  });
+  assert.equal(cut.ok, true);
+  assert.equal(cut.rokad.tell, true);
+  assert.equal(cut.rokad.available, true);
+  assert.equal(cut.rokad.rokad, true);
+  assert.equal(cut.rokad.from, 'köp');
+  assert.equal(cut.rokad.to, 'sälj');
+  assert.equal(cut.rokad.volymFaktor, 0.75);
+  assert.equal(cut.rokad.nyVolym, 0.75);
+  assert.equal(cut.rokad.paper, true);
+  assert.equal(cut.rokad.live, false);
+  assert.equal(cut.rokad.flattenNow, false);
+  assert.equal(cut.pilotVolume, 1);
+  assert.equal(rokadVolume(1), 0.75);
+  assert.equal(inheritPilotVolume(1, rokadVolume(1)), 0.75);
+  assert.equal(inheritPilotVolume(1, 2), 1);
+  assert.equal(inheritPilotVolume(1, 4), 1);
+  assert.equal(LIVE_LOCKED, true);
+  assert.equal(cut.live, false);
+  assert.match(cut.rokad.gate, /ÖB godkänner/);
+  assert.equal(cut.rokad.gate, RIDER_ROKAD_GATE);
+  assert.ok(!/\d+\s*kr/i.test(cut.rokad.note));
+  assert.doesNotMatch(cut.rokad.note, /P&L|pnl/);
+
+  const emptyVol = computeRide({
+    entry: 100,
+    maxFel: 2,
+    rr: 2,
+    grav: 100,
+    side: 'köp',
+    prognos: 'sälj',
+    prognosRr: 2,
+  });
+  assert.equal(emptyVol.rokad.tell, true);
+  assert.equal(emptyVol.rokad.nyVolym, null);
+  assert.equal(emptyVol.pilotVolume, null);
+  assert.equal(rokadVolume(''), null);
+  assert.equal(rokadVolume(null), null);
+  assert.equal(rokadVolume(undefined), null);
+
+  const same = computeRide({
+    entry: 100,
+    maxFel: 2,
+    rr: 2,
+    grav: 100,
+    side: 'köp',
+    prognos: 'köp',
+    prognosRr: 2,
+    pilotVolume: 1,
+  });
+  assert.equal(same.rokad.tell, false);
+  assert.equal(same.rokad.nyVolym, null);
+
+  const blank = computeRide({
+    entry: 100,
+    maxFel: 2,
+    rr: 2,
+    grav: 100,
+    side: 'köp',
+    prognosRr: 2,
+    pilotVolume: 1,
+  });
+  assert.equal(blank.rokad.tell, false);
+  assert.equal(blank.rokad.nyVolym, null);
+
+  const noRr = computeRide({
+    entry: 100,
+    maxFel: 2,
+    rr: 2,
+    grav: 100,
+    side: 'köp',
+    prognos: 'sälj',
+    pilotVolume: 1,
+  });
+  assert.equal(noRr.rokad.tell, false);
+
+  const lens = computeRide({
+    entry: 100,
+    maxFel: 2,
+    rr: 2,
+    grav: 100,
+    side: 'köp',
+    prognos: 'sälj',
+    prognosRr: 2,
+    tempo: '1.5',
+    pilotVolume: 1,
+  });
+  assert.equal(lens.rokad.tell, true);
+  assert.equal(lens.rokad.flattenNow, false);
+  assert.equal(lens.rokad.action, 'byt_hall');
+
+  const flip = rideRokad({ side: 'sälj', prognos: 'köp', prognosRr: 2, pilotVolume: 1 });
+  assert.equal(flip.from, 'sälj');
+  assert.equal(flip.to, 'köp');
+  assert.equal(flip.nyVolym, 0.75);
+});
+
+test('rokad-tell syns mjukt på arena och silhuett-HUD', () => {
+  const ride = computeRide({
+    entry: 100,
+    maxFel: 2,
+    rr: 2,
+    grav: 100,
+    side: 'köp',
+    prognos: 'sälj',
+    prognosRr: 2,
+    pilotVolume: 1,
+  });
+  const html = renderPlayArena(ride);
+  assert.match(html, /data-rokad-tell="1"/);
+  assert.match(html, /data-rider-rokad-tell/);
+  assert.match(html, /data-rokad="1"/);
+  assert.match(html, /data-mode="rokad"/);
+  assert.match(html, /data-rider-side-sil/);
+  assert.match(html, /data-rokad-from="köp"/);
+  assert.match(html, /data-rokad-to="sälj"/);
+  assert.match(html, /köp → sälj/);
+  assert.match(html, /volym −25 %/);
+  assert.match(html, /0,75/);
+  assert.match(html, /ÖB godkänner/);
+  assert.match(html, /data-rokad-gate="1"/);
+  assert.match(html, /process före fart/);
+  assert.match(html, /data-verbs="w s f \[ \] space"/);
+  assert.ok(!/<button/i.test(html));
+  assert.ok(!/<dialog/i.test(html));
+  assert.ok(!/data-rider-pad|data-action="rider-key"/i.test(html));
+  assert.ok(!/WATCHERS|anden i lampan/i.test(html));
+  assert.ok(!/\d+\s*kr/i.test(html));
+  assert.doesNotMatch(html, /P&L|pnl/);
+  assert.equal(reservedRiderKey('r'), false);
+  assert.equal(reservedRiderKey('o'), false);
+  assert.equal(LIVE_LOCKED, true);
+
+  const emptyVol = renderPlayArena(
+    computeRide({
+      entry: 100,
+      maxFel: 2,
+      rr: 2,
+      grav: 100,
+      side: 'köp',
+      prognos: 'sälj',
+      prognosRr: 2,
+    }),
+  );
+  assert.match(emptyVol, /data-rokad-tell="1"/);
+  assert.match(emptyVol, /volym −25 %/);
+  assert.ok(!/0,75/.test(emptyVol));
+  assert.ok(!/\d+\s*kr/i.test(emptyVol));
+
+  const quiet = renderPlayArena(computeRide({ entry: 100, maxFel: 2, rr: 2, grav: 100 }));
+  assert.match(quiet, /data-rokad-tell="0"/);
+  assert.ok(!/data-rider-rokad-tell/.test(quiet));
+  assert.ok(!/data-mode="rokad"/.test(quiet));
 });
 
 test('tom-arena dry-run: W/S/F/[ ]/Space flyttar silhuett utan påhittade priser', () => {
