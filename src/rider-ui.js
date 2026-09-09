@@ -45,10 +45,13 @@ function renderScanlines() {
   return `<div class="rider-scanlines" aria-hidden="true"></div>`;
 }
 
-function renderBitHud(lev, speed, railText, rails = [], play = {}, hopped = false, trailed = false) {
+function renderBitHud(lev, speed, railText, rails = [], play = {}, hopped = false, trailed = false, rokad = null) {
   const rail = play.rail || 0;
   const sit = play.sit ?? rail;
-  const mode = hopped ? 'hop' : trailed ? 'trail' : 'hold';
+  const rokadOn = Boolean(rokad && rokad.tell);
+  const fromSide = rokad?.from || play.side || 'köp';
+  const toSide = rokadOn ? rokad.to : fromSide;
+  const mode = hopped ? 'hop' : trailed ? 'trail' : rokadOn ? 'rokad' : 'hold';
   const levBars = [1, 2, 3, 4]
     .map((n) => `<span class="rider-sil-bar${n <= lev ? ' is-on' : ''}" data-lev-bar="${n}"></span>`)
     .join('');
@@ -61,12 +64,22 @@ function renderBitHud(lev, speed, railText, rails = [], play = {}, hopped = fals
         .join('')
     : '<span class="rider-sil-rail-pip is-empty" data-rail-sil="-1"></span>';
   return `<div class="rider-play-hud rider-bit-hud" data-rider-sil data-verbs="w s f [ ] space">
-      <div class="rider-sil-mode" data-rider-mode-sil data-mode="${mode}" data-hop-tell="${hopped ? '1' : '0'}" data-trail-tell="${trailed ? '1' : '0'}">
+      <div class="rider-sil-mode" data-rider-mode-sil data-mode="${mode}" data-hop-tell="${hopped ? '1' : '0'}" data-trail-tell="${trailed ? '1' : '0'}" data-rokad-tell="${rokadOn ? '1' : '0'}">
         <span class="rider-sil-pip is-paper" data-mode-paper></span>
-        <span class="rider-sil-pip ${hopped ? 'is-hop is-tell' : trailed ? 'is-trail is-tell' : 'is-hold'}" data-hop-sil></span>
+        <span class="rider-sil-pip ${hopped ? 'is-hop is-tell' : trailed ? 'is-trail is-tell' : rokadOn ? 'is-rokad is-tell' : 'is-hold'}" data-hop-sil></span>
         ${hopped ? '<span class="rider-sil-tell" data-rider-hop-tell>tell</span>' : ''}
         ${trailed ? '<span class="rider-sil-tell" data-rider-trail-tell>tell</span>' : ''}
+        ${rokadOn ? '<span class="rider-sil-tell" data-rider-rokad-tell>tell</span>' : ''}
       </div>
+      ${
+        play.side || rokad
+          ? `<div class="rider-sil-side" data-rider-side-sil data-side="${escapeHtml(fromSide)}" data-rokad-from="${escapeHtml(fromSide)}" data-rokad-to="${escapeHtml(toSide)}">
+        <span class="rider-sil-side-pip is-from" data-side-from="${escapeHtml(fromSide)}"></span>
+        ${rokadOn ? '<span class="rider-sil-side-arrow" aria-hidden="true">→</span>' : ''}
+        <span class="rider-sil-side-pip is-to${rokadOn ? ' is-rokad' : ''}" data-side-to="${escapeHtml(toSide)}"></span>
+      </div>`
+          : ''
+      }
       <div class="rider-sil-lev" data-rider-lev-sil data-lev="${lev}">
         ${levBars}
         <strong data-rider-leverage-hud>${lev}×</strong>
@@ -177,6 +190,11 @@ export function renderPlayArena(ride, play = {}) {
   const jumped = Boolean(ride.jump && ride.jump.jumped);
   const tell = Boolean(ride.jump && ride.jump.tell);
   const trailed = Boolean(ride.trail && ride.trail.tell);
+  const rokadOn = Boolean(ride.rokad && ride.rokad.tell);
+  const rokadVol =
+    rokadOn && ride.rokad.nyVolym !== null && ride.rokad.nyVolym !== undefined
+      ? escapeHtml(formatPx(ride.rokad.nyVolym))
+      : '';
   const hop = jumped
     ? `<div class="rider-hop is-jump rider-hop-tell" data-hop="1" data-hop-tell="1" data-window="${HOP_WINDOW_MS}" role="status">
         <span class="rider-hop-kicker">Hopp</span>
@@ -196,6 +214,15 @@ export function renderPlayArena(ride, play = {}) {
         <span class="faint">process före fart · SL krymper</span>
       </div>`
     : '';
+  const rokad = rokadOn
+    ? `<div class="rider-rokad rider-hop-tell is-rokad" data-rokad="1" data-rokad-tell="1" data-rokad-gate="1" role="status">
+        <span class="rider-hop-kicker">Rokad</span>
+        <span class="rider-hop-tell-mark" data-rider-rokad-tell>tell</span>
+        <span class="rider-hop-path">${escapeHtml(ride.rokad.from)} → ${escapeHtml(ride.rokad.to)}</span>
+        <span class="faint">process före fart · volym −25 %${rokadVol ? ` · ${rokadVol}` : ''} · ÖB godkänner</span>
+      </div>
+      <p class="rider-rokad-gate faint" data-rokad-gate="1">${escapeHtml(ride.rokad.gate)}</p>`
+    : '';
 
   const sitPrice = rails[sit] ?? ride.grav;
   const toPrice = jumped ? ride.jump.to : sitPrice;
@@ -205,13 +232,14 @@ export function renderPlayArena(ride, play = {}) {
 
   const coastMs = coastPeriodMs(lev);
   const railText = rails[rail] != null ? escapeHtml(String(rails[rail])) : '';
-  return `<div class="rider-play rider-bit is-looking ${jumped ? 'has-hop' : 'has-hold'}${trailed ? ' has-trail' : ''}" data-rider-play data-bit="32" data-look="1"
-      data-hop-tell="${tell ? '1' : '0'}" data-trail-tell="${trailed ? '1' : '0'}"
+  return `<div class="rider-play rider-bit is-looking ${jumped ? 'has-hop' : 'has-hold'}${trailed ? ' has-trail' : ''}${rokadOn ? ' has-rokad' : ''}" data-rider-play data-bit="32" data-look="1"
+      data-hop-tell="${tell ? '1' : '0'}" data-trail-tell="${trailed ? '1' : '0'}" data-rokad-tell="${rokadOn ? '1' : '0'}"
+      data-side="${escapeHtml(ride.input?.side || 'köp')}" data-rokad-from="${escapeHtml(ride.rokad?.from || ride.input?.side || 'köp')}" data-rokad-to="${escapeHtml(ride.rokad?.to || ride.input?.side || 'köp')}"
       data-leverage="${lev}" data-speed="${speed}" data-lens="${lens}" data-rail="${rail}" data-sit="${sit}"
       style="--rider-speed:${speed};--rider-lens:${lens};--rider-coast-ms:${coastMs}ms;--hop-window:${HOP_WINDOW_MS}ms;"
       role="img" aria-label="Paper-arena">
     ${renderScanlines()}
-    ${renderBitHud(lev, speed, railText, rails, play, jumped, trailed)}
+    ${renderBitHud(lev, speed, railText, rails, { ...play, side: ride.input?.side }, jumped, trailed, ride.rokad)}
     <div class="rider-arena-field" data-rider-field style="transform:scale(var(--rider-lens));transform-origin:center;">
       <div class="rider-speed-scan" aria-hidden="true"></div>
       ${markHtml}
@@ -219,6 +247,7 @@ export function renderPlayArena(ride, play = {}) {
     </div>
     ${hop}
     ${trail}
+    ${rokad}
     <p class="faint rider-muted-opt">${coastMuted ? 'coast tyst' : ''} · hävstång HUD = fart · max 4×</p>
   </div>`;
 }
@@ -391,6 +420,17 @@ export function renderRider(draft, ride, hopPulse = 0, play = {}, opts = {}) {
                 <input name="cluster" value="${riderVal(draft, 'cluster')}" /></label>
               <label>Tempo / lins
                 <input name="tempo" placeholder="lins, inte fill" value="${riderVal(draft, 'tempo')}" /></label>
+              <label>Prognos <span class="hint">rokad — tom = ingen vändning</span>
+                <select name="prognos">
+                  <option value="" ${!draft.prognos ? 'selected' : ''}></option>
+                  <option value="köp" ${draft.prognos === 'köp' ? 'selected' : ''}>Köp</option>
+                  <option value="sälj" ${draft.prognos === 'sälj' ? 'selected' : ''}>Sälj</option>
+                  <option value="neutral" ${draft.prognos === 'neutral' ? 'selected' : ''}>Neutral</option>
+                </select></label>
+              <label>Prognos-RR <span class="hint">krävs för rokad</span>
+                <input name="prognosRr" inputmode="decimal" placeholder="tom = ingen rokad" value="${riderVal(draft, 'prognosRr')}" /></label>
+              <label>Hålla-RR <span class="hint">valfritt</span>
+                <input name="hallaRr" inputmode="decimal" value="${riderVal(draft, 'hallaRr')}" /></label>
               <label>Coast <span class="hint">valfritt</span>
                 <input name="coast" inputmode="decimal" placeholder="tom är ärlig" value="${riderVal(draft, 'coast')}" /></label>
             </div>
@@ -432,6 +472,10 @@ export function readRiderForm(form) {
     havstang: String(fd.get('havstang') || ''),
     cluster: String(fd.get('cluster') || ''),
     tempo: String(fd.get('tempo') || ''),
+    prognos: String(fd.get('prognos') || ''),
+    prognosRr: String(fd.get('prognosRr') || ''),
+    hallaRr: String(fd.get('hallaRr') || ''),
+    nastaSasong: String(fd.get('nastaSasong') || ''),
   };
 }
 

@@ -4,7 +4,7 @@
  * Optional grav / övre / coast stay empty honestly; they are not invent-filled.
  */
 
-import { formatPx, structureSignal } from './robot.js';
+import { formatPx, structureSignal, seasonPlan } from './robot.js';
 
 export { formatPx };
 
@@ -40,6 +40,10 @@ const TEMPLATE_FIELDS = [
   'havstang',
   'cluster',
   'tempo',
+  'prognos',
+  'prognosRr',
+  'hallaRr',
+  'nastaSasong',
 ];
 
 function num(v) {
@@ -107,6 +111,10 @@ export function parseRideInput(raw) {
     havstang: clampLeverage(raw.havstang),
     cluster: String(raw.cluster || '').trim(),
     tempo: String(raw.tempo || '').trim(),
+    prognos: String(raw.prognos || '').trim(),
+    prognosRr: num(raw.prognosRr),
+    hallaRr: num(raw.hallaRr),
+    nastaSasong: String(raw.nastaSasong || '').trim(),
     midAir: Boolean(raw.midAir),
   };
 }
@@ -293,6 +301,7 @@ export function computeRide(raw) {
       havstang: input.havstang,
       jump: { jumped: false, from: null, to: null, windowMs: HOP_WINDOW_MS, tell: false },
       trail: emptyRideTrail(null),
+      rokad: rideRokad(raw),
       tillgang: input.tillgang,
       pilotVolume: inheritPilotVolume(input.pilotVolume, null),
       input,
@@ -304,6 +313,7 @@ export function computeRide(raw) {
   const horizon = rideHorizon(input);
   const jump = rideJump(input, grav, structure);
   const trail = rideTrail(input, levels, structure);
+  const rokad = rideRokad(raw);
   const coast = input.coast;
 
   return paperStamp({
@@ -322,6 +332,7 @@ export function computeRide(raw) {
     havstang: input.havstang,
     jump,
     trail,
+    rokad,
     tillgang: input.tillgang,
     pilotVolume: inheritPilotVolume(input.pilotVolume, null),
     input,
@@ -339,6 +350,77 @@ export function inheritPilotVolume(pilot, proposed) {
   const guess = Number(proposed);
   if (!Number.isFinite(guess)) return pilot;
   return guess > pilot ? pilot : guess;
+}
+
+export const RIDER_ROKAD_NOTE =
+  'rokadläge: byt håll, volym −25 %. ÖB godkänner. Ingen order lagd.';
+export const RIDER_ROKAD_GATE = 'ÖB godkänner. Paper. Ingen order.';
+
+/** −25 % of pilot volume. Empty stays empty. Never raises. */
+export function rokadVolume(pilot) {
+  if (pilot === null || pilot === undefined) return null;
+  const n = Number(pilot);
+  if (!Number.isFinite(n) || n <= 0) return null;
+  return inheritPilotVolume(n, n * 0.75);
+}
+
+export function emptyRideRokad(side = 'köp') {
+  const from = side === 'sälj' ? 'sälj' : 'köp';
+  return {
+    available: false,
+    tell: false,
+    rokad: false,
+    action: 'ingen',
+    reverseTo: null,
+    from,
+    to: from,
+    volymFaktor: null,
+    nyVolym: null,
+    flattenNow: false,
+    note: '',
+    gate: '',
+    paper: true,
+    live: false,
+  };
+}
+
+/**
+ * Artificer-locked paper rokad: reverse side, volume −25 %.
+ * Decision point — ÖB godkänner. Does not place an order. Empty volume stays empty.
+ */
+export function rideRokad(raw = {}) {
+  const input = parseRideInput(raw);
+  const from = input.side;
+  const hold = emptyRideRokad(from);
+  const season = seasonPlan({
+    side: from,
+    prognos: input.prognos,
+    prognosRr: input.prognosRr,
+    hallaRr: input.hallaRr,
+    nastaSasong: input.nastaSasong,
+    openSize: input.pilotVolume,
+    volym: input.pilotVolume,
+  });
+  if (!season.rokad) {
+    return { ...hold, action: season.action || 'ingen' };
+  }
+  const to = season.reverseTo === 'sälj' || season.reverseTo === 'köp' ? season.reverseTo : from;
+  return {
+    available: true,
+    tell: true,
+    rokad: true,
+    action: season.action,
+    reverseTo: to,
+    from,
+    to,
+    volymFaktor: 0.75,
+    nyVolym: rokadVolume(input.pilotVolume),
+    flattenNow: Boolean(season.flattenNow),
+    note: RIDER_ROKAD_NOTE,
+    gate: RIDER_ROKAD_GATE,
+    paper: true,
+    live: false,
+  };
 }
 
 /**
@@ -450,6 +532,10 @@ export function emptyRideDraft() {
     havstang: '',
     cluster: '',
     tempo: '',
+    prognos: '',
+    prognosRr: '',
+    hallaRr: '',
+    nastaSasong: '',
   };
 }
 

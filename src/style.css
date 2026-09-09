@@ -1509,6 +1509,36 @@ body.view-rider .shell-artificer {
   background: #8fce8a;
 }
 
+.rider-sil-pip.is-rokad {
+  background: #c4a04a;
+}
+
+.rider-sil-side {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.rider-sil-side-pip {
+  width: 8px;
+  height: 8px;
+  border: 1px solid #3d5c3a;
+  background: #1a2618;
+}
+
+.rider-sil-side-pip.is-from {
+  background: #6a8f5a;
+}
+
+.rider-sil-side-pip.is-to.is-rokad {
+  background: #c4a04a;
+}
+
+.rider-sil-side-arrow {
+  font-size: 9px;
+  color: #e0c48a;
+}
+
 .rider-sil-pip.is-hop.is-tell {
   animation: rider-hop-tell-pip var(--hop-window, 2s) ease-in-out infinite;
 }
@@ -1810,6 +1840,32 @@ body.view-rider .shell-artificer {
 
 .rider-play[data-trail-tell="1"] .rider-mark-sl .rider-mark-line {
   animation: rider-hop-tell-line var(--hop-window, 2s) ease-in-out;
+}
+
+.rider-rokad {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 10px;
+  margin-top: 6px;
+  font-family: var(--mono);
+  font-size: 13px;
+  color: #e6d7b0;
+  background: rgba(40, 32, 14, 0.55);
+  border: 1px solid rgba(196, 160, 74, 0.38);
+}
+
+.rider-rokad-gate {
+  margin: 4px 4px 0;
+  font-family: var(--mono);
+  font-size: 11px;
+}
+
+.rider-play[data-rokad-tell="1"] .rider-bit-hud {
+  box-shadow: inset 0 0 0 1px rgba(196, 160, 74, 0.28);
 }
 
 .rider-hop-path {
