@@ -1,6 +1,6 @@
 {
   "id": "intake",
-  "version": "1.2",
+  "version": "1.3",
   "tenant": "fastigheterutomlands",
   "lang": "en",
   "mode": "paper",
@@ -8,7 +8,11 @@
   "meta": {
     "brand": "Fastigheterutomlands.com",
     "channel": "whatsapp_cloud_api",
-    "notes": "Paper. No live send. Brand/WABA/number in tenant-config, not here. Menu: Interest / Question / Book a call / Human. Book fields (OB): name, country/area, contact preference required; budget band + note optional; no timeline. No invented amounts or phone numbers in bot replies. Customer-facing copy: English."
+    "notes": "Paper. No live send. Brand/WABA/number in tenant-config, not here. Menu: Interest / Question / Book a call / Human. English copy. Question path uses faq-secure-purchase.json then broker referral. Book fields: name, country/area, contact preference required; budget band + note optional; no timeline. No invented amounts, phones, or IBAN in bot replies. Live requires named yes from OB.",
+    "knowledge": {
+      "faq": "../../../tenants/fastigheterutomlands/knowledge/faq-secure-purchase.json",
+      "rule": "FAQ replies are general only; always refer to personal broker for clear answers. Never send payment details."
+    }
   },
   "nodes": {
     "start": {
@@ -85,17 +89,27 @@
         {
           "id": "land",
           "title": "Country / area",
-          "next": "fraga_prompt"
+          "next": "faq_land"
         },
         {
           "id": "process",
           "title": "Buying process",
-          "next": "fraga_prompt"
+          "next": "faq_process"
         },
         {
           "id": "finans",
           "title": "Financing",
-          "next": "fraga_prompt"
+          "next": "faq_finans"
+        },
+        {
+          "id": "escrow",
+          "title": "Escrow / funds",
+          "next": "faq_escrow"
+        },
+        {
+          "id": "payment",
+          "title": "Payment plans",
+          "next": "faq_payment"
         },
         {
           "id": "annat",
@@ -117,7 +131,7 @@
     "fraga_prompt": {
       "type": "message",
       "wa": "text",
-      "body": "Write your question in one message. A human will reply soon.",
+      "body": "Write your question in one message. I can share general process info only. For a clear answer on your case, a broker should confirm. A human will follow up.",
       "expect": "free_text",
       "capture": {
         "field": "fraga_text",
@@ -196,8 +210,8 @@
       "type": "handoff",
       "tag": "fraga",
       "queue": "sälj",
-      "summary_template": "Question ({fraga_amne}): {fraga_text}",
-      "user_message": "Thanks. A colleague will take over from here.",
+      "summary_template": "Question ({fraga_amne}): {fraga_text} | Reminder: broker referral required for binding answers.",
+      "user_message": "Thanks. A colleague will take over. For clear answers on your case, please speak with your personal broker.",
       "bot": "silent"
     },
     "handoff_boka": {
@@ -223,6 +237,64 @@
       "summary_template": "Timeout / unclear reply in intake. Last state: {last_node}",
       "user_message": "I am connecting you to a human.",
       "bot": "silent"
+    },
+    "faq_land": {
+      "type": "message",
+      "wa": "text",
+      "body": "Available countries and properties depend on current stock and local rules. Governing law for the SPA is typically the country where the property sits, unless otherwise agreed in writing. Local legal review may be required (for example a Dutch notary for a residential purchase in the Netherlands by a private individual).\n\nFor listings and a clear answer for your target area, please speak with your personal broker — or use Book a call.",
+      "knowledge_topic": "land",
+      "next": "fraga_after_faq"
+    },
+    "faq_process": {
+      "type": "message",
+      "wa": "text",
+      "body": "In short: (1) Sign the sale & purchase agreement (SPA) and complete KYC/AML. (2) Buyer pays a 30% down payment into verified escrow — not a private account. (3) Inspection / due diligence and transfer deed are prepared; remaining funds follow the chosen plan only after approval. (4) When 100% is secured, title is registered under local law; only then does escrow release funds to the seller. Money and title move in that order.\n\nFor a clear answer on your case, please speak with your personal broker.",
+      "knowledge_topic": "process",
+      "next": "fraga_after_faq"
+    },
+    "faq_finans": {
+      "type": "message",
+      "wa": "text",
+      "body": "Financing options and source-of-funds evidence are deal-specific. Escrow needs approved papers before receiving funds. We do not invent rates or loan terms here.\n\nFor a clear answer on financing for your case, please speak with your personal broker.",
+      "knowledge_topic": "finans",
+      "next": "fraga_after_faq"
+    },
+    "faq_escrow": {
+      "type": "message",
+      "wa": "text",
+      "body": "The purchase price is held by independent escrow (Living Abroad Advisory Centres Limited, also known as FastigheterUtomlands) until conditions are met and title is registered. Escrow does not release funds to the seller before that.\n\nAccount details are issued separately by your broker or Finance Manager — never trust payment details sent casually in chat.\n\nFor a clear answer on your case, please speak with your personal broker.",
+      "knowledge_topic": "escrow",
+      "next": "fraga_after_faq"
+    },
+    "faq_payment": {
+      "type": "message",
+      "wa": "text",
+      "body": "Two common models (percentages of the agreed price): Model A — 30% on SPA, then 70% after approved inspection. Model B — 30% on SPA, then 20%, 25%, and 25% on the staged timetable. SEPA / SEPA Instant is the primary method. Crypto only if the contract and escrow schedule expressly allow it.\n\nExact amounts and account details come only from your broker or Finance Manager for your deal.\n\nFor a clear answer on your case, please speak with your personal broker.",
+      "knowledge_topic": "payment",
+      "next": "fraga_after_faq"
+    },
+    "fraga_after_faq": {
+      "type": "choice",
+      "wa": "buttons",
+      "body": "Need more help? For a clear answer on your case, please speak with a broker.",
+      "options": [
+        {
+          "id": "boka_efter_faq",
+          "title": "Book a call",
+          "next": "boka_flow"
+        },
+        {
+          "id": "mer_fraga",
+          "title": "Another topic",
+          "next": "fraga_typ"
+        },
+        {
+          "id": "manniska_efter_faq",
+          "title": "Human",
+          "next": "handoff_manniska"
+        }
+      ],
+      "fallback": "handoff_timeout"
     }
   },
   "rules": {

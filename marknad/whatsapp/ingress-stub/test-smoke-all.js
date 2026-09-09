@@ -80,19 +80,36 @@ async function run() {
     });
     r = await json("POST", "/mock/choice", {
       chat: "b-fraga",
-      option_id: "land",
+      option_id: "process",
     });
-    r = await json("POST", "/mock/text", {
-      chat: "b-fraga",
-      text: "Any new listings in Spain?",
-    });
+    // message chains to fraga_after_faq (choice)
+    if (r.data.reply?.type !== "choice" && r.data.reply?.type !== "message") {
+      throw new Error(`fraga_faq ${JSON.stringify(r.data)}`);
+    }
+    // ensure we land on after-faq choice
+    if (r.data.session?.node === "faq_process" || r.data.reply?.type === "message") {
+      // advance if still on message with next
+    }
+    // pick human from after-faq if on choice
+    if (r.data.reply?.type === "choice" || r.data.session?.node === "fraga_after_faq") {
+      r = await json("POST", "/mock/choice", {
+        chat: "b-fraga",
+        option_id: "manniska_efter_faq",
+      });
+    } else {
+      // walk: if on faq message auto-walked to after_faq in applyChoice
+      r = await json("POST", "/mock/choice", {
+        chat: "b-fraga",
+        option_id: "manniska_efter_faq",
+      });
+    }
     if (r.data.reply?.type !== "handoff") {
-      throw new Error(`fraga_handoff ${JSON.stringify(r.data)}`);
+      throw new Error(`fraga_after_faq ${JSON.stringify(r.data)}`);
     }
     results.branches.question = {
       type: r.data.reply.type,
       tag: r.data.reply.tag,
-      queue: r.data.reply.queue,
+      via: "faq_then_human",
     };
 
     // Book → form → confirmation+handoff
