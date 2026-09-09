@@ -17,7 +17,7 @@
 - White-label + IPO-paper stubbar (`91d4d4d`).
 
 ## Paper-bygge i PR #4 (draft — merge bara efter namngivet ja)
-Branch `cursor/rider-kansla-32bit-0a6e`. Gate `hasCompletedFirstRide` / `RIDER_FIRST_RIDE_KEY`, «små belopp»-hint, impuls (process före fart), 32-bit playfeel (W/S/F/[ ]/Space), silhuett-HUD, tom-arena dry-run (`fde2807`), mjuk impuls + kolla-grafen på fylld arena (`3dbc025` / `6dbb626`), hopp-tell + soft unlock (`b90b3c0`), struktur-trail-tell (`c8b83e4`: trail bara på RSI/Bollinger+budstuds; SL krymper bara, aldrig breddas; mjuk tell på arena/silhuett-HUD), rokad-tell (`ba97064` / `b99e062`: vänd sida syns i silhuett, volym −25 % av aktuell pilotvolym, mjuk tell + ÖB-gate i paper; ingen live-väg). Tester gröna. `LIVE_LOCKED` orörd. Synkad mot main `74d22f6`. Draft.
+Branch `cursor/rider-kansla-32bit-0a6e`. Gate `hasCompletedFirstRide` / `RIDER_FIRST_RIDE_KEY`, «små belopp»-hint, impuls (process före fart), 32-bit playfeel (W/S/F/[ ]/Space), silhuett-HUD, tom-arena dry-run (`fde2807`), mjuk impuls + kolla-grafen på fylld arena (`3dbc025` / `6dbb626`), hopp-tell + soft unlock (`b90b3c0`), struktur-trail-tell (`c8b83e4`: trail bara på RSI/Bollinger+budstuds; SL krymper bara, aldrig breddas; mjuk tell på arena/silhuett-HUD), rokad-tell (`ba97064` / `b99e062`: vänd sida syns i silhuett, volym −25 % av aktuell pilotvolym, mjuk tell + ÖB-gate i paper; ingen live-väg). Tester gröna. `LIVE_LOCKED` orörd. Synkad mot main `81c61fd`. Draft.
 
 **17:54 Sthlm 7 sep:** rebase klar mot tip. Draft kvar.
 **09:38 Sthlm 8 sep:** tom-arena dry-run landat.
@@ -28,7 +28,7 @@ Branch `cursor/rider-kansla-32bit-0a6e`. Gate `hasCompletedFirstRide` / `RIDER_F
 **17:45 Sthlm 8 sep:** mjuk struktur-trail-tell landat (`c8b83e4`) — SL krymper bara på RSI/Bollinger+budstuds. Draft. Merge väntar namngivet ja.
 **09:38 Sthlm 9 sep (ständig):** magasin `8765` var nere → omstartad, HTTP 200. Main-status synkad. Nästa paper-UX = rokad-tell.
 **09:47 Sthlm 9 sep:** rokad-tell landat (`b99e062`). Merge väntar namngivet ja.
-**13:49 Sthlm 9 sep (ständig):** PR #4 synkad mot main `74d22f6` (WhatsApp Fastigheterutomlands paper, ConnectPoint paper, CHECKLISTA-OFARDIGT, rider-status `662ed37`). Landade slices kvar: dry-run, impuls, hopp-tell, struktur-trail, rokad-tell. `LIVE_LOCKED` true. Nästa paper-UX = **Lamp/WATCHERS-skin** — bara kvällstid per ÖB 9 sep; implementeras inte i denna synk. Draft PR #8 mitt-hedge ligger separat. Merge väntar namngivet ja.
+**13:49 Sthlm 9 sep (ständig):** PR #4 synkad mot main `81c61fd` (via `74d22f6`: WhatsApp Fastigheterutomlands paper, ConnectPoint paper, CHECKLISTA-OFARDIGT, rider-status `662ed37`; plus white-label/ForceX paper). Landade slices kvar: dry-run, impuls, hopp-tell, struktur-trail, rokad-tell. `LIVE_LOCKED` true. Nästa paper-UX = **Lamp/WATCHERS-skin** — bara kvällstid per ÖB 9 sep; implementeras inte i denna synk. Draft PR #8 mitt-hedge ligger separat. Merge väntar namngivet ja.
 
 https://github.com/ARTIFICER-VAULT-HIVEMINDSYSOP/dirigentverket/pull/4
 
