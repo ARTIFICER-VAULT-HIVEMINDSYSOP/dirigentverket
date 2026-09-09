@@ -8,21 +8,33 @@
 - License-text = paper tills Legal skriver och ÖB säger ja.
 - Inga påhittade kronor.
 
-## Tenant-nycklar (utkast)
-| Nyckel | Syfte | Default i klustret |
-|--------|--------|--------------------|
-| `brand.name` | Visningsnamn | Kapital och Strategi |
-| `brand.logo` | Logotyp-väg/URL | saknas tills namngiven |
-| `crm.baseUrl` | ForceX/tenant-CRM | `crm1.forcex.software` |
-| `calendar.owner` | Bokningskalender | saknas per tenant |
-| `surfaces.magasin` | Magasin på/av | on |
-| `surfaces.rider` | Trade Rider paper | on |
-| `live.orders` | Live-lampa | off tills namngivet ja |
+## Befintliga filer (main)
+| Fil | Roll |
+|-----|------|
+| `tenant.example.json` | Mall för ny licenstagare (skin, crm, calendars, magazines, sele, rules, license) |
+| `public/tenant.js` | Läser `./tenant.json` runtime; fallback till KS-skin. Ingen PII. |
+| `tenants/<slug>/` | Tenant-overlays (t.ex. Fastigheterutomlands flows/knowledge) — utan kundregister |
+
+Kopiera `tenant.example.json` → `public/tenant.json` (eller tenant-overlay) per licens. `tenant.json` med skarpa CRM-nycklar/köer gitignoreras eller hålls utanför pack.
+
+## Tenant-nycklar (utkast ↔ example)
+| Nyckel (paper) | `tenant.example.json` | Default i klustret |
+|----------------|------------------------|--------------------|
+| `brand.name` | `skin.name` | Kapital och Strategi |
+| `brand.logo` | `skin.logo` | saknas tills namngiven |
+| `crm.baseUrl` | `crm.url` | `crm1.forcex.software` |
+| `crm.open` | `crm.open` | `detail` (aldrig Call) |
+| `calendar.owner` | `calendars[]` | saknas per tenant |
+| `surfaces.magasin` | `magazines[]` | on |
+| `surfaces.rider` | (nexus `#/rider`) | on / paper |
+| `live.orders` | `rules.paper_default` + ÖB-ja | off tills namngivet ja |
+| `license.*` | `license.status/licensor/licensee/fee` | paper / `saknas` |
 
 ## Pack-regel
 1. Motor + paper-docs utan register.
-2. Tenant-overlays i egen fil (inte hårdkod i `src`).
+2. Tenant-overlays i egen fil/mapp (inte hårdkod i `src`).
 3. Verifiera att dump/backup saknar telefon, saldo, kommentarsregister.
+4. `fee` och belopp = `saknas` tills Legal + ÖB; hitta inte på kronor.
 
 ## Inte
 - Live-utskick, merge, betala, radera
