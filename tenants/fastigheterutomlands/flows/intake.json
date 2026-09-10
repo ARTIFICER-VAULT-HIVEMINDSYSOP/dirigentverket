@@ -1,18 +1,19 @@
 {
   "id": "intake",
-  "version": "1.3",
+  "version": "1.4",
   "tenant": "fastigheterutomlands",
   "lang": "en",
   "mode": "paper",
   "entry": "start",
   "meta": {
     "brand": "Fastigheterutomlands.com",
-    "channel": "whatsapp_cloud_api",
-    "notes": "Paper. No live send. Brand/WABA/number in tenant-config, not here. Menu: Interest / Question / Book a call / Human. English copy. Question path uses faq-secure-purchase.json then broker referral. Book fields: name, country/area, contact preference required; budget band + note optional; no timeline. No invented amounts, phones, or IBAN in bot replies. Live requires named yes from OB.",
+    "channel": "telegram_bot_api",
+    "notes": "Paper. No live send. Telegram BotFather token in tenant-config, not here. Menu: Interest / Question / Book a call / Human. English. FAQ + always refer to personal broker. Book fields: name, country/area, contact required; budget band + note optional; no timeline. Live requires named yes from OB.",
     "knowledge": {
       "faq": "../../../tenants/fastigheterutomlands/knowledge/faq-secure-purchase.json",
       "rule": "FAQ replies are general only; always refer to personal broker for clear answers. Never send payment details."
-    }
+    },
+    "channel_note": "Primary channel: Telegram (paper). WhatsApp parked due to Meta WABA restriction."
   },
   "nodes": {
     "start": {
@@ -48,7 +49,8 @@
           "next": "handoff_manniska"
         }
       ],
-      "fallback": "handoff_timeout"
+      "fallback": "handoff_timeout",
+      "tg": "inline_keyboard"
     },
     "intresse_info": {
       "type": "message",
@@ -77,7 +79,8 @@
           "next": "handoff_manniska"
         }
       ],
-      "fallback": "handoff_timeout"
+      "fallback": "handoff_timeout",
+      "tg": "inline_keyboard"
     },
     "fraga_typ": {
       "type": "choice",
@@ -126,7 +129,8 @@
         "field": "fraga_amne",
         "from": "option_id"
       },
-      "fallback": "handoff_timeout"
+      "fallback": "handoff_timeout",
+      "tg": "inline_keyboard"
     },
     "fraga_prompt": {
       "type": "message",
@@ -294,7 +298,8 @@
           "next": "handoff_manniska"
         }
       ],
-      "fallback": "handoff_timeout"
+      "fallback": "handoff_timeout",
+      "tg": "inline_keyboard"
     }
   },
   "rules": {
