@@ -1,59 +1,72 @@
 # PAPER: Telegram-svarsrobot — Fastigheterutomlands.com
 
-Status: paper. **Kanalbyte från WhatsApp** (ÖB 2026-09-10): samma recept, slippa Meta-verifiering. Live-skick bara efter namngivet ja. Byggare Bob + VD.
+Status: paper. Kanalbyte från WhatsApp (Meta-lås) → **Telegram**. Live bara efter ÖB namngivet ja. Byggare Bob + VD.
 
 ## Varför Telegram
 
-- BotFather → token på minuter (ingen Business Manager / WABA / display-name-granskning)
-- Inline-knappar + reply keyboard = samma valträd
-- Webhook eller long-poll; ingen 24h-template-mur för första svar (kunden startar med /start)
+Samma dialogrecept utan Meta WABA/verifiering/selfie. BotFather-token + webhook räcker.
 
-## Samma recept (återanvänd)
+## Vad vi bygger
 
-- Flöde: `tenants/fastigheterutomlands/flows/intake.json` (Interest / Question / Book / Human)
-- FAQ: `knowledge/faq-secure-purchase.json` + mäklarhänvisning, ingen IBAN i chatt
-- Handoff-kö oförändrad
-- Dialogmotor tenant-agnostisk — byt bara `meta.channel` → `telegram_bot_api` + adapter
+Svarsrobot med **val** (inline-knappar) och **vidare** till nästa steg eller människa. Styrt träd — inte fri AI först.
 
 ## Lager
 
 ```
 Telegram Bot API
-        │ webhook / getUpdates
+        │ webhook in/out  (eller long-poll paper)
         ▼
-Ingress (HTTPS)  — secret token i header
+Ingress (HTTPS)  — secret token-header, session
         ▼
-Session store
+Session store   — chat-id → state, tenant, språk
         ▼
-Dialogmotor (samma JSON-noder)
+Dialogmotor     — samma JSON-flöden som WhatsApp-paper
         ▼
-Adapters (CRM/handoff)
+Adapters        — CRM/kalender (tenant)
+        ▼
+Handoff-kö      — människa; bot tyst
 ```
 
-## Mapping WhatsApp → Telegram
+## Byggstenar (Telegram ≈ Meta)
 
-| WA | Telegram |
-|----|----------|
-| Reply buttons (≤3) | InlineKeyboard (rader) |
-| List (≤10) | InlineKeyboard eller reply keyboard |
-| Flows (formulär) | stegvisa frågor / WebApp senare |
-| Template utanför 24h | Behövs ej — bot svarar efter /start |
+| Behov | Telegram | Gräns |
+|-------|----------|-------|
+| 2–3 snabba val | Inline keyboard (callback) | praktiskt ≤3 per rad |
+| Fler alternativ | Inline keyboard flera rader / ReplyKeyboard | ≤10 i vårt flöde |
+| Formulär | steg-för-steg frågor eller WebApp senare | paper: mock form |
+| Första kontakt | användaren startar bot (`/start`) | ingen 24h-template |
+
+## Dialog
+
+Återanvänder `tenants/fastigheterutomlands/flows/intake.json` (+ FAQ):
+
+- `/start` → Interest / Question / Book a call / Human
+- FAQ + alltid broker-hänvisning
+- Handoff tystar bot
+
+## Tenant-config (aldrig git)
+
+- `telegram.bot_token` (BotFather)
+- `telegram.webhook_secret`
+- `telegram.bot_username`
+- Brand/CRM oförändrat white-label
 
 ## Steg för att tända
 
-1. @BotFather → `/newbot` → spara token i tenant-config (aldrig git)
-2. Sätt webhook till ingress (paper stub först)
-3. Mock: /start → meny → alla grenar (samma test:all-idé)
-4. ÖB namngivet ja → live
+1. BotFather → `/newbot` → token → tenant-config lokalt
+2. Paper: ingress-stub + mock callbacks (inga live-skick)
+3. Test: `/start` → knappar → handoff syns i kö
+4. Webhook HTTPS mot ingress
+5. ÖB namngivet ja → live
 
-## Inte i scope
+## Inte i scope än
 
-- WhatsApp-live (parkerad)
-- Token i repo
-- Auto-CRM Create utan godkännande
+- Live token i repo
+- WhatsApp parallellt (parkerat p.g.a. Meta-restriktion)
+- Betalningar / ads
 
 ## Klart när
 
-- Denna paper
-- Telegram-stub + smoke (Bob)
-- Live efter ja
+- Denna paper i Dirigentverket
+- Stub: verify-liknande health + mock choice PASS
+- Rapport till VD
