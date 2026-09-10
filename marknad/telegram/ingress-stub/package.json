@@ -1,0 +1,12 @@
+{
+  "name": "fu-telegram-ingress-stub",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Paper Telegram ingress + mock inline choices. No live send. Token never in git.",
+  "scripts": {
+    "start": "node server.js",
+    "test:verify": "node test-smoke.js",
+    "test:all": "node test-smoke-all.js"
+  }
+}
