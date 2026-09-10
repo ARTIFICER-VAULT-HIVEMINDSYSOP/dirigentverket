@@ -926,6 +926,9 @@ test('mitt-hedge-tell: kursserie + band, tom serie = ingen tell', () => {
   const quiet = computeRide({ entry: 100, maxFel: 2, rr: 2, grav: 100, bbLower: 100, bbUpper: 110 });
   assert.equal(quiet.hedge.tell, false);
   assert.equal(quiet.hedge.proposed, false);
+  assert.equal(quiet.hedge.freqPip, false);
+  assert.equal(quiet.hedge.saknas, true);
+  assert.deepEqual(quiet.hedge.ghosts, []);
 
   const few = computeRide({
     entry: 105,
@@ -937,6 +940,10 @@ test('mitt-hedge-tell: kursserie + band, tom serie = ingen tell', () => {
     priceSeries: '100\n110\n100',
   });
   assert.equal(few.hedge.tell, false);
+  assert.equal(few.hedge.freqPip, true);
+  assert.equal(few.hedge.saknas, false);
+  assert.equal(few.hedge.count, 2);
+  assert.deepEqual(few.hedge.ghosts, []);
 
   const onlyHedge = rideHedge({
     bbLower: 100,
@@ -978,6 +985,62 @@ test('mitt-hedge-tell syns mjukt på arena och silhuett-HUD', () => {
   assert.match(quiet, /data-hedge-tell="0"/);
   assert.ok(!/data-rider-hedge-tell/.test(quiet));
   assert.ok(!/data-mode="hedge"/.test(quiet));
+});
+
+test('frekvens-pip när svängar är mätbara; saknas när serie/band tomt', () => {
+  const on = computeRide({
+    entry: 105,
+    maxFel: 2,
+    rr: 2,
+    grav: 105,
+    bbLower: 100,
+    bbUpper: 110,
+    priceSeries: '100\n110\n100\n110',
+  });
+  assert.equal(on.hedge.freqPip, true);
+  assert.equal(on.hedge.saknas, false);
+  assert.equal(on.hedge.count, 3);
+  assert.equal(on.hedge.ghosts.length, 3);
+  assert.equal(on.hedge.ghosts[1].kind, 'mid');
+  assert.equal(on.hedge.ghosts[1].at, 105);
+  const html = renderPlayArena(on);
+  assert.match(html, /data-freq-pip="1"/);
+  assert.match(html, /data-freq-saknas="0"/);
+  assert.match(html, /data-freq-count="3"/);
+  assert.match(html, /data-rider-freq/);
+  assert.match(html, /data-hedge-ghost="1"/);
+  assert.match(html, /rider-mark-hedge-mid/);
+  assert.match(html, /rider-mark-hedge-nedre/);
+  assert.ok(!/<button/i.test(html));
+  assert.ok(!/<dialog/i.test(html));
+  assert.equal(LIVE_LOCKED, true);
+
+  const empty = computeRide({ entry: 100, maxFel: 2, rr: 2, grav: 100 });
+  assert.equal(empty.hedge.freqPip, false);
+  assert.equal(empty.hedge.saknas, true);
+  assert.deepEqual(empty.hedge.ghosts, []);
+  const emptyHtml = renderPlayArena(empty);
+  assert.match(emptyHtml, /data-freq-saknas="1"/);
+  assert.match(emptyHtml, />saknas</);
+  assert.match(emptyHtml, /data-hedge-ghost="0"/);
+  assert.ok(!/rider-mark-hedge-mid/.test(emptyHtml));
+
+  const badBand = computeRide({
+    entry: 105,
+    maxFel: 2,
+    rr: 2,
+    grav: 105,
+    bbLower: 110,
+    bbUpper: 100,
+    priceSeries: '100\n110\n100\n110',
+  });
+  assert.equal(badBand.hedge.saknas, true);
+  assert.equal(badBand.hedge.freqPip, false);
+  assert.deepEqual(badBand.hedge.ghosts, []);
+  const badHtml = renderPlayArena(badBand);
+  assert.match(badHtml, /data-freq-saknas="1"/);
+  assert.ok(!/rider-mark-hedge-mid/.test(badHtml));
+  assert.ok(!/data-hedge-ghost="1"/.test(badHtml));
 });
 
 test('tom-arena dry-run: W/S/F/[ ]/Space flyttar silhuett utan påhittade priser', () => {

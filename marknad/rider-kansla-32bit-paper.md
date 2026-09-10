@@ -20,7 +20,9 @@
 ## PR #4 — landat (inte draft)
 Gate `hasCompletedFirstRide` / `RIDER_FIRST_RIDE_KEY`, «små belopp»-hint, impuls (process före fart), 32-bit playfeel (W/S/F/[ ]/Space), silhuett-HUD, tom-arena dry-run (`fde2807`), mjuk impuls + kolla-grafen på fylld arena (`3dbc025` / `6dbb626`), hopp-tell + soft unlock (`b90b3c0`), struktur-trail-tell (`c8b83e4`), rokad-tell (`ba97064` / `b99e062`). Tester gröna. Merge-commit `a8ea411`.
 
-**15:31 Sthlm 9 sep:** PR #4 mergad till main. Statusfil synkad. Nästa paper-UX = **Lamp/WATCHERS-skin** — bara kvällstid per ÖB 9 sep. Draft PR #8 mitt-hedge ligger separat (väntar namngivet merge-ja).
+**15:31 Sthlm 9 sep:** PR #4 mergad till main. Statusfil synkad. Nästa paper-UX = **Lamp/WATCHERS-skin** — bara kvällstid per ÖB 9 sep.
+
+**10 sep eftermiddag (draft PR #8, inte mergad):** mjuk mitt-hedge-tell (`c4c5df4`) + frekvens-pip / saknas-band på `#/rider`. Pip när svängfrekvens är mätbar. Tom serie eller ogiltigt band = saknas (inga påhittade mitt-markörer). Ghost-silhuett för köp+sälj i mitten bara när banden är ifyllda. Väntar namngivet ÖB merge-ja.
 
 https://github.com/ARTIFICER-VAULT-HIVEMINDSYSOP/dirigentverket/pull/4
 
@@ -29,7 +31,7 @@ När ÖB öppnar `#/rider` ska det kännas så här, i den ordningen:
 1. Arena först — grafen syns innan någon formvägg.
 2. Process-hint syns mjukt (inte skrikig varning).
 3. W/S flyttar räls direkt; F fäster; hävstång 1–4× syns som fart/pip, inte textmur.
-4. Space = lins; hopp har tell; trail-tell syns bara på struktur; rokad-tell (vänd sida, volym −25 %, ÖB-gate) när paper-rokad finns; inga nya play-knappar på ytan.
+4. Space = lins; hopp har tell; trail-tell syns bara på struktur; rokad-tell (vänd sida, volym −25 %, ÖB-gate) när paper-rokad finns; mitt-hedge-tell + frekvens-pip när serien räcker, saknas-pip när serie/band tomt; inga nya play-knappar på ytan.
 5. En lyckad paper-ride krävs innan «små belopp» syns/öppnas.
 6. PAPER-badge sticky; live-knapp död.
 7. Tom arena = dry-run: silhuett rör sig före Räkna; tomma rutor stannar tomma.

@@ -376,18 +376,39 @@ export function emptyRideHedge() {
   return {
     tell: false,
     proposed: false,
+    freqPip: false,
+    saknas: true,
+    saknasKind: 'serie',
     mode: null,
     entry: null,
     count: null,
-    note: '',
+    lastSide: null,
+    lower: null,
+    upper: null,
+    ghosts: [],
+    note: 'saknas',
     paper: true,
     live: false,
   };
 }
 
+function hedgeGhosts(frequency, proposed) {
+  if (!proposed) return [];
+  const mid = frequency.mid;
+  const lower = frequency.lower;
+  const upper = frequency.upper;
+  if (mid == null || lower == null || upper == null) return [];
+  if (frequency.width == null || frequency.width <= 0) return [];
+  return [
+    { kind: 'nedre', at: lower },
+    { kind: 'mid', at: mid },
+    { kind: 'övre', at: upper },
+  ];
+}
+
 /**
  * Soft mitt-hedge tell. Same Artificer lock: user-typed series + bands.
- * Empty series = saknas. Never invents OHLC. Never places an order.
+ * Empty series or invalid band = saknas. Never invents OHLC. Never places an order.
  */
 export function rideHedge(raw = {}) {
   const input = parseRideInput(raw);
@@ -397,20 +418,35 @@ export function rideHedge(raw = {}) {
     minFrequency: input.minFrequency,
     stopDist: input.maxFel,
   });
-  if (!hedge.proposed) {
-    return { ...hold, count: frequency.known ? frequency.count : null };
-  }
+  const freqPip = Boolean(frequency.known);
+  const saknas = Boolean(!frequency.known || frequency.error || frequency.saknas);
+  const saknasKind = frequency.error ? 'band' : saknas ? 'serie' : null;
+  const base = {
+    ...hold,
+    freqPip,
+    saknas,
+    saknasKind,
+    count: frequency.known ? frequency.count : null,
+    lastSide: frequency.lastSide,
+    lower: frequency.known || frequency.width != null ? frequency.lower : null,
+    upper: frequency.known || frequency.width != null ? frequency.upper : null,
+    ghosts: [],
+    note: saknas ? 'saknas' : frequency.note || '',
+  };
+  if (!hedge.proposed) return base;
   return {
+    ...base,
     tell: true,
     proposed: true,
+    saknas: false,
+    saknasKind: null,
     mode: 'mitt_hedge',
     entry: hedge.entry,
     count: hedge.count,
     kop: hedge.kop,
     salj: hedge.salj,
+    ghosts: hedgeGhosts(frequency, true),
     note: 'mitt-hedge · köp + sälj i mitten. Process före fart. Ingen order.',
-    paper: true,
-    live: false,
   };
 }
 

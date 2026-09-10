@@ -45,6 +45,22 @@ function renderScanlines() {
   return `<div class="rider-scanlines" aria-hidden="true"></div>`;
 }
 
+function renderFreqPips(hedge) {
+  if (!hedge) return '';
+  const saknas = Boolean(hedge.saknas);
+  const pip = Boolean(hedge.freqPip);
+  const count = pip && hedge.count != null ? hedge.count : null;
+  const lit = count != null ? Math.min(5, Math.max(0, count)) : 0;
+  const pips = [0, 1, 2, 3, 4]
+    .map((i) => `<span class="rider-sil-freq-pip${i < lit ? ' is-on' : ''}" data-freq-pip-i="${i}"></span>`)
+    .join('');
+  const countAttr = count != null ? ` data-freq-count="${count}"` : '';
+  return `<div class="rider-sil-freq" data-rider-freq data-freq-pip="${pip ? '1' : '0'}" data-freq-saknas="${saknas ? '1' : '0'}"${countAttr}>
+        ${pips}
+        ${saknas ? '<span class="rider-sil-freq-empty">saknas</span>' : ''}
+      </div>`;
+}
+
 function renderBitHud(lev, speed, railText, rails = [], play = {}, hopped = false, trailed = false, rokad = null, hedge = null) {
   const rail = play.rail || 0;
   const sit = play.sit ?? rail;
@@ -72,6 +88,7 @@ function renderBitHud(lev, speed, railText, rails = [], play = {}, hopped = fals
         ${trailed ? '<span class="rider-sil-tell" data-rider-trail-tell>tell</span>' : ''}
         ${rokadOn ? '<span class="rider-sil-tell" data-rider-rokad-tell>tell</span>' : ''}
         ${hedgeOn ? '<span class="rider-sil-tell" data-rider-hedge-tell>tell</span>' : ''}
+        ${renderFreqPips(hedge)}
       </div>
       ${
         play.side || rokad
@@ -122,6 +139,7 @@ export function renderPlayArena(ride, play = {}) {
       })
       .join('');
     return `<div class="rider-play is-empty rider-bit is-dry-run" data-rider-play data-bit="32" data-dry-run="1" role="status"
+      data-freq-pip="${ride?.hedge?.freqPip ? '1' : '0'}" data-freq-saknas="${!ride || !ride.hedge || ride.hedge.saknas ? '1' : '0'}" data-hedge-ghost="0"
       data-leverage="${lev}" data-speed="${speed}" data-lens="${lens}" data-rail="${rail}" data-sit="${sit}"
       style="--rider-speed:${speed};--rider-lens:${lens};--rider-coast-ms:${coastPeriodMs(lev)}ms;">
       ${renderScanlines()}
@@ -150,6 +168,7 @@ export function renderPlayArena(ride, play = {}) {
     ...(ride.horizon?.prices || []),
     ride.jump?.jumped ? ride.jump.from : null,
     ride.jump?.jumped ? ride.jump.to : null,
+    ...((ride.hedge && ride.hedge.ghosts) || []).map((g) => g.at),
   ].filter((n) => n !== null && n !== undefined);
   const scale = arenaScale(prices);
 
@@ -165,6 +184,11 @@ export function renderPlayArena(ride, play = {}) {
   if (ride.jump && ride.jump.jumped) {
     marks.push({ kind: 'from', at: ride.jump.from, label: 'från' });
     marks.push({ kind: 'to', at: ride.jump.to, label: 'till' });
+  }
+  if (ride.hedge && ride.hedge.proposed && Array.isArray(ride.hedge.ghosts)) {
+    for (const g of ride.hedge.ghosts) {
+      if (g && g.at != null) marks.push({ kind: `hedge-${g.kind}`, at: g.at, label: g.kind === 'mid' ? 'mitt' : g.kind });
+    }
   }
   marks.push({ kind: 'sl', at: ride.sl, label: 'SL' });
 
@@ -243,8 +267,9 @@ export function renderPlayArena(ride, play = {}) {
 
   const coastMs = coastPeriodMs(lev);
   const railText = rails[rail] != null ? escapeHtml(String(rails[rail])) : '';
+  const ghostOn = Boolean(hedgeOn && ride.hedge.ghosts && ride.hedge.ghosts.length);
   return `<div class="rider-play rider-bit is-looking ${jumped ? 'has-hop' : 'has-hold'}${trailed ? ' has-trail' : ''}${rokadOn ? ' has-rokad' : ''}${hedgeOn ? ' has-hedge' : ''}" data-rider-play data-bit="32" data-look="1"
-      data-hop-tell="${tell ? '1' : '0'}" data-trail-tell="${trailed ? '1' : '0'}" data-rokad-tell="${rokadOn ? '1' : '0'}" data-hedge-tell="${hedgeOn ? '1' : '0'}"
+      data-hop-tell="${tell ? '1' : '0'}" data-trail-tell="${trailed ? '1' : '0'}" data-rokad-tell="${rokadOn ? '1' : '0'}" data-hedge-tell="${hedgeOn ? '1' : '0'}" data-freq-pip="${ride.hedge && ride.hedge.freqPip ? '1' : '0'}" data-freq-saknas="${ride.hedge && ride.hedge.saknas ? '1' : '0'}" data-hedge-ghost="${ghostOn ? '1' : '0'}"
       data-side="${escapeHtml(ride.input?.side || 'köp')}" data-rokad-from="${escapeHtml(ride.rokad?.from || ride.input?.side || 'köp')}" data-rokad-to="${escapeHtml(ride.rokad?.to || ride.input?.side || 'köp')}"
       data-leverage="${lev}" data-speed="${speed}" data-lens="${lens}" data-rail="${rail}" data-sit="${sit}"
       style="--rider-speed:${speed};--rider-lens:${lens};--rider-coast-ms:${coastMs}ms;--hop-window:${HOP_WINDOW_MS}ms;"
