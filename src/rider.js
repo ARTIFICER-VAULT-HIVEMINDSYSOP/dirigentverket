@@ -5,6 +5,7 @@
  */
 
 import { formatPx, structureSignal, seasonPlan } from './robot.js';
+import { measureFrequency, proposeMittHedge } from './hedge.js';
 
 export { formatPx };
 
@@ -44,6 +45,8 @@ const TEMPLATE_FIELDS = [
   'prognosRr',
   'hallaRr',
   'nastaSasong',
+  'priceSeries',
+  'minFrequency',
 ];
 
 function num(v) {
@@ -115,6 +118,8 @@ export function parseRideInput(raw) {
     prognosRr: num(raw.prognosRr),
     hallaRr: num(raw.hallaRr),
     nastaSasong: String(raw.nastaSasong || '').trim(),
+    priceSeries: raw.priceSeries,
+    minFrequency: raw.minFrequency,
     midAir: Boolean(raw.midAir),
   };
 }
@@ -302,6 +307,7 @@ export function computeRide(raw) {
       jump: { jumped: false, from: null, to: null, windowMs: HOP_WINDOW_MS, tell: false },
       trail: emptyRideTrail(null),
       rokad: rideRokad(raw),
+      hedge: rideHedge(raw),
       tillgang: input.tillgang,
       pilotVolume: inheritPilotVolume(input.pilotVolume, null),
       input,
@@ -314,6 +320,7 @@ export function computeRide(raw) {
   const jump = rideJump(input, grav, structure);
   const trail = rideTrail(input, levels, structure);
   const rokad = rideRokad(raw);
+  const hedge = rideHedge(raw);
   const coast = input.coast;
 
   return paperStamp({
@@ -333,6 +340,7 @@ export function computeRide(raw) {
     jump,
     trail,
     rokad,
+    hedge,
     tillgang: input.tillgang,
     pilotVolume: inheritPilotVolume(input.pilotVolume, null),
     input,
@@ -362,6 +370,48 @@ export function rokadVolume(pilot) {
   const n = Number(pilot);
   if (!Number.isFinite(n) || n <= 0) return null;
   return inheritPilotVolume(n, n * 0.75);
+}
+
+export function emptyRideHedge() {
+  return {
+    tell: false,
+    proposed: false,
+    mode: null,
+    entry: null,
+    count: null,
+    note: '',
+    paper: true,
+    live: false,
+  };
+}
+
+/**
+ * Soft mitt-hedge tell. Same Artificer lock: user-typed series + bands.
+ * Empty series = saknas. Never invents OHLC. Never places an order.
+ */
+export function rideHedge(raw = {}) {
+  const input = parseRideInput(raw);
+  const hold = emptyRideHedge();
+  const frequency = measureFrequency(input.priceSeries, input.bbLower, input.bbUpper);
+  const hedge = proposeMittHedge(frequency, {
+    minFrequency: input.minFrequency,
+    stopDist: input.maxFel,
+  });
+  if (!hedge.proposed) {
+    return { ...hold, count: frequency.known ? frequency.count : null };
+  }
+  return {
+    tell: true,
+    proposed: true,
+    mode: 'mitt_hedge',
+    entry: hedge.entry,
+    count: hedge.count,
+    kop: hedge.kop,
+    salj: hedge.salj,
+    note: 'mitt-hedge · köp + sälj i mitten. Process före fart. Ingen order.',
+    paper: true,
+    live: false,
+  };
 }
 
 export function emptyRideRokad(side = 'köp') {
@@ -536,6 +586,8 @@ export function emptyRideDraft() {
     prognosRr: '',
     hallaRr: '',
     nastaSasong: '',
+    priceSeries: '',
+    minFrequency: '',
   };
 }
 

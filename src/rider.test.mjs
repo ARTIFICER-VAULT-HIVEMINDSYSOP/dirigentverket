@@ -37,6 +37,7 @@ import {
   inheritPilotVolume,
   rokadVolume,
   rideRokad,
+  rideHedge,
   RIDER_ROKAD_GATE,
   rideImpulse,
   RIDER_IMPULSE_NOTE,
@@ -314,7 +315,7 @@ test('arena-UI A–E: tom play-rad, kicker inte lampa, hopp from→to', () => {
   for (const name of ['tillgang', 'side', 'pilotVolume', 'entry', 'maxFel', 'rr', 'grav']) {
     assert.match(page, new RegExp(`id="rider-core"[\\s\\S]*name="${name}"`));
   }
-  for (const name of ['requested', 'current', 'rsi', 'bbLower', 'bbUpper', 'bounce', 'ovre', 'undre', 'havstang', 'cluster', 'prognos', 'prognosRr', 'hallaRr']) {
+  for (const name of ['requested', 'current', 'rsi', 'bbLower', 'bbUpper', 'bounce', 'ovre', 'undre', 'havstang', 'cluster', 'prognos', 'prognosRr', 'hallaRr', 'priceSeries', 'minFrequency']) {
     assert.match(page, new RegExp(`id="rider-advanced"[\\s\\S]*name="${name}"`));
     assert.ok(!new RegExp(`id="rider-core"[\\s\\S]*name="${name}"[\\s\\S]*id="rider-advanced"`).test(page));
   }
@@ -901,6 +902,82 @@ test('rokad-tell syns mjukt på arena och silhuett-HUD', () => {
   assert.match(quiet, /data-rokad-tell="0"/);
   assert.ok(!/data-rider-rokad-tell/.test(quiet));
   assert.ok(!/data-mode="rokad"/.test(quiet));
+});
+
+test('mitt-hedge-tell: kursserie + band, tom serie = ingen tell', () => {
+  const on = computeRide({
+    entry: 105,
+    maxFel: 2,
+    rr: 2,
+    grav: 105,
+    bbLower: 100,
+    bbUpper: 110,
+    priceSeries: '100\n110\n100\n110',
+  });
+  assert.equal(on.ok, true);
+  assert.equal(on.hedge.tell, true);
+  assert.equal(on.hedge.proposed, true);
+  assert.equal(on.hedge.mode, 'mitt_hedge');
+  assert.equal(on.hedge.entry, 105);
+  assert.equal(on.hedge.paper, true);
+  assert.equal(on.hedge.live, false);
+  assert.equal(LIVE_LOCKED, true);
+
+  const quiet = computeRide({ entry: 100, maxFel: 2, rr: 2, grav: 100, bbLower: 100, bbUpper: 110 });
+  assert.equal(quiet.hedge.tell, false);
+  assert.equal(quiet.hedge.proposed, false);
+
+  const few = computeRide({
+    entry: 105,
+    maxFel: 2,
+    rr: 2,
+    grav: 105,
+    bbLower: 100,
+    bbUpper: 110,
+    priceSeries: '100\n110\n100',
+  });
+  assert.equal(few.hedge.tell, false);
+
+  const onlyHedge = rideHedge({
+    bbLower: 100,
+    bbUpper: 110,
+    priceSeries: '100\n110\n100\n110',
+    maxFel: 2,
+  });
+  assert.equal(onlyHedge.tell, true);
+  assert.equal(onlyHedge.entry, 105);
+});
+
+test('mitt-hedge-tell syns mjukt på arena och silhuett-HUD', () => {
+  const ride = computeRide({
+    entry: 105,
+    maxFel: 2,
+    rr: 2,
+    grav: 105,
+    bbLower: 100,
+    bbUpper: 110,
+    priceSeries: '100\n110\n100\n110',
+  });
+  const html = renderPlayArena(ride);
+  assert.match(html, /data-hedge-tell="1"/);
+  assert.match(html, /data-rider-hedge-tell/);
+  assert.match(html, /data-hedge="1"/);
+  assert.match(html, /data-mode="hedge"/);
+  assert.match(html, /köp \+ sälj/);
+  assert.match(html, /process före fart/);
+  assert.match(html, /ingen order/);
+  assert.ok(!/<button/i.test(html));
+  assert.ok(!/<dialog/i.test(html));
+  assert.ok(!/data-rider-pad|data-action="rider-key"/i.test(html));
+  assert.ok(!/WATCHERS|anden i lampan/i.test(html));
+  assert.ok(!/\d+\s*kr/i.test(html));
+  assert.doesNotMatch(html, /P&L|pnl/);
+  assert.equal(LIVE_LOCKED, true);
+
+  const quiet = renderPlayArena(computeRide({ entry: 100, maxFel: 2, rr: 2, grav: 100 }));
+  assert.match(quiet, /data-hedge-tell="0"/);
+  assert.ok(!/data-rider-hedge-tell/.test(quiet));
+  assert.ok(!/data-mode="hedge"/.test(quiet));
 });
 
 test('tom-arena dry-run: W/S/F/[ ]/Space flyttar silhuett utan påhittade priser', () => {
