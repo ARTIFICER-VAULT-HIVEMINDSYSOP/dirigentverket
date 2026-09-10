@@ -20,10 +20,13 @@
 ## PR #4 — landat (inte draft)
 Gate `hasCompletedFirstRide` / `RIDER_FIRST_RIDE_KEY`, «små belopp»-hint, impuls (process före fart), 32-bit playfeel (W/S/F/[ ]/Space), silhuett-HUD, tom-arena dry-run (`fde2807`), mjuk impuls + kolla-grafen på fylld arena (`3dbc025` / `6dbb626`), hopp-tell + soft unlock (`b90b3c0`), struktur-trail-tell (`c8b83e4`), rokad-tell (`ba97064` / `b99e062`). Tester gröna. Merge-commit `a8ea411`.
 
-**15:31 Sthlm 9 sep:** PR #4 mergad till main. Statusfil synkad. Nästa paper-UX = **Lamp/WATCHERS-skin** — bara kvällstid per ÖB 9 sep.
+**15:31 Sthlm 9 sep:** PR #4 mergad till main. Statusfil synkad.
 
-**10 sep eftermiddag (draft PR #8, inte mergad):** mjuk mitt-hedge-tell (`c4c5df4`) + frekvens-pip / saknas-band på `#/rider`. Pip när svängfrekvens är mätbar. Tom serie eller ogiltigt band = saknas (inga påhittade mitt-markörer). Ghost-silhuett för köp+sälj i mitten bara när banden är ifyllda. Väntar namngivet ÖB merge-ja.
+**13:39 Sthlm 10 sep (ständig-process):** Draft PR #8 mitt-hedge — mjuk Rider mitt-hedge-tell redan på branchen (`c4c5df4`); update-branch mot main klar (0 behind). Cloud follow-up: frekvens-pip + saknas-band empty-tell (samma draft, ingen merge). Lamp/WATCHERS-skin = bara kvällstid. Merge PR #8 väntar namngivet ÖB-ja.
 
+**10 sep eftermiddag (draft PR #8, inte mergad):** frekvens-pip + saknas-band landat på branchen (`2a396fa`). Pip när svängfrekvens är mätbar. Tom serie eller ogiltigt band = saknas (inga påhittade mitt-markörer). Ghost-silhuett för köp+sälj i mitten bara när banden är ifyllda. Väntar namngivet ÖB merge-ja.
+
+https://github.com/ARTIFICER-VAULT-HIVEMINDSYSOP/dirigentverket/pull/8
 https://github.com/ARTIFICER-VAULT-HIVEMINDSYSOP/dirigentverket/pull/4
 
 ## Prova-känsla (nu på main — paper)
