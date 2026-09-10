@@ -1,6 +1,6 @@
 # ÖB — ofärdigt (påminns vardagar)
 
-Uppdaterad 2026-09-09. Bocka av när bevis finns. Lampan = **kvällstid**.
+Uppdaterad 2026-09-10. Bocka av när bevis finns. Lampan = **kvällstid**.
 
 ## Du (ÖB) måste
 
@@ -10,26 +10,27 @@ Uppdaterad 2026-09-09. Bocka av när bevis finns. Lampan = **kvällstid**.
 - [ ] Live-order (bara efter ja på namngivna rader): LMT 4%, Klein USDCHF+EURCHF, North 3+3, ROBOT 1% NI
 - [ ] Intro-mejl: riktig inloggningslänk (OTP `OTP123456` redan satt)
 - [ ] Bjuda in `william@kapitalstrategi.com` till Cursor
+- [ ] **Radera** fyra brus-agenter: `RADERA — tom`, `RADERA — LAMPAN dubblett`, `RADERA — MB-kontroll`, `RADERA — Studio lampan`
 
-## Stab / grönt (kan köras)
+## Stab / grönt
 
-- [ ] KS Pages: klarställ push/deploy + bevisa custom domain när DNS sitter
-- [x] Frihetsbibliotek Pages: Actions tänd + 200 (`frihetsbibliotek-sida`)
+- [ ] KS Pages: push/deploy + custom domain när DNS sitter
+- [x] Frihetsbibliotek Pages: Actions tänd + 200
 - [ ] Magasin-genväg på KS `/admin`
-- [ ] ForceX: visa kommentarer, rensa rena dubbletter; saldo tom=saknas
-- [ ] ForceX retro: magasin-utfall utan kortkommentar
-- [x] ConnectPoint: portal HTML-stub (kö Godkänn/Ändra/Avvisa) — `public/connectpoint-godkannande.html`; live Create kräver ÖB-ja
-- [x] WhatsApp: flödes-JSON v1 + ingress-stub (paper smoke OK)
-- [ ] Telegram-svarsrobot Fastigheterutomlands (samma recept; Meta/WhatsApp parkerad)
-- [ ] Telegram live: BotFather-token + namngivet ja
-- [ ] UnSpun 020 MKULTRA transcript (efter live-prio)
+- [ ] ForceX: kommentarer/dubbletter; saldo tom=saknas; retro magasin-utfall
+- [x] ConnectPoint: portal HTML-stub — `public/connectpoint-godkannande.html`; live Create kräver ÖB-ja
+- [x] WhatsApp paper (parkerad Meta)
+- [x] Telegram Fastigheterutomlands: meny v1.9 SV/EN, sajt=grundmanual, poller live (test)
+- [ ] Telegram: namngivet **produktion-ja** när du vill ha den permanent
+- [x] Säljcoach skapad + Säljstab-kanal
+- [ ] UnSpun 020 (efter live-prio)
 
 ## Kväll (lampan)
 
-- [ ] Allt gällande lampan / spelet — bara kvällstid
+- [ ] Allt lampan / spelet — bara kvällstid
 
-## Rådsmaterial (klart som text)
+## Rådsmaterial
 
-- [x] RT-tråd 126619 → `marknad/rad-arv-stor-summa-rt-126619.md`
-- [x] ConnectPoint paper → `marknad/voip/PAPER-connectpoint-forcex-godkannande.md`
-
+- [x] RT-tråd 126619
+- [x] ConnectPoint paper
+- [x] `stab/ORGNING.md`
