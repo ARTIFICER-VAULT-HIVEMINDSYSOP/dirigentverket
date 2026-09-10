@@ -14,13 +14,14 @@ Uppdaterad 2026-09-09. Bocka av när bevis finns. Lampan = **kvällstid**.
 ## Stab / grönt (kan köras)
 
 - [ ] KS Pages: klarställ push/deploy + bevisa custom domain när DNS sitter
-- [ ] Frihetsbibliotek Pages: Actions + bevisa HTTP 200
+- [x] Frihetsbibliotek Pages: Actions tänd + 200 (`frihetsbibliotek-sida`)
 - [ ] Magasin-genväg på KS `/admin`
 - [ ] ForceX: visa kommentarer, rensa rena dubbletter; saldo tom=saknas
 - [ ] ForceX retro: magasin-utfall utan kortkommentar
 - [ ] ConnectPoint: portal HTML (kö Godkänn/Avvisa) — API saknas i agent-UI
 - [x] WhatsApp: flödes-JSON v1 + ingress-stub (paper smoke OK)
-- [ ] WhatsApp live: Meta WABA/nummer + namngivet ja
+- [ ] Telegram-svarsrobot Fastigheterutomlands (samma recept; Meta/WhatsApp parkerad)
+- [ ] Telegram live: BotFather-token + namngivet ja
 - [ ] UnSpun 020 MKULTRA transcript (efter live-prio)
 
 ## Kväll (lampan)
