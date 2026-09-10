@@ -20,7 +20,8 @@ Uppdaterad 2026-09-09. Bocka av när bevis finns. Lampan = **kvällstid**.
 - [ ] ForceX retro: magasin-utfall utan kortkommentar
 - [ ] ConnectPoint: portal HTML (kö Godkänn/Avvisa) — API saknas i agent-UI
 - [x] WhatsApp: flödes-JSON v1 + ingress-stub (paper smoke OK)
-- [ ] WhatsApp live: Meta WABA/nummer + namngivet ja
+- [ ] Telegram-svarsrobot Fastigheterutomlands (samma recept; Meta/WhatsApp parkerad)
+- [ ] Telegram live: BotFather-token + namngivet ja
 - [ ] UnSpun 020 MKULTRA transcript (efter live-prio)
 
 ## Kväll (lampan)
