@@ -40,3 +40,7 @@ Kopiera `tenant.example.json` → `public/tenant.json` (eller tenant-overlay) pe
 ## Inte
 - Live-utskick, merge, betala, radera
 - PII i git eller backup
+
+## Magasin-genväg (paper)
+KS `/admin` → Magasin är ofärdigt tills DNS/Pages sitter. Lokal magasin-hälsa = port `8765` (HTTP 200). Tenant-yta `magazines[]` styr desk-köer; ingen kund-PII i example.
+

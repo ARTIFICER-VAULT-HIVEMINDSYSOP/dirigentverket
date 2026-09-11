@@ -1,6 +1,6 @@
 # ÖB — ofärdigt (påminns vardagar)
 
-Uppdaterad 2026-09-09. Bocka av när bevis finns. Lampan = **kvällstid**.
+Uppdaterad 2026-09-11. Bocka av när bevis finns. Lampan = **kvällstid**.
 
 ## Du (ÖB) måste
 
@@ -10,18 +10,20 @@ Uppdaterad 2026-09-09. Bocka av när bevis finns. Lampan = **kvällstid**.
 - [ ] Live-order (bara efter ja på namngivna rader): LMT 4%, Klein USDCHF+EURCHF, North 3+3, ROBOT 1% NI
 - [ ] Intro-mejl: riktig inloggningslänk (OTP `OTP123456` redan satt)
 - [ ] Bjuda in `william@kapitalstrategi.com` till Cursor
+- [ ] **Radera** fyra brus-agenter: `RADERA — tom`, `RADERA — LAMPAN dubblett`, `RADERA — MB-kontroll`, `RADERA — Studio lampan`
 
-## Stab / grönt (kan köras)
+## Stab / grönt
 
-- [ ] KS Pages: klarställ push/deploy + bevisa custom domain när DNS sitter
-- [ ] Frihetsbibliotek Pages: Actions + bevisa HTTP 200
-- [ ] Magasin-genväg på KS `/admin`
-- [ ] ForceX: visa kommentarer, rensa rena dubbletter; saldo tom=saknas
-- [ ] ForceX retro: magasin-utfall utan kortkommentar
-- [ ] ConnectPoint: portal HTML (kö Godkänn/Avvisa) — API saknas i agent-UI
-- [x] WhatsApp: flödes-JSON v1 + ingress-stub (paper smoke OK)
-- [ ] WhatsApp live: Meta WABA/nummer + namngivet ja
-- [ ] UnSpun 020 MKULTRA transcript (efter live-prio)
+- [ ] KS Pages: push/deploy + custom domain när DNS sitter
+- [x] Frihetsbibliotek Pages: Actions tänd + 200
+- [ ] Magasin-genväg på KS `/admin` (lokal Magasin `8765` root+`magasin.html` HTTP 200 verifierad 11 sep morgon; KS-genväg väntar DNS)
+- [ ] ForceX: kommentarer/dubbletter; saldo tom=saknas; retro magasin-utfall
+- [ ] ConnectPoint: portal HTML — API saknas i agent-UI
+- [x] WhatsApp paper (parkerad Meta)
+- [x] Telegram Fastigheterutomlands: meny v1.9 SV/EN, sajt=grundmanual, poller live (test)
+- [ ] Telegram: namngivet **produktion-ja** när du vill ha den permanent
+- [x] Säljcoach skapad + Säljstab-kanal
+- [ ] UnSpun 020 (efter live-prio)
 
 ## Kväll (lampan)
 
@@ -29,8 +31,8 @@ Uppdaterad 2026-09-09. Bocka av när bevis finns. Lampan = **kvällstid**.
   - paper Lamp/WATCHERS-skinn på `#/robot` (sten + lampa + tell) — draft, väntar ÖB-accept
   - status: `marknad/lamp-watchers-paper.md` · `LIVE_LOCKED` oförändrad
 
-## Rådsmaterial (klart som text)
+## Rådsmaterial
 
-- [x] RT-tråd 126619 → `marknad/rad-arv-stor-summa-rt-126619.md`
-- [x] ConnectPoint paper → `marknad/voip/PAPER-connectpoint-forcex-godkannande.md`
-
+- [x] RT-tråd 126619
+- [x] ConnectPoint paper
+- [x] `stab/ORGNING.md`

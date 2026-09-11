@@ -1,0 +1,7 @@
+{
+  "port": 8788,
+  "webhook_secret": "paper-tg-secret-change-me",
+  "mode": "paper",
+  "flow_path": "../../../tenants/fastigheterutomlands/flows/intake.json",
+  "bot_token": ""
+}
