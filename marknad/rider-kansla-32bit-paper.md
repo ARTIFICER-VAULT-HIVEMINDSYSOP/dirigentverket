@@ -26,6 +26,8 @@ Gate `hasCompletedFirstRide` / `RIDER_FIRST_RIDE_KEY`, «små belopp»-hint, imp
 
 **10 sep eftermiddag (draft PR #8, inte mergad):** frekvens-pip + saknas-band landat på branchen (`2a396fa`). Pip när svängfrekvens är mätbar. Tom serie eller ogiltigt band = saknas (inga påhittade mitt-markörer). Ghost-silhuett för köp+sälj i mitten bara när banden är ifyllda. Väntar namngivet ÖB merge-ja.
 
+**09:42 Sthlm 11 sep (ständig-process):** Magasin 8765 HTTP 200. PR #8 + #11 update-branch → 0 behind. Cloud follow-up bc-7a6a7541: mjuk band-silhuett + mitt-pip när mitt-hedge-plan finns (samma draft, ingen merge). PR #9 lamp CONFLICTING — kväll. PII-fri backup `/workspace/backups/dirigentverket-verktyg-kod-20260911-0743.tar.gz`. Merge väntar namngivet ja. No live/send/merge.
+
 https://github.com/ARTIFICER-VAULT-HIVEMINDSYSOP/dirigentverket/pull/8
 https://github.com/ARTIFICER-VAULT-HIVEMINDSYSOP/dirigentverket/pull/4
 
