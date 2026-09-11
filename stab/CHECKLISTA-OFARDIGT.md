@@ -27,7 +27,9 @@ Uppdaterad 2026-09-11. Bocka av när bevis finns. Lampan = **kvällstid**.
 
 ## Kväll (lampan)
 
-- [ ] Allt lampan / spelet — bara kvällstid
+- [ ] Allt gällande lampan / spelet — bara kvällstid
+  - paper Lamp/WATCHERS-skinn på `#/robot` (sten + lampa + tell) — draft, väntar ÖB-accept
+  - status: `marknad/lamp-watchers-paper.md` · `LIVE_LOCKED` oförändrad
 
 ## Rådsmaterial
 

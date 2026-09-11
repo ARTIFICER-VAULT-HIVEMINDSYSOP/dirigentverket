@@ -32,6 +32,8 @@ Gate `hasCompletedFirstRide` / `RIDER_FIRST_RIDE_KEY`, «små belopp»-hint, imp
 
 **18:02 Sthlm 11 sep (ständig-process):** Magasin 8765 HTTP 200. PR #8 CLEAN/MERGEABLE, 0 behind (16 ahead). Band-fade giltig→saknas landat (`cb2badc`). Status synkad. Cloud follow-up: mjuk frekvens-progress-pip mot minFrequency innan plan (samma draft, ingen merge). PII-fri backup `/workspace/backups/dirigentverket-verktyg-kod-20260911-1804.tar.gz`. PR #9 lamp CONFLICTING — kväll rebase. Merge väntar namngivet ja. No live/send/merge.
 
+**Kväll 11 sep (PR #9):** lamp-branch synkad mot main. Draft kvar. `LIVE_LOCKED`. Ingen merge.
+
 https://github.com/ARTIFICER-VAULT-HIVEMINDSYSOP/dirigentverket/pull/8
 https://github.com/ARTIFICER-VAULT-HIVEMINDSYSOP/dirigentverket/pull/4
 
@@ -49,4 +51,4 @@ När ÖB öppnar `#/rider` ska det kännas så här, i den ordningen:
 - Live-order, mäklare, påhittade P&L
 - Sidapp utanför Dirigentverket-nexus
 - Merge utan ÖB-ja på namngiven PR-rad
-- Lamp-/WATCHERS-skin — bara kvällstid (ÖB 9 sep); inte startad här
+- Lamp-/WATCHERS-skin — kväll; paper-status i `marknad/lamp-watchers-paper.md`

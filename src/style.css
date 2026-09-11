@@ -768,11 +768,12 @@ th.num {
 body.view-artificer {
   background-color: #090705;
   background-image:
-    url("/watchers.png"),
-    radial-gradient(ellipse 42% 55% at 78% 38%, rgba(224, 196, 138, 0.22), transparent 55%),
-    radial-gradient(circle at 18% 82%, rgba(90, 55, 18, 0.4), transparent 42%),
+    var(--watchers-chamber, none),
+    radial-gradient(ellipse 38% 48% at 72% 18%, rgba(224, 196, 138, 0.14), transparent 58%),
+    radial-gradient(circle at 18% 86%, rgba(72, 44, 16, 0.38), transparent 44%),
+    radial-gradient(ellipse 70% 40% at 50% 100%, rgba(28, 18, 8, 0.55), transparent 62%),
     linear-gradient(180deg, #120e09 0%, #090705 72%);
-  background-size: cover, cover, cover, cover;
+  background-size: cover, cover, cover, cover, cover;
   background-position: center center;
   background-repeat: no-repeat;
   background-attachment: fixed;
@@ -860,10 +861,25 @@ body.view-rider .nav-artificer {
     0 2px 0 rgba(40, 28, 8, 0.8);
 }
 
+.artificer-mark {
+  display: block;
+  height: 28px;
+  width: auto;
+  margin: 10px auto 0;
+  object-fit: contain;
+  opacity: 0.82;
+}
+
+.artificer-seal {
+  position: relative;
+  width: 118px;
+  height: 118px;
+  margin: 12px auto 4px;
+}
+
 .artificer-ring {
-  width: 92px;
-  height: 92px;
-  margin: 14px auto 6px;
+  position: absolute;
+  inset: 0;
   border-radius: 50%;
   border: 1px solid rgba(201, 166, 107, 0.5);
   box-shadow:
@@ -873,8 +889,213 @@ body.view-rider .nav-artificer {
     inset 0 0 18px rgba(224, 196, 138, 0.18),
     0 0 28px rgba(201, 166, 107, 0.18);
   background:
-    radial-gradient(circle at 50% 50%, rgba(224, 196, 138, 0.28) 0 4px, transparent 5px),
-    radial-gradient(circle at 50% 50%, transparent 18px, rgba(201, 166, 107, 0.22) 19px, transparent 20px);
+    radial-gradient(circle at 50% 50%, rgba(224, 196, 138, 0.16) 0 4px, transparent 5px),
+    radial-gradient(circle at 50% 50%, transparent 18px, rgba(201, 166, 107, 0.2) 19px, transparent 20px);
+}
+
+.lamp-vessel {
+  position: absolute;
+  inset: 26px 34px 20px;
+}
+
+.lamp-haze {
+  position: absolute;
+  left: 50%;
+  top: -6px;
+  width: 22px;
+  height: 18px;
+  margin-left: -11px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at 50% 80%, rgba(224, 196, 138, 0.22), transparent 70%);
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+.lamp-flame {
+  position: absolute;
+  left: 50%;
+  top: 2px;
+  width: 7px;
+  height: 11px;
+  margin-left: -3.5px;
+  border-radius: 50% 50% 45% 45%;
+  background:
+    radial-gradient(circle at 50% 72%, #f6e7b4 0 35%, #c9a66b 62%, transparent 78%);
+  box-shadow: 0 0 10px rgba(224, 196, 138, 0.35);
+  opacity: 0.48;
+}
+
+.lamp-wick {
+  position: absolute;
+  left: 50%;
+  top: 12px;
+  width: 2px;
+  height: 6px;
+  margin-left: -1px;
+  background: #5a4a2e;
+  border-radius: 1px;
+}
+
+.lamp-bowl {
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  top: 18px;
+  height: 22px;
+  border-radius: 40% 40% 48% 48%;
+  background:
+    linear-gradient(180deg, #8a7044 0%, #5a4628 42%, #3a2c18 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(224, 196, 138, 0.35),
+    inset 0 -4px 8px rgba(0, 0, 0, 0.35);
+}
+
+.lamp-handle {
+  position: absolute;
+  right: 2px;
+  top: 20px;
+  width: 12px;
+  height: 16px;
+  border: 1.5px solid #8a7044;
+  border-left: 0;
+  border-radius: 0 10px 10px 0;
+  opacity: 0.85;
+}
+
+.lamp-foot {
+  position: absolute;
+  left: 50%;
+  bottom: 6px;
+  width: 16px;
+  height: 8px;
+  margin-left: -8px;
+  border-radius: 0 0 4px 4px;
+  background: linear-gradient(180deg, #6a542e, #3a2c18);
+}
+
+.lamp-badge-paper {
+  position: sticky;
+  top: 8px;
+  z-index: 2;
+  align-self: stretch;
+  max-width: 640px;
+  width: 100%;
+  margin: 4px auto 10px;
+  padding: 8px 12px;
+  text-align: center;
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #e6d3a2;
+  background: rgba(22, 16, 10, 0.9);
+  border: 1px solid rgba(201, 166, 107, 0.45);
+  border-radius: 999px;
+}
+
+.lamp-mode {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  margin: 0 0 12px;
+}
+
+.lamp-mode-paper,
+.lamp-mode-live {
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  padding: 6px 12px;
+  border-radius: 999px;
+}
+
+.lamp-mode-paper {
+  color: #e6d3a2;
+  background: rgba(201, 166, 107, 0.16);
+  border: 1px solid rgba(201, 166, 107, 0.5);
+}
+
+.lamp-mode-live {
+  color: #8a8074;
+  background: rgba(18, 16, 12, 0.7);
+  border: 1px dashed rgba(138, 128, 116, 0.45);
+  text-decoration: line-through;
+  text-decoration-color: var(--danger);
+  opacity: 0.72;
+}
+
+.artificer-stage[data-lamp="wait"] .lamp-flame {
+  opacity: 0.2;
+  box-shadow: none;
+}
+
+.artificer-stage[data-lamp="wait"] .lamp-haze {
+  opacity: 0.12;
+}
+
+.artificer-stage[data-lamp="lit"] .lamp-flame {
+  opacity: 0.88;
+  box-shadow: 0 0 16px rgba(224, 196, 138, 0.5);
+}
+
+.artificer-stage[data-lamp="lit"] .lamp-haze,
+.artificer-stage[data-lamp="trail"] .lamp-haze {
+  opacity: 0.55;
+}
+
+.artificer-stage[data-lamp="trail"] .lamp-flame {
+  opacity: 1;
+  box-shadow: 0 0 20px rgba(224, 196, 138, 0.62);
+}
+
+.artificer-stage[data-lamp="trail"] .artificer-ring {
+  box-shadow:
+    0 0 0 7px rgba(201, 166, 107, 0.16),
+    0 0 0 14px rgba(201, 166, 107, 0.1),
+    0 0 0 22px rgba(201, 166, 107, 0.05),
+    inset 0 0 18px rgba(224, 196, 138, 0.28),
+    0 0 36px rgba(201, 166, 107, 0.28);
+}
+
+.artificer-stage[data-lamp="trail"] .stone-tablet::before,
+.artificer-stage[data-lamp="trail"] .stone-tablet::after {
+  opacity: 1;
+  filter: drop-shadow(0 0 6px rgba(224, 196, 138, 0.4));
+}
+
+.artificer-stage[data-lamp="lit"] .stone-tablet,
+.artificer-stage[data-lamp="trail"] .stone-tablet {
+  box-shadow:
+    0 0 0 1px rgba(18, 14, 8, 0.9),
+    0 0 0 7px rgba(42, 34, 20, 0.55),
+    0 0 0 8px rgba(201, 166, 107, 0.28),
+    0 28px 64px rgba(0, 0, 0, 0.55),
+    inset 0 1px 0 rgba(224, 196, 138, 0.2),
+    inset 0 0 48px rgba(0, 0, 0, 0.28);
+}
+
+.stone-tablet:focus-within {
+  border-color: rgba(201, 166, 107, 0.55);
+}
+
+.lamp-vessel:hover .lamp-flame {
+  opacity: 0.92;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .artificer-stage[data-lamp="idle"] .lamp-flame,
+  .artificer-stage[data-lamp="lit"] .lamp-flame,
+  .artificer-stage[data-lamp="trail"] .lamp-flame {
+    animation: lamp-wick 2.8s ease-in-out infinite;
+  }
+}
+
+@keyframes lamp-wick {
+  0%,
+  100% { transform: scaleY(1) translateY(0); opacity: inherit; }
+  50% { transform: scaleY(1.12) translateY(-1px); }
 }
 
 .view-artificer .banner-robot {
@@ -1032,6 +1253,14 @@ body.view-rider .nav-artificer {
 @media (max-width: 560px) {
   .shell-artificer {
     padding: 12px 12px 56px;
+  }
+  .artificer-seal {
+    width: 96px;
+    height: 96px;
+  }
+  .lamp-badge-paper {
+    letter-spacing: 0.08em;
+    font-size: 11px;
   }
   .stone-tablet {
     padding: 20px 14px 16px;
