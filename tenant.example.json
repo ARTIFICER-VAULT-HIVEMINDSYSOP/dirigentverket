@@ -12,6 +12,10 @@
     "url": "",
     "open": "detail"
   },
+  "connectpoint": {
+    "baseUrl": "",
+    "paper": true
+  },
   "calendars": [],
   "queue": {
     "csv": "",

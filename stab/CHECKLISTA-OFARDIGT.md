@@ -18,7 +18,7 @@ Uppdaterad 2026-09-11. Bocka av när bevis finns. Lampan = **kvällstid**.
 - [x] Frihetsbibliotek Pages: Actions tänd + 200
 - [ ] Magasin-genväg på KS `/admin` (lokal Magasin `8765` root+`magasin.html` HTTP 200 verifierad 11 sep morgon; KS-genväg väntar DNS)
 - [ ] ForceX: kommentarer/dubbletter; saldo tom=saknas; retro magasin-utfall
-- [ ] ConnectPoint: portal HTML — API saknas i agent-UI
+- [x] ConnectPoint: portal HTML-stub — `public/connectpoint-godkannande.html`; live Create kräver ÖB-ja
 - [x] WhatsApp paper (parkerad Meta)
 - [x] Telegram Fastigheterutomlands: meny v1.9 SV/EN, sajt=grundmanual, poller live (test)
 - [ ] Telegram: namngivet **produktion-ja** när du vill ha den permanent
