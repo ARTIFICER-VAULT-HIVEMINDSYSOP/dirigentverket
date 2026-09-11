@@ -26,6 +26,10 @@ Gate `hasCompletedFirstRide` / `RIDER_FIRST_RIDE_KEY`, «små belopp»-hint, imp
 
 **09:42 Sthlm 11 sep (ständig-process):** Magasin 8765 HTTP 200. PR #8 + #11 update-branch → 0 behind. Cloud follow-up bc-7a6a7541: mjuk band-silhuett + mitt-pip när mitt-hedge-plan finns (samma draft, ingen merge). PR #9 lamp CONFLICTING — kväll. PII-fri backup `/workspace/backups/dirigentverket-verktyg-kod-20260911-0743.tar.gz`. Merge väntar namngivet ja. No live/send/merge.
 
+**11 sep förmiddag (draft PR #8, inte mergad):** band-silhuett + mitt-pip landat (`8bc4fcc`). Giltig mitt-hedge-plan ritar svaga övre/nedre räls och mitt-pip (entry) på `#/rider`. Tom serie / saknas-band = ingen plan. Väntar namngivet ÖB merge-ja.
+
+**13:38 Sthlm 11 sep (ständig-process):** Magasin 8765 HTTP 200. PR #8 CLEAN/MERGEABLE, 0 behind (14 ahead). PR #11 update-branch. Status synkad. Cloud follow-up: mjuk band-fade när mitt-hedge går giltig→saknas (samma draft, ingen merge). Lamp = kväll. Merge väntar namngivet ja. No live/send/merge.
+
 https://github.com/ARTIFICER-VAULT-HIVEMINDSYSOP/dirigentverket/pull/8
 https://github.com/ARTIFICER-VAULT-HIVEMINDSYSOP/dirigentverket/pull/4
 
@@ -34,7 +38,7 @@ När ÖB öppnar `#/rider` ska det kännas så här, i den ordningen:
 1. Arena först — grafen syns innan någon formvägg.
 2. Process-hint syns mjukt (inte skrikig varning).
 3. W/S flyttar räls direkt; F fäster; hävstång 1–4× syns som fart/pip, inte textmur.
-4. Space = lins; hopp har tell; trail-tell syns bara på struktur; rokad-tell (vänd sida, volym −25 %, ÖB-gate) när paper-rokad finns; inga nya play-knappar på ytan.
+4. Space = lins; hopp har tell; trail-tell syns bara på struktur; rokad-tell (vänd sida, volym −25 %, ÖB-gate) när paper-rokad finns; mitt-hedge-tell + frekvens-pip när serien räcker, saknas-pip när serie/band tomt; band-räls + mitt-pip bara när planen finns; inga nya play-knappar på ytan.
 5. En lyckad paper-ride krävs innan «små belopp» syns/öppnas.
 6. PAPER-badge sticky; live-knapp död.
 7. Tom arena = dry-run: silhuett rör sig före Räkna; tomma rutor stannar tomma.
