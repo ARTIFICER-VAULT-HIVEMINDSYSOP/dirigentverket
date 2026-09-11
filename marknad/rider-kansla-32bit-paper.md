@@ -30,6 +30,8 @@ Gate `hasCompletedFirstRide` / `RIDER_FIRST_RIDE_KEY`, «små belopp»-hint, imp
 
 **13:38 Sthlm 11 sep (ständig-process):** Magasin 8765 HTTP 200. PR #8 CLEAN/MERGEABLE, 0 behind (14 ahead). PR #11 update-branch. Status synkad. Cloud follow-up: mjuk band-fade när mitt-hedge går giltig→saknas (samma draft, ingen merge). Lamp = kväll. Merge väntar namngivet ja. No live/send/merge.
 
+**18:02 Sthlm 11 sep (ständig-process):** Magasin 8765 HTTP 200. PR #8 CLEAN/MERGEABLE, 0 behind (16 ahead). Band-fade giltig→saknas landat (`cb2badc`). Status synkad. Cloud follow-up: mjuk frekvens-progress-pip mot minFrequency innan plan (samma draft, ingen merge). PII-fri backup `/workspace/backups/dirigentverket-verktyg-kod-20260911-1804.tar.gz`. PR #9 lamp CONFLICTING — kväll rebase. Merge väntar namngivet ja. No live/send/merge.
+
 https://github.com/ARTIFICER-VAULT-HIVEMINDSYSOP/dirigentverket/pull/8
 https://github.com/ARTIFICER-VAULT-HIVEMINDSYSOP/dirigentverket/pull/4
 
@@ -38,7 +40,7 @@ När ÖB öppnar `#/rider` ska det kännas så här, i den ordningen:
 1. Arena först — grafen syns innan någon formvägg.
 2. Process-hint syns mjukt (inte skrikig varning).
 3. W/S flyttar räls direkt; F fäster; hävstång 1–4× syns som fart/pip, inte textmur.
-4. Space = lins; hopp har tell; trail-tell syns bara på struktur; rokad-tell (vänd sida, volym −25 %, ÖB-gate) när paper-rokad finns; mitt-hedge-tell + frekvens-pip när serien räcker, saknas-pip när serie/band tomt; band-räls + mitt-pip bara när planen finns; inga nya play-knappar på ytan.
+4. Space = lins; hopp har tell; trail-tell syns bara på struktur; rokad-tell (vänd sida, volym −25 %, ÖB-gate) när paper-rokad finns; mitt-hedge-tell + frekvens-pip när serien räcker, saknas-pip när serie/band tomt; band-räls + mitt-pip bara när planen finns; band-fade när plan går giltig→saknas; inga nya play-knappar på ytan.
 5. En lyckad paper-ride krävs innan «små belopp» syns/öppnas.
 6. PAPER-badge sticky; live-knapp död.
 7. Tom arena = dry-run: silhuett rör sig före Räkna; tomma rutor stannar tomma.
