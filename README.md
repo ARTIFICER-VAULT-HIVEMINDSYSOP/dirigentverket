@@ -42,11 +42,17 @@ Paper / utredning i samma app. Foreslar SL och TP. Lagger inga ordrar. Inga kurs
 
 SL flyttas bara när RSI närmar sig ett Bollinger-band och bud studsar mot bandet. Paper. Användaren skriver RSI, band och budstuds själv.
 
-Flerårsplan för VIP: byt håll på öppen position om ifylld prognos för nästa säsong bär; snabbare tempo räddar genom att föreslå stäng/vänd nu. Rokadläge vid vändning: volym −25 % (ny volym = 75 % av ifylld öppen storlek; tom storlek gissas inte). Paper. ÖB godkänner. Tom prognos ger ingen vändning. Saknas prognos-RR påstås inte att nästa säsong kan bära.
+Flerårsplan för VIP: byt håll på öppen position om ifylld prognos för nästa säsong bär; snabbare tempo räddar genom att föreslå stäng/vänd nu. Rokadläge vid säsongsvändning: volym −25 % (ny volym = 75 % av ifylld öppen storlek; tom storlek gissas inte). Paper. ÖB godkänner. Tom prognos ger ingen vändning. Saknas prognos-RR påstås inte att nästa säsong kan bära.
+
+**Mitt-hedge (paper):** när en inklistrad kursserie svänger tillräckligt ofta mellan två band (standard minst 3 avslutade svängar, närzon 15 %) föreslås både köp och sälj i mitten. Köp mot taket, sälj mot golvet. Tom serie eller ogiltigt band = saknas. Ingen order. Befintlig SL/TP-väg oförändrad utan serie.
+
+**Minus-rokad (paper, egen knopp):** byt till motsatt sida bara om återhämtning är mätbar (prognos-RR, struktur mot motsatt håll, eller återtagennivå + kurs). Volym = **25 %** av ifylld storlek (`ROKAD_MOTSATT_FAKTOR = 0.25`). Inte samma knopp som säsongens −25 % (0,75). Tom mätning = ingen rokad.
+
+**GULDR / guld / gold:** primär rokad-tillgång. Premiss (regel, inte uppmätt bevis): historisk uppåtbias. Snabbare utfall via motsatt sida på 25 %; längre horisont väntar ca 8 månader (konfigurerbar). Tom historik = ingen påstådd avkastning. Ingen OHLC hittas på.
 
 ## Teknik
 
-Vite. seed.js, calc.js, synergy.js, robot.js, rider.js, sele.js.
+Vite. seed.js, calc.js, synergy.js, robot.js, rider.js, sele.js, hedge.js, rokad.js.
 
 ## Nyheter
 

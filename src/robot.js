@@ -3,6 +3,9 @@
  * Computes SL, TP and optional size. Never fetches quotes. Never places orders.
  */
 
+import { measureFrequency, parsePriceSeries, proposeMittHedge } from './hedge.js';
+import { guldRokadRule, losingRokad, recoveryMeasure } from './rokad.js';
+
 function num(v) {
   if (v === '' || v === null || v === undefined) return null;
   const x = Number(String(v).replace(',', '.').replace(/\s/g, ''));
@@ -51,6 +54,11 @@ export function parseRobotInput(raw) {
     prognosRr: num(raw.prognosRr),
     hallaRr: num(raw.hallaRr),
     openSize: num(raw.openSize != null && raw.openSize !== '' ? raw.openSize : raw.volym),
+    priceSeries: parsePriceSeries(raw.priceSeries),
+    minFrequency: raw.minFrequency,
+    reclaim: num(raw.reclaim),
+    guldHistorik: String(raw.guldHistorik || '').trim(),
+    guldVantanManader: raw.guldVantanManader,
   };
 }
 
@@ -81,6 +89,7 @@ export function seasonPlan(input) {
   const prognosRr = num(input.prognosRr);
   const hallaRr = num(input.hallaRr);
   const seasonLabel = String(input.nastaSasong || '').trim() || 'nästa säsong';
+  const recovery = recoveryMeasure(input, structureSignal(input));
 
   if (!prognos) {
     return paperStamp({ action: 'ingen', rokad: false, note: 'prognos saknas — ingen vändning föreslås.' });
@@ -103,21 +112,29 @@ export function seasonPlan(input) {
     return paperStamp({ action: 'halla', rokad: false, note: 'prognos-RR slår inte att sitta kvar. Behåll öppen sida.' });
   }
   if (tempo === 'snabbare') {
+    const cut = recovery.known ? rokadCut(input) : { rokad: false };
     return paperStamp({
       action: 'radda',
       reverseTo: prognos,
       flattenNow: true,
-      ...rokadCut(input),
-      note: `räddning, snabbare tempo: stäng den öppna (paper) och föreslå vändning till ${prognos}. Vänta inte in nästa säsong. ${ROKAD_NOTE}`,
+      recovery,
+      ...cut,
+      note: `räddning, snabbare tempo: stäng den öppna (paper) och föreslå vändning till ${prognos}. Vänta inte in nästa säsong. ${
+        recovery.known ? ROKAD_NOTE : recovery.note
+      }`,
     });
   }
+  const cut = recovery.known ? rokadCut(input) : { rokad: false };
   return paperStamp({
     action: 'byt_hall',
     reverseTo: prognos,
     flattenNow: false,
     season: seasonLabel,
-    ...rokadCut(input),
-    note: `flerår: byt håll till ${prognos} när ${seasonLabel} börjar, om prognos-RR ${prognosRr} håller. ${ROKAD_NOTE}`,
+    recovery,
+    ...cut,
+    note: `flerår: byt håll till ${prognos} när ${seasonLabel} börjar, om prognos-RR ${prognosRr} håller. ${
+      recovery.known ? ROKAD_NOTE : recovery.note
+    }`,
   });
 }
 
@@ -371,9 +388,24 @@ function resolveDynamic(input, initial, structure) {
   return heldInitialDynamic(input, initial, structure);
 }
 
+function attachHedge(input) {
+  const frequency = measureFrequency(input.priceSeries, input.bbLower, input.bbUpper);
+  const stopDist = slDistance({
+    entry: frequency.mid,
+    risk: input.risk,
+    riskMode: input.riskMode,
+    atr: input.atr,
+  });
+  const hedge = proposeMittHedge(frequency, { minFrequency: input.minFrequency, stopDist });
+  return { frequency, hedge };
+}
+
 export function computeRobot(raw) {
   const input = parseRobotInput(raw);
   const structure = structureSignal(input);
+  const { frequency, hedge } = attachHedge(input);
+  const rokad = losingRokad(input, structure);
+  const gold = guldRokadRule(input);
   const errors = [];
   if (!input.instrument) errors.push('Ange instrument.');
   if (input.entry === null || input.entry <= 0) errors.push('Ange entry (kurs).');
@@ -381,12 +413,39 @@ export function computeRobot(raw) {
   const dist = slDistance(input);
   if (dist === null) errors.push('Ange riskavstånd (pris eller %) eller ATR.');
   if (errors.length) {
-    return { ok: false, errors, input, initial: null, dynamic: null, size: null, structure, season: seasonPlan(input) };
+    return {
+      ok: false,
+      errors,
+      input,
+      initial: null,
+      dynamic: null,
+      size: null,
+      structure,
+      season: seasonPlan(input),
+      frequency,
+      hedge,
+      rokad,
+      gold,
+    };
   }
   const initial = initialLevels(input);
   const dynamic = resolveDynamic(input, initial, structure);
   const size = positionSize(input, dist);
-  return { ok: true, errors: [], input, initial, dynamic, size, dist, structure, season: seasonPlan(input) };
+  return {
+    ok: true,
+    errors: [],
+    input,
+    initial,
+    dynamic,
+    size,
+    dist,
+    structure,
+    season: seasonPlan(input),
+    frequency,
+    hedge,
+    rokad,
+    gold,
+  };
 }
 
 export function formatPx(n) {
@@ -430,6 +489,11 @@ export function emptyRobotDraft() {
     hallaRr: '',
     openSize: '',
     volym: '',
+    priceSeries: '',
+    minFrequency: '',
+    reclaim: '',
+    guldHistorik: '',
+    guldVantanManader: '',
   };
 }
 

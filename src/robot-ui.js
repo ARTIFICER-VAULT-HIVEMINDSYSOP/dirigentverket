@@ -1,6 +1,91 @@
 import { computeRobot, formatPx, formatSize } from './robot.js';
 import { emptyFigure, escapeHtml } from './format.js';
 
+function lastSideLabel(side) {
+  if (side === 'nedre') return 'nedre band';
+  if (side === 'övre') return 'övre band';
+  return 'ingen';
+}
+
+function renderFrequencyBlock(frequency) {
+  if (!frequency) return '';
+  if (!frequency.known) {
+    if (!frequency.hasSeries) return '';
+    return `
+      <div class="structure-banner structure-wait">
+        <div class="metric-label">Frekvens</div>
+        <p>${escapeHtml(frequency.note || 'saknas')}</p>
+      </div>`;
+  }
+  const last = frequency.lastSide ? lastSideLabel(frequency.lastSide) : 'ingen';
+  return `
+      <div class="structure-banner ${frequency.count > 0 ? 'structure-ok' : 'structure-wait'}">
+        <div class="metric-label">Frekvens</div>
+        <p>${escapeHtml(frequency.note)}</p>
+        <div class="kalkyl-live">
+          <div class="card"><div class="metric-label">Svängar</div><div class="metric-value">${escapeHtml(String(frequency.count))}</div></div>
+          <div class="card"><div class="metric-label">Senast rörd</div><div class="metric-value">${escapeHtml(last)}</div></div>
+          <div class="card"><div class="metric-label">Mitt</div><div class="metric-value">${escapeHtml(formatPx(frequency.mid))}</div></div>
+          <div class="card"><div class="metric-label">Bredd</div><div class="metric-value">${escapeHtml(formatPx(frequency.width))}</div></div>
+        </div>
+      </div>`;
+}
+
+function renderHedgeBlock(hedge, frequency) {
+  if (!hedge) return '';
+  if (!hedge.proposed) {
+    if (!frequency || !frequency.known) return '';
+    return `
+      <div class="structure-banner structure-wait">
+        <div class="metric-label">Mitt-hedge</div>
+        <p>${escapeHtml(hedge.note)}</p>
+      </div>`;
+  }
+  const { kop, salj } = hedge;
+  return `
+      <div class="structure-banner structure-ok">
+        <div class="metric-label">Mitt-hedge</div>
+        <p>${escapeHtml(hedge.note)}</p>
+        <div class="kalkyl-live">
+          <div class="card"><div class="metric-label">Entry (mitt)</div><div class="metric-value">${escapeHtml(formatPx(hedge.entry))}</div><div class="faint">köp + sälj</div></div>
+          <div class="card"><div class="metric-label">Köp SL / TP</div><div class="metric-value">${escapeHtml(formatPx(kop.sl))} / ${escapeHtml(formatPx(kop.tp))}</div><div class="faint">vinst mot taket</div></div>
+          <div class="card"><div class="metric-label">Sälj SL / TP</div><div class="metric-value">${escapeHtml(formatPx(salj.sl))} / ${escapeHtml(formatPx(salj.tp))}</div><div class="faint">vinst mot golvet</div></div>
+        </div>
+        <p class="faint">${hedge.stopOutside ? 'SL utanför bandet (riskavstånd).' : 'SL vid bandet — fyll riskavstånd för SL utanför.'} Ingen order läggs.</p>
+      </div>`;
+}
+
+function renderRokadBlock(rokad) {
+  if (!rokad) return '';
+  const show = rokad.rokad || rokad.losing === true;
+  if (!show) return '';
+  const vol =
+    rokad.nyVolym !== null && rokad.nyVolym !== undefined
+      ? escapeHtml(formatSize(rokad.nyVolym) || String(rokad.nyVolym))
+      : 'fyll i volym';
+  return `
+      <div class="structure-banner ${rokad.rokad ? 'structure-ok' : 'structure-wait'}">
+        <div class="metric-label">Rokad</div>
+        <p>${escapeHtml(rokad.note)}</p>
+        ${
+          rokad.rokad
+            ? `<p>Motsatt sida: ${escapeHtml(rokad.reverseTo || '')}. Ny volym: ${vol} (25 % av ifylld).</p>`
+            : ''
+        }
+        <p class="faint">Ingen order läggs. Återhämtning måste vara ifylld och mätbar.</p>
+      </div>`;
+}
+
+function renderGoldBlock(gold) {
+  if (!gold || !gold.allowed) return '';
+  return `
+      <div class="structure-banner structure-wait">
+        <div class="metric-label">Guld</div>
+        <p>${escapeHtml(gold.note)}</p>
+        <p class="faint">25 % motsatt nu; vänta ca ${escapeHtml(String(gold.delayedMonths))} månader på den längre horisonten. Tom historik = ingen uppmätt avkastning.</p>
+      </div>`;
+}
+
 export function val(robotDraft, name) {
   const v = robotDraft[name];
   return v === undefined || v === null ? '' : escapeHtml(String(v));
@@ -35,10 +120,11 @@ function renderSeasonBanner(season) {
 export function renderRobotResult(robotResult) {
   const r = robotResult;
   if (!r) {
-    return `<p class="muted">Fyll i instrument, sida, entry, risk och RR. Kurs hämtas inte — skriv den själv. SL flyttas bara vid RSI+Bollinger+budstuds.</p>`;
+    return `<p class="muted">Fyll i instrument, sida, entry, risk och RR. Kurs hämtas inte — skriv den själv. SL flyttas bara vid RSI+Bollinger+budstuds. Klistra in en kursserie mot banden för att mäta svängfrekvens och eventuellt få en mitt-hedge.</p>`;
   }
+  const freqHedge = `${renderFrequencyBlock(r.frequency)}${renderHedgeBlock(r.hedge, r.frequency)}${renderRokadBlock(r.rokad)}${renderGoldBlock(r.gold)}`;
   if (!r.ok) {
-    return `<div class="info-banner">${r.errors.map((e) => escapeHtml(e)).join(' ')}</div>${renderSeasonBanner(r.season)}`;
+    return `<div class="info-banner">${r.errors.map((e) => escapeHtml(e)).join(' ')}</div>${freqHedge}${renderSeasonBanner(r.season)}`;
   }
   const { initial, dynamic, size, input, structure } = r;
   const sizeBlock =
@@ -76,6 +162,7 @@ export function renderRobotResult(robotResult) {
       ${sizeBlock}
     </div>
     ${structureBlock}
+    ${freqHedge}
     ${seasonBlock}
     ${dyn}
   `;
@@ -170,8 +257,18 @@ export function renderRobot(robotDraft, robotResult) {
               <input name="prognosRr" inputmode="decimal" placeholder="förväntat RR nästa säsong" value="${val(robotDraft, 'prognosRr')}" /></label>
             <label>RR om vi sitter kvar <span class="hint">valfritt</span>
               <input name="hallaRr" inputmode="decimal" placeholder="valfritt" value="${val(robotDraft, 'hallaRr')}" /></label>
-            <label>Öppen volym <span class="hint">valfritt — rokad −25 % vid vändning, gissas inte</span>
+            <label>Öppen volym <span class="hint">valfritt — säsong −25 %; rokad vid minus = 25 % motsatt. Gissas inte</span>
               <input name="openSize" inputmode="decimal" placeholder="fyll i volym" value="${val(robotDraft, 'openSize')}" /></label>
+            <label>Återtagennivå <span class="hint">valfritt — mätbar återhämtning, gissas inte</span>
+              <input name="reclaim" inputmode="decimal" placeholder="kurs" value="${val(robotDraft, 'reclaim')}" /></label>
+            <label>Guld, väntan (mån) <span class="hint">valfritt, standard 8 — bara regel, inte avkastning</span>
+              <input name="guldVantanManader" inputmode="numeric" placeholder="8" value="${val(robotDraft, 'guldVantanManader')}" /></label>
+            <label class="full">Guldhistorik <span class="hint">valfritt — tom = saknas, vi påstår inte uppmätt avkastning</span>
+              <textarea name="guldHistorik" rows="2" placeholder="tom = saknas">${val(robotDraft, 'guldHistorik')}</textarea></label>
+            <label class="full">Kursserie <span class="hint">en kurs per rad eller kommaseparerat — skriv själv, hämtas inte</span>
+              <textarea name="priceSeries" rows="5" placeholder="t.ex. 98&#10;102&#10;99&#10;105">${val(robotDraft, 'priceSeries')}</textarea></label>
+            <label>Minsta svängfrekvens <span class="hint">valfritt, standard 3</span>
+              <input name="minFrequency" inputmode="numeric" placeholder="3" value="${val(robotDraft, 'minFrequency')}" /></label>
           </div>
           <div class="btn-row">
             <button class="btn btn-gold" type="submit">Räkna paper-plan</button>
@@ -208,5 +305,10 @@ export function readRobotForm(form) {
     hallaRr: String(fd.get('hallaRr') || ''),
     openSize: String(fd.get('openSize') || fd.get('volym') || ''),
     volym: String(fd.get('volym') || fd.get('openSize') || ''),
+    priceSeries: String(fd.get('priceSeries') || ''),
+    minFrequency: String(fd.get('minFrequency') || ''),
+    reclaim: String(fd.get('reclaim') || ''),
+    guldHistorik: String(fd.get('guldHistorik') || ''),
+    guldVantanManader: String(fd.get('guldVantanManader') || ''),
   };
 }

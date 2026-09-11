@@ -14,6 +14,7 @@ import {
   playRails,
   dryRunSlotTop,
   HOP_WINDOW_MS,
+  HEDGE_FADE_MS,
 } from './rider.js';
 import { escapeHtml, emptyFigure } from './format.js';
 import { emptyHudState, magazineView } from './contact-queue.js';
@@ -45,13 +46,44 @@ function renderScanlines() {
   return `<div class="rider-scanlines" aria-hidden="true"></div>`;
 }
 
-function renderBitHud(lev, speed, railText, rails = [], play = {}, hopped = false, trailed = false, rokad = null) {
+function renderFreqPips(hedge) {
+  if (!hedge) return '';
+  const saknas = Boolean(hedge.saknas);
+  const pip = Boolean(hedge.freqPip);
+  const progress = Boolean(hedge.freqProgress);
+  const count = pip && hedge.count != null ? hedge.count : null;
+  const need = progress && hedge.freqNeed != null ? hedge.freqNeed : null;
+  const have = progress && hedge.freqHave != null ? hedge.freqHave : null;
+  const slots = progress && need != null ? Math.min(5, Math.max(1, need)) : 5;
+  const lit = progress && have != null ? Math.min(slots, Math.max(0, have)) : count != null ? Math.min(5, Math.max(0, count)) : 0;
+  const pips = Array.from({ length: slots }, (_, i) => {
+    const cls = [
+      'rider-sil-freq-pip',
+      i < lit ? 'is-on' : '',
+      progress ? 'is-progress' : '',
+    ]
+      .filter(Boolean)
+      .join(' ');
+    return `<span class="${cls}" data-freq-pip-i="${i}"></span>`;
+  }).join('');
+  const countAttr = count != null ? ` data-freq-count="${count}"` : '';
+  const progressAttr = ` data-freq-progress="${progress ? '1' : '0'}"`;
+  const needAttr = need != null ? ` data-freq-need="${need}"` : '';
+  const haveAttr = have != null ? ` data-freq-have="${have}"` : '';
+  return `<div class="rider-sil-freq${progress ? ' is-progress' : ''}" data-rider-freq data-freq-pip="${pip ? '1' : '0'}" data-freq-saknas="${saknas ? '1' : '0'}"${progressAttr}${needAttr}${haveAttr}${countAttr}>
+        ${pips}
+        ${saknas ? '<span class="rider-sil-freq-empty">saknas</span>' : ''}
+      </div>`;
+}
+
+function renderBitHud(lev, speed, railText, rails = [], play = {}, hopped = false, trailed = false, rokad = null, hedge = null) {
   const rail = play.rail || 0;
   const sit = play.sit ?? rail;
   const rokadOn = Boolean(rokad && rokad.tell);
+  const hedgeOn = Boolean(hedge && hedge.tell);
   const fromSide = rokad?.from || play.side || 'köp';
   const toSide = rokadOn ? rokad.to : fromSide;
-  const mode = hopped ? 'hop' : trailed ? 'trail' : rokadOn ? 'rokad' : 'hold';
+  const mode = hopped ? 'hop' : trailed ? 'trail' : rokadOn ? 'rokad' : hedgeOn ? 'hedge' : 'hold';
   const levBars = [1, 2, 3, 4]
     .map((n) => `<span class="rider-sil-bar${n <= lev ? ' is-on' : ''}" data-lev-bar="${n}"></span>`)
     .join('');
@@ -64,12 +96,14 @@ function renderBitHud(lev, speed, railText, rails = [], play = {}, hopped = fals
         .join('')
     : '<span class="rider-sil-rail-pip is-empty" data-rail-sil="-1"></span>';
   return `<div class="rider-play-hud rider-bit-hud" data-rider-sil data-verbs="w s f [ ] space">
-      <div class="rider-sil-mode" data-rider-mode-sil data-mode="${mode}" data-hop-tell="${hopped ? '1' : '0'}" data-trail-tell="${trailed ? '1' : '0'}" data-rokad-tell="${rokadOn ? '1' : '0'}">
+      <div class="rider-sil-mode" data-rider-mode-sil data-mode="${mode}" data-hop-tell="${hopped ? '1' : '0'}" data-trail-tell="${trailed ? '1' : '0'}" data-rokad-tell="${rokadOn ? '1' : '0'}" data-hedge-tell="${hedgeOn ? '1' : '0'}">
         <span class="rider-sil-pip is-paper" data-mode-paper></span>
-        <span class="rider-sil-pip ${hopped ? 'is-hop is-tell' : trailed ? 'is-trail is-tell' : rokadOn ? 'is-rokad is-tell' : 'is-hold'}" data-hop-sil></span>
+        <span class="rider-sil-pip ${hopped ? 'is-hop is-tell' : trailed ? 'is-trail is-tell' : rokadOn ? 'is-rokad is-tell' : hedgeOn ? 'is-hedge is-tell' : 'is-hold'}" data-hop-sil></span>
         ${hopped ? '<span class="rider-sil-tell" data-rider-hop-tell>tell</span>' : ''}
         ${trailed ? '<span class="rider-sil-tell" data-rider-trail-tell>tell</span>' : ''}
         ${rokadOn ? '<span class="rider-sil-tell" data-rider-rokad-tell>tell</span>' : ''}
+        ${hedgeOn ? '<span class="rider-sil-tell" data-rider-hedge-tell>tell</span>' : ''}
+        ${renderFreqPips(hedge)}
       </div>
       ${
         play.side || rokad
@@ -120,10 +154,11 @@ export function renderPlayArena(ride, play = {}) {
       })
       .join('');
     return `<div class="rider-play is-empty rider-bit is-dry-run" data-rider-play data-bit="32" data-dry-run="1" role="status"
+      data-freq-pip="${ride?.hedge?.freqPip ? '1' : '0'}" data-freq-saknas="${!ride || !ride.hedge || ride.hedge.saknas ? '1' : '0'}" data-freq-progress="${ride?.hedge?.freqProgress ? '1' : '0'}" data-hedge-ghost="0" data-hedge-band="0" data-hedge-mid-pip="0" data-hedge-fade="0"
       data-leverage="${lev}" data-speed="${speed}" data-lens="${lens}" data-rail="${rail}" data-sit="${sit}"
       style="--rider-speed:${speed};--rider-lens:${lens};--rider-coast-ms:${coastPeriodMs(lev)}ms;">
       ${renderScanlines()}
-      ${renderBitHud(lev, speed, '', rails, { ...play, rail, sit }, false)}
+      ${renderBitHud(lev, speed, '', rails, { ...play, rail, sit }, false, false, null, ride?.hedge)}
       <div class="rider-arena-field" data-rider-field style="transform:scale(var(--rider-lens));transform-origin:center;">
         <div class="rider-speed-scan" aria-hidden="true"></div>
         ${dryMarks}
@@ -140,6 +175,8 @@ export function renderPlayArena(ride, play = {}) {
   const lens = play.lens || 1;
   const rail = play.rail || 0;
   const sit = play.sit ?? rail;
+  const fade = play.hedgeFade && play.hedgeFade.fading ? play.hedgeFade : null;
+  const fadeGhosts = fade ? fade.ghosts || [] : [];
   const prices = [
     ride.tp,
     ride.sl,
@@ -148,6 +185,8 @@ export function renderPlayArena(ride, play = {}) {
     ...(ride.horizon?.prices || []),
     ride.jump?.jumped ? ride.jump.from : null,
     ride.jump?.jumped ? ride.jump.to : null,
+    ...((ride.hedge && ride.hedge.ghosts) || []).map((g) => g.at),
+    ...fadeGhosts.map((g) => g.at),
   ].filter((n) => n !== null && n !== undefined);
   const scale = arenaScale(prices);
 
@@ -164,6 +203,32 @@ export function renderPlayArena(ride, play = {}) {
     marks.push({ kind: 'from', at: ride.jump.from, label: 'från' });
     marks.push({ kind: 'to', at: ride.jump.to, label: 'till' });
   }
+  if (ride.hedge && ride.hedge.proposed && Array.isArray(ride.hedge.ghosts)) {
+    for (const g of ride.hedge.ghosts) {
+      if (g && g.at != null) {
+        marks.push({
+          kind: `hedge-${g.kind}`,
+          at: g.at,
+          label: g.kind === 'mid' ? 'mitt' : g.kind,
+          hedgeRail: g.kind === 'nedre' || g.kind === 'övre' ? g.kind : null,
+          hedgeMidPip: g.kind === 'mid',
+        });
+      }
+    }
+  } else if (fade && fadeGhosts.length) {
+    for (const g of fadeGhosts) {
+      if (g && g.at != null) {
+        marks.push({
+          kind: `hedge-${g.kind}`,
+          at: g.at,
+          label: g.kind === 'mid' ? 'mitt' : g.kind,
+          hedgeRail: g.kind === 'nedre' || g.kind === 'övre' ? g.kind : null,
+          hedgeMidPip: g.kind === 'mid',
+          hedgeFade: true,
+        });
+      }
+    }
+  }
   marks.push({ kind: 'sl', at: ride.sl, label: 'SL' });
 
   const markHtml = marks
@@ -171,17 +236,29 @@ export function renderPlayArena(ride, play = {}) {
       const top = scale.y(row.at);
       const railIndex = rails.indexOf(row.at);
       const railAttr = railIndex >= 0 ? `data-rail-index="${railIndex}" data-rail-price="${row.at}"` : '';
+      const hedgeRailAttr = row.hedgeRail ? ` data-hedge-rail="${escapeHtml(row.hedgeRail)}"` : '';
+      const hedgeMidAttr = row.hedgeMidPip ? ' data-hedge-mid-pip="1"' : '';
+      const hedgeFadeAttr = row.hedgeFade ? ' data-hedge-fade="1"' : '';
       const cls = [
         'rider-mark',
         `rider-mark-${row.kind}`,
         railIndex === rail ? 'is-rail' : '',
         railIndex === sit ? 'is-sit' : '',
+        row.hedgeRail ? 'is-hedge-rail' : '',
+        row.hedgeMidPip ? 'is-hedge-mid-pip' : '',
+        row.hedgeFade ? 'is-hedge-fade' : '',
       ]
         .filter(Boolean)
         .join(' ');
-      return `<div class="${cls}" ${railAttr} data-top="${top}%" style="top:${top}%">
+      return `<div class="${cls}" ${railAttr}${hedgeRailAttr}${hedgeMidAttr}${hedgeFadeAttr} data-top="${top}%" style="top:${top}%">
         <span class="rider-mark-label">${escapeHtml(row.label)}</span>
-        <span class="rider-mark-line"><span class="rider-mark-pip" aria-hidden="true"></span></span>
+        <span class="rider-mark-line">${
+          row.hedgeRail
+            ? '<span class="rider-hedge-rail" aria-hidden="true"></span>'
+            : row.hedgeMidPip
+              ? '<span class="rider-hedge-mid-pip" aria-hidden="true"></span>'
+              : '<span class="rider-mark-pip" aria-hidden="true"></span>'
+        }</span>
         <span class="rider-mark-px">${escapeHtml(formatPx(row.at))}</span>
       </div>`;
     })
@@ -191,6 +268,7 @@ export function renderPlayArena(ride, play = {}) {
   const tell = Boolean(ride.jump && ride.jump.tell);
   const trailed = Boolean(ride.trail && ride.trail.tell);
   const rokadOn = Boolean(ride.rokad && ride.rokad.tell);
+  const hedgeOn = Boolean(ride.hedge && ride.hedge.tell);
   const rokadVol =
     rokadOn && ride.rokad.nyVolym !== null && ride.rokad.nyVolym !== undefined
       ? escapeHtml(formatPx(ride.rokad.nyVolym))
@@ -223,6 +301,14 @@ export function renderPlayArena(ride, play = {}) {
       </div>
       <p class="rider-rokad-gate faint" data-rokad-gate="1">${escapeHtml(ride.rokad.gate)}</p>`
     : '';
+  const hedge = hedgeOn
+    ? `<div class="rider-hedge rider-hop-tell is-hedge" data-hedge="1" data-hedge-tell="1" role="status">
+        <span class="rider-hop-kicker">Mitt-hedge</span>
+        <span class="rider-hop-tell-mark" data-rider-hedge-tell>tell</span>
+        <span class="rider-hop-path">köp + sälj${ride.hedge.entry != null ? ` · mitt ${escapeHtml(formatPx(ride.hedge.entry))}` : ''}</span>
+        <span class="faint">process före fart · ingen order</span>
+      </div>`
+    : '';
 
   const sitPrice = rails[sit] ?? ride.grav;
   const toPrice = jumped ? ride.jump.to : sitPrice;
@@ -232,14 +318,19 @@ export function renderPlayArena(ride, play = {}) {
 
   const coastMs = coastPeriodMs(lev);
   const railText = rails[rail] != null ? escapeHtml(String(rails[rail])) : '';
-  return `<div class="rider-play rider-bit is-looking ${jumped ? 'has-hop' : 'has-hold'}${trailed ? ' has-trail' : ''}${rokadOn ? ' has-rokad' : ''}" data-rider-play data-bit="32" data-look="1"
-      data-hop-tell="${tell ? '1' : '0'}" data-trail-tell="${trailed ? '1' : '0'}" data-rokad-tell="${rokadOn ? '1' : '0'}"
+  const ghostOn = Boolean(hedgeOn && ride.hedge.ghosts && ride.hedge.ghosts.length);
+  const bandOn = Boolean(hedgeOn && ride.hedge.bandRails && ride.hedge.bandRails.length);
+  const midPipOn = Boolean(hedgeOn && ride.hedge.midPip && ride.hedge.midPip.at != null);
+  const fadeOn = Boolean(fade && fadeGhosts.length);
+  const fadeMs = fade && fade.ms != null ? fade.ms : HEDGE_FADE_MS;
+  return `<div class="rider-play rider-bit is-looking ${jumped ? 'has-hop' : 'has-hold'}${trailed ? ' has-trail' : ''}${rokadOn ? ' has-rokad' : ''}${hedgeOn ? ' has-hedge' : ''}${fadeOn ? ' has-hedge-fade' : ''}" data-rider-play data-bit="32" data-look="1"
+      data-hop-tell="${tell ? '1' : '0'}" data-trail-tell="${trailed ? '1' : '0'}" data-rokad-tell="${rokadOn ? '1' : '0'}" data-hedge-tell="${hedgeOn ? '1' : '0'}" data-freq-pip="${ride.hedge && ride.hedge.freqPip ? '1' : '0'}" data-freq-saknas="${ride.hedge && ride.hedge.saknas ? '1' : '0'}" data-freq-progress="${ride.hedge && ride.hedge.freqProgress ? '1' : '0'}" data-hedge-ghost="${ghostOn ? '1' : '0'}" data-hedge-band="${bandOn ? '1' : '0'}" data-hedge-mid-pip="${midPipOn ? '1' : '0'}" data-hedge-fade="${fadeOn ? '1' : '0'}"
       data-side="${escapeHtml(ride.input?.side || 'köp')}" data-rokad-from="${escapeHtml(ride.rokad?.from || ride.input?.side || 'köp')}" data-rokad-to="${escapeHtml(ride.rokad?.to || ride.input?.side || 'köp')}"
       data-leverage="${lev}" data-speed="${speed}" data-lens="${lens}" data-rail="${rail}" data-sit="${sit}"
-      style="--rider-speed:${speed};--rider-lens:${lens};--rider-coast-ms:${coastMs}ms;--hop-window:${HOP_WINDOW_MS}ms;"
+      style="--rider-speed:${speed};--rider-lens:${lens};--rider-coast-ms:${coastMs}ms;--hop-window:${HOP_WINDOW_MS}ms;--hedge-fade-ms:${fadeMs}ms;"
       role="img" aria-label="Paper-arena">
     ${renderScanlines()}
-    ${renderBitHud(lev, speed, railText, rails, { ...play, side: ride.input?.side }, jumped, trailed, ride.rokad)}
+    ${renderBitHud(lev, speed, railText, rails, { ...play, side: ride.input?.side }, jumped, trailed, ride.rokad, ride.hedge)}
     <div class="rider-arena-field" data-rider-field style="transform:scale(var(--rider-lens));transform-origin:center;">
       <div class="rider-speed-scan" aria-hidden="true"></div>
       ${markHtml}
@@ -248,6 +339,7 @@ export function renderPlayArena(ride, play = {}) {
     ${hop}
     ${trail}
     ${rokad}
+    ${hedge}
     <p class="faint rider-muted-opt">${coastMuted ? 'coast tyst' : ''} · hävstång HUD = fart · max 4×</p>
   </div>`;
 }
@@ -431,6 +523,10 @@ export function renderRider(draft, ride, hopPulse = 0, play = {}, opts = {}) {
                 <input name="prognosRr" inputmode="decimal" placeholder="tom = ingen rokad" value="${riderVal(draft, 'prognosRr')}" /></label>
               <label>Hålla-RR <span class="hint">valfritt</span>
                 <input name="hallaRr" inputmode="decimal" value="${riderVal(draft, 'hallaRr')}" /></label>
+              <label class="full">Kursserie <span class="hint">mitt-hedge — en kurs per rad, skriv själv</span>
+                <textarea name="priceSeries" rows="3" placeholder="tom = ingen mitt-hedge">${riderVal(draft, 'priceSeries')}</textarea></label>
+              <label>Minsta svängfrekvens <span class="hint">valfritt, standard 3</span>
+                <input name="minFrequency" inputmode="numeric" placeholder="3" value="${riderVal(draft, 'minFrequency')}" /></label>
               <label>Coast <span class="hint">valfritt</span>
                 <input name="coast" inputmode="decimal" placeholder="tom är ärlig" value="${riderVal(draft, 'coast')}" /></label>
             </div>
@@ -476,6 +572,8 @@ export function readRiderForm(form) {
     prognosRr: String(fd.get('prognosRr') || ''),
     hallaRr: String(fd.get('hallaRr') || ''),
     nastaSasong: String(fd.get('nastaSasong') || ''),
+    priceSeries: String(fd.get('priceSeries') || ''),
+    minFrequency: String(fd.get('minFrequency') || ''),
   };
 }
 
