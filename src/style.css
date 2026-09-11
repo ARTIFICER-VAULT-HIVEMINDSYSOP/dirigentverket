@@ -1540,6 +1540,20 @@ body.view-rider .shell-artificer {
   box-shadow: 0 0 6px rgba(138, 154, 106, 0.35);
 }
 
+.rider-sil-freq.is-progress .rider-sil-freq-pip {
+  border-color: #2e3628;
+  background: #12160f;
+}
+
+.rider-sil-freq.is-progress .rider-sil-freq-pip.is-on {
+  background: #5c6a48;
+  box-shadow: none;
+}
+
+.rider-play[data-freq-progress="1"] .rider-sil-freq.is-progress {
+  opacity: 0.82;
+}
+
 .rider-sil-freq-empty {
   font-family: var(--mono);
   font-size: 9px;

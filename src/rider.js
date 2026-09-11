@@ -5,7 +5,7 @@
  */
 
 import { formatPx, structureSignal, seasonPlan } from './robot.js';
-import { measureFrequency, proposeMittHedge } from './hedge.js';
+import { measureFrequency, parseMinFrequency, proposeMittHedge } from './hedge.js';
 
 export { formatPx };
 
@@ -379,6 +379,9 @@ export function emptyRideHedge() {
     tell: false,
     proposed: false,
     freqPip: false,
+    freqProgress: false,
+    freqNeed: null,
+    freqHave: null,
     saknas: true,
     saknasKind: 'serie',
     mode: null,
@@ -435,9 +438,24 @@ export function rideHedge(raw = {}) {
   const freqPip = Boolean(frequency.known);
   const saknas = Boolean(!frequency.known || frequency.error || frequency.saknas);
   const saknasKind = frequency.error ? 'band' : saknas ? 'serie' : null;
+  const minN = parseMinFrequency(input.minFrequency);
+  const have = frequency.known ? frequency.count : null;
+  const freqProgress = Boolean(
+    frequency.known &&
+      !frequency.error &&
+      !saknas &&
+      !hedge.proposed &&
+      have != null &&
+      have >= 1 &&
+      minN != null &&
+      have < minN,
+  );
   const base = {
     ...hold,
     freqPip,
+    freqProgress,
+    freqNeed: freqProgress ? minN : null,
+    freqHave: freqProgress ? have : null,
     saknas,
     saknasKind,
     count: frequency.known ? frequency.count : null,
@@ -455,6 +473,9 @@ export function rideHedge(raw = {}) {
     ...base,
     tell: true,
     proposed: true,
+    freqProgress: false,
+    freqNeed: null,
+    freqHave: null,
     saknas: false,
     saknasKind: null,
     mode: 'mitt_hedge',

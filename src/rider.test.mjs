@@ -1122,6 +1122,91 @@ test('band-silhuett + mitt-pip när mitt-hedge-plan finns; saknas annars', () =>
   assert.ok(!/<span class="rider-hedge-mid-pip"/.test(badHtml));
 });
 
+test('frekvens-progress-pip under grind; ger plats när plan blir giltig', () => {
+  const few = computeRide({
+    entry: 105,
+    maxFel: 2,
+    rr: 2,
+    grav: 105,
+    bbLower: 100,
+    bbUpper: 110,
+    priceSeries: '100\n110\n100',
+  });
+  assert.equal(few.hedge.proposed, false);
+  assert.equal(few.hedge.freqPip, true);
+  assert.equal(few.hedge.freqProgress, true);
+  assert.equal(few.hedge.freqHave, 2);
+  assert.equal(few.hedge.freqNeed, 3);
+  assert.equal(few.hedge.midPip, null);
+  assert.deepEqual(few.hedge.ghosts, []);
+  const fewHtml = renderPlayArena(few);
+  assert.match(fewHtml, /data-freq-progress="1"/);
+  assert.match(fewHtml, /data-freq-have="2"/);
+  assert.match(fewHtml, /data-freq-need="3"/);
+  assert.match(fewHtml, /rider-sil-freq is-progress/);
+  assert.match(fewHtml, /data-hedge-band="0"/);
+  assert.match(fewHtml, /data-hedge-mid-pip="0"/);
+  assert.ok(!/rider-mark-hedge-mid/.test(fewHtml));
+  assert.ok(!/<span class="rider-hedge-mid-pip"/.test(fewHtml));
+  assert.ok(!/<button/i.test(fewHtml));
+  assert.doesNotMatch(fewHtml, /P&L|pnl/);
+  assert.equal(LIVE_LOCKED, true);
+
+  const on = computeRide({
+    entry: 105,
+    maxFel: 2,
+    rr: 2,
+    grav: 105,
+    bbLower: 100,
+    bbUpper: 110,
+    priceSeries: '100\n110\n100\n110',
+  });
+  assert.equal(on.hedge.proposed, true);
+  assert.equal(on.hedge.freqProgress, false);
+  assert.equal(on.hedge.freqNeed, null);
+  assert.equal(on.hedge.freqHave, null);
+  assert.equal(on.hedge.midPip.at, 105);
+  const onHtml = renderPlayArena(on);
+  assert.match(onHtml, /data-freq-progress="0"/);
+  assert.match(onHtml, /data-hedge-mid-pip="1"/);
+  assert.match(onHtml, /rider-mark-hedge-mid/);
+  assert.ok(!/rider-sil-freq is-progress/.test(onHtml));
+  assert.equal((onHtml.match(/rider-mark-hedge-mid/g) || []).length, 1);
+
+  const empty = computeRide({ entry: 100, maxFel: 2, rr: 2, grav: 100 });
+  assert.equal(empty.hedge.freqProgress, false);
+  const emptyHtml = renderPlayArena(empty);
+  assert.match(emptyHtml, /data-freq-progress="0"/);
+  assert.match(emptyHtml, /data-freq-saknas="1"/);
+  assert.ok(!/rider-sil-freq is-progress/.test(emptyHtml));
+
+  const badBand = computeRide({
+    entry: 105,
+    maxFel: 2,
+    rr: 2,
+    grav: 105,
+    bbLower: 110,
+    bbUpper: 100,
+    priceSeries: '100\n110\n100\n110',
+  });
+  assert.equal(badBand.hedge.freqProgress, false);
+  const badHtml = renderPlayArena(badBand);
+  assert.match(badHtml, /data-freq-progress="0"/);
+  assert.ok(!/rider-sil-freq is-progress/.test(badHtml));
+
+  const zeroSwing = computeRide({
+    entry: 105,
+    maxFel: 2,
+    rr: 2,
+    grav: 105,
+    bbLower: 100,
+    bbUpper: 110,
+    priceSeries: '100\n101\n100',
+  });
+  assert.equal(zeroSwing.hedge.count, 0);
+  assert.equal(zeroSwing.hedge.freqProgress, false);
+});
+
 test('band-fade när giltig mitt-hedge blir saknas; ingen påhittad mitt', () => {
   const on = computeRide({
     entry: 105,
