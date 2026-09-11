@@ -28,7 +28,9 @@ Gate `hasCompletedFirstRide` / `RIDER_FIRST_RIDE_KEY`, «små belopp»-hint, imp
 
 **09:42 Sthlm 11 sep (ständig-process):** Magasin 8765 HTTP 200. PR #8 + #11 update-branch → 0 behind. Cloud follow-up bc-7a6a7541: mjuk band-silhuett + mitt-pip när mitt-hedge-plan finns (samma draft, ingen merge). PR #9 lamp CONFLICTING — kväll. PII-fri backup `/workspace/backups/dirigentverket-verktyg-kod-20260911-0743.tar.gz`. Merge väntar namngivet ja. No live/send/merge.
 
-**11 sep förmiddag (draft PR #8, inte mergad):** band-silhuett + mitt-pip landat. Giltig mitt-hedge-plan (frekvens-grind OK, övre>nedre) ritar svaga övre/nedre räls och en mitt-pip (entry) på `#/rider`. Tom serie / saknas-band = ingen plan, empty-tell orörd. Inga nya play-knappar. Väntar namngivet ÖB merge-ja.
+**11 sep förmiddag (draft PR #8, inte mergad):** band-silhuett + mitt-pip landat (`8bc4fcc`). Giltig mitt-hedge-plan ritar svaga övre/nedre räls och mitt-pip (entry) på `#/rider`. Tom serie / saknas-band = ingen plan. Väntar namngivet ÖB merge-ja.
+
+**13:38 Sthlm 11 sep (ständig-process):** Magasin 8765 HTTP 200. PR #8 CLEAN/MERGEABLE, 0 behind (14 ahead). PR #11 update-branch. Status synkad. Cloud follow-up: mjuk band-fade när mitt-hedge går giltig→saknas (samma draft, ingen merge). Lamp = kväll. Merge väntar namngivet ja. No live/send/merge.
 
 https://github.com/ARTIFICER-VAULT-HIVEMINDSYSOP/dirigentverket/pull/8
 https://github.com/ARTIFICER-VAULT-HIVEMINDSYSOP/dirigentverket/pull/4
