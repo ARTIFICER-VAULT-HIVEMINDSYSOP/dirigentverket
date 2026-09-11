@@ -386,6 +386,8 @@ export function emptyRideHedge() {
     lower: null,
     upper: null,
     ghosts: [],
+    bandRails: [],
+    midPip: null,
     note: 'saknas',
     paper: true,
     live: false,
@@ -404,6 +406,16 @@ function hedgeGhosts(frequency, proposed) {
     { kind: 'mid', at: mid },
     { kind: 'övre', at: upper },
   ];
+}
+
+/** Weak silhouette rails + mid pip only when a mitt-hedge plan exists. Never invents levels. */
+function hedgeBandFeel(frequency, proposed) {
+  const ghosts = hedgeGhosts(frequency, proposed);
+  return {
+    ghosts,
+    bandRails: ghosts.filter((g) => g.kind === 'nedre' || g.kind === 'övre'),
+    midPip: ghosts.find((g) => g.kind === 'mid') || null,
+  };
 }
 
 /**
@@ -431,9 +443,12 @@ export function rideHedge(raw = {}) {
     lower: frequency.known || frequency.width != null ? frequency.lower : null,
     upper: frequency.known || frequency.width != null ? frequency.upper : null,
     ghosts: [],
+    bandRails: [],
+    midPip: null,
     note: saknas ? 'saknas' : frequency.note || '',
   };
   if (!hedge.proposed) return base;
+  const feel = hedgeBandFeel(frequency, true);
   return {
     ...base,
     tell: true,
@@ -445,7 +460,9 @@ export function rideHedge(raw = {}) {
     count: hedge.count,
     kop: hedge.kop,
     salj: hedge.salj,
-    ghosts: hedgeGhosts(frequency, true),
+    ghosts: feel.ghosts,
+    bandRails: feel.bandRails,
+    midPip: feel.midPip,
     note: 'mitt-hedge · köp + sälj i mitten. Process före fart. Ingen order.',
   };
 }

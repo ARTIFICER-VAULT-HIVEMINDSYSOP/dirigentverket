@@ -1931,6 +1931,38 @@ body.view-rider .shell-artificer {
   box-shadow: none;
 }
 
+.rider-mark.is-hedge-rail .rider-mark-line {
+  height: 2px;
+  background: repeating-linear-gradient(
+    90deg,
+    rgba(138, 154, 106, 0.38) 0 7px,
+    transparent 7px 12px
+  );
+}
+
+.rider-hedge-rail {
+  display: block;
+  width: 100%;
+  height: 2px;
+}
+
+.rider-mark.is-hedge-mid-pip .rider-mark-line {
+  height: 1px;
+  background: rgba(138, 154, 106, 0.22);
+}
+
+.rider-hedge-mid-pip {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 7px;
+  height: 7px;
+  margin: -4px 0 0 -4px;
+  background: rgba(196, 210, 168, 0.72);
+  border: 1px solid rgba(138, 154, 106, 0.7);
+  image-rendering: pixelated;
+}
+
 .rider-mark-hedge-mid .rider-mark-pip,
 .rider-mark-hedge-nedre .rider-mark-pip,
 .rider-mark-hedge-övre .rider-mark-pip {
@@ -1949,6 +1981,10 @@ body.view-rider .shell-artificer {
 .rider-mark-hedge-övre .rider-mark-px {
   color: #6e7a58;
   opacity: 0.85;
+}
+
+.rider-play[data-hedge-band="1"] .rider-arena-field {
+  box-shadow: inset 0 0 0 1px rgba(138, 154, 106, 0.12);
 }
 
 .rider-hop-path {

@@ -139,7 +139,7 @@ export function renderPlayArena(ride, play = {}) {
       })
       .join('');
     return `<div class="rider-play is-empty rider-bit is-dry-run" data-rider-play data-bit="32" data-dry-run="1" role="status"
-      data-freq-pip="${ride?.hedge?.freqPip ? '1' : '0'}" data-freq-saknas="${!ride || !ride.hedge || ride.hedge.saknas ? '1' : '0'}" data-hedge-ghost="0"
+      data-freq-pip="${ride?.hedge?.freqPip ? '1' : '0'}" data-freq-saknas="${!ride || !ride.hedge || ride.hedge.saknas ? '1' : '0'}" data-hedge-ghost="0" data-hedge-band="0" data-hedge-mid-pip="0"
       data-leverage="${lev}" data-speed="${speed}" data-lens="${lens}" data-rail="${rail}" data-sit="${sit}"
       style="--rider-speed:${speed};--rider-lens:${lens};--rider-coast-ms:${coastPeriodMs(lev)}ms;">
       ${renderScanlines()}
@@ -187,7 +187,15 @@ export function renderPlayArena(ride, play = {}) {
   }
   if (ride.hedge && ride.hedge.proposed && Array.isArray(ride.hedge.ghosts)) {
     for (const g of ride.hedge.ghosts) {
-      if (g && g.at != null) marks.push({ kind: `hedge-${g.kind}`, at: g.at, label: g.kind === 'mid' ? 'mitt' : g.kind });
+      if (g && g.at != null) {
+        marks.push({
+          kind: `hedge-${g.kind}`,
+          at: g.at,
+          label: g.kind === 'mid' ? 'mitt' : g.kind,
+          hedgeRail: g.kind === 'nedre' || g.kind === 'övre' ? g.kind : null,
+          hedgeMidPip: g.kind === 'mid',
+        });
+      }
     }
   }
   marks.push({ kind: 'sl', at: ride.sl, label: 'SL' });
@@ -197,17 +205,27 @@ export function renderPlayArena(ride, play = {}) {
       const top = scale.y(row.at);
       const railIndex = rails.indexOf(row.at);
       const railAttr = railIndex >= 0 ? `data-rail-index="${railIndex}" data-rail-price="${row.at}"` : '';
+      const hedgeRailAttr = row.hedgeRail ? ` data-hedge-rail="${escapeHtml(row.hedgeRail)}"` : '';
+      const hedgeMidAttr = row.hedgeMidPip ? ' data-hedge-mid-pip="1"' : '';
       const cls = [
         'rider-mark',
         `rider-mark-${row.kind}`,
         railIndex === rail ? 'is-rail' : '',
         railIndex === sit ? 'is-sit' : '',
+        row.hedgeRail ? 'is-hedge-rail' : '',
+        row.hedgeMidPip ? 'is-hedge-mid-pip' : '',
       ]
         .filter(Boolean)
         .join(' ');
-      return `<div class="${cls}" ${railAttr} data-top="${top}%" style="top:${top}%">
+      return `<div class="${cls}" ${railAttr}${hedgeRailAttr}${hedgeMidAttr} data-top="${top}%" style="top:${top}%">
         <span class="rider-mark-label">${escapeHtml(row.label)}</span>
-        <span class="rider-mark-line"><span class="rider-mark-pip" aria-hidden="true"></span></span>
+        <span class="rider-mark-line">${
+          row.hedgeRail
+            ? '<span class="rider-hedge-rail" aria-hidden="true"></span>'
+            : row.hedgeMidPip
+              ? '<span class="rider-hedge-mid-pip" aria-hidden="true"></span>'
+              : '<span class="rider-mark-pip" aria-hidden="true"></span>'
+        }</span>
         <span class="rider-mark-px">${escapeHtml(formatPx(row.at))}</span>
       </div>`;
     })
@@ -268,8 +286,10 @@ export function renderPlayArena(ride, play = {}) {
   const coastMs = coastPeriodMs(lev);
   const railText = rails[rail] != null ? escapeHtml(String(rails[rail])) : '';
   const ghostOn = Boolean(hedgeOn && ride.hedge.ghosts && ride.hedge.ghosts.length);
+  const bandOn = Boolean(hedgeOn && ride.hedge.bandRails && ride.hedge.bandRails.length);
+  const midPipOn = Boolean(hedgeOn && ride.hedge.midPip && ride.hedge.midPip.at != null);
   return `<div class="rider-play rider-bit is-looking ${jumped ? 'has-hop' : 'has-hold'}${trailed ? ' has-trail' : ''}${rokadOn ? ' has-rokad' : ''}${hedgeOn ? ' has-hedge' : ''}" data-rider-play data-bit="32" data-look="1"
-      data-hop-tell="${tell ? '1' : '0'}" data-trail-tell="${trailed ? '1' : '0'}" data-rokad-tell="${rokadOn ? '1' : '0'}" data-hedge-tell="${hedgeOn ? '1' : '0'}" data-freq-pip="${ride.hedge && ride.hedge.freqPip ? '1' : '0'}" data-freq-saknas="${ride.hedge && ride.hedge.saknas ? '1' : '0'}" data-hedge-ghost="${ghostOn ? '1' : '0'}"
+      data-hop-tell="${tell ? '1' : '0'}" data-trail-tell="${trailed ? '1' : '0'}" data-rokad-tell="${rokadOn ? '1' : '0'}" data-hedge-tell="${hedgeOn ? '1' : '0'}" data-freq-pip="${ride.hedge && ride.hedge.freqPip ? '1' : '0'}" data-freq-saknas="${ride.hedge && ride.hedge.saknas ? '1' : '0'}" data-hedge-ghost="${ghostOn ? '1' : '0'}" data-hedge-band="${bandOn ? '1' : '0'}" data-hedge-mid-pip="${midPipOn ? '1' : '0'}"
       data-side="${escapeHtml(ride.input?.side || 'köp')}" data-rokad-from="${escapeHtml(ride.rokad?.from || ride.input?.side || 'köp')}" data-rokad-to="${escapeHtml(ride.rokad?.to || ride.input?.side || 'köp')}"
       data-leverage="${lev}" data-speed="${speed}" data-lens="${lens}" data-rail="${rail}" data-sit="${sit}"
       style="--rider-speed:${speed};--rider-lens:${lens};--rider-coast-ms:${coastMs}ms;--hop-window:${HOP_WINDOW_MS}ms;"
