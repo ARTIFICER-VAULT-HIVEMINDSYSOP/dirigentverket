@@ -13,6 +13,8 @@ from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse
 
+from markets import get_markets_snapshot, start_markets_refresh
+
 ROOT = Path(os.environ.get("DIRIGENT_ROOT") or Path(__file__).resolve().parent)
 PUBLIC = ROOT / "public"
 HOST = os.environ.get("DIRIGENT_HOST") or "0.0.0.0"
@@ -561,6 +563,9 @@ class Handler(SimpleHTTPRequestHandler):
         parsed = urlparse(self.path)
         if self._serve_src(parsed.path):
             return
+        if parsed.path == "/api/markets":
+            self._json(200, get_markets_snapshot())
+            return
         if parsed.path == "/api/luckor":
             qs = parse_qs(parsed.query)
             magasin = (qs.get("magasin") or [""])[0]
@@ -741,6 +746,7 @@ class Handler(SimpleHTTPRequestHandler):
 
 def main() -> None:
     os.chdir(PUBLIC)
+    start_markets_refresh()
     httpd = ThreadingHTTPServer((HOST, PORT), Handler)
     print("magasin_server %s:%s serving %s" % (HOST, PORT, PUBLIC), flush=True)
     try:
