@@ -38,6 +38,9 @@ import {
   rokadVolume,
   rideRokad,
   rideHedge,
+  hedgeBandFade,
+  emptyHedgeFade,
+  HEDGE_FADE_MS,
   RIDER_ROKAD_GATE,
   rideImpulse,
   RIDER_IMPULSE_NOTE,
@@ -1117,6 +1120,88 @@ test('band-silhuett + mitt-pip när mitt-hedge-plan finns; saknas annars', () =>
   assert.match(badHtml, /data-hedge-band="0"/);
   assert.ok(!/data-hedge-rail=/.test(badHtml));
   assert.ok(!/<span class="rider-hedge-mid-pip"/.test(badHtml));
+});
+
+test('band-fade när giltig mitt-hedge blir saknas; ingen påhittad mitt', () => {
+  const on = computeRide({
+    entry: 105,
+    maxFel: 2,
+    rr: 2,
+    grav: 105,
+    bbLower: 100,
+    bbUpper: 110,
+    priceSeries: '100\n110\n100\n110',
+  });
+  const empty = computeRide({ entry: 100, maxFel: 2, rr: 2, grav: 100 });
+  const few = computeRide({
+    entry: 105,
+    maxFel: 2,
+    rr: 2,
+    grav: 105,
+    bbLower: 100,
+    bbUpper: 110,
+    priceSeries: '100\n110\n100',
+  });
+  const badBand = computeRide({
+    entry: 105,
+    maxFel: 2,
+    rr: 2,
+    grav: 105,
+    bbLower: 110,
+    bbUpper: 100,
+    priceSeries: '100\n110\n100\n110',
+  });
+  const noBand = computeRide({
+    entry: 105,
+    maxFel: 2,
+    rr: 2,
+    grav: 105,
+    priceSeries: '100\n110\n100\n110',
+  });
+
+  const toEmpty = hedgeBandFade(on.hedge, empty.hedge);
+  assert.equal(toEmpty.fading, true);
+  assert.equal(toEmpty.paper, true);
+  assert.equal(toEmpty.ms, HEDGE_FADE_MS);
+  assert.equal(toEmpty.bandRails.length, 2);
+  assert.equal(toEmpty.bandRails[0].at, 100);
+  assert.equal(toEmpty.bandRails[1].at, 110);
+  assert.equal(toEmpty.midPip.at, 105);
+  assert.equal(toEmpty.ghosts.length, 3);
+
+  assert.equal(hedgeBandFade(on.hedge, few.hedge).fading, true);
+  assert.equal(hedgeBandFade(on.hedge, badBand.hedge).fading, true);
+  assert.equal(hedgeBandFade(on.hedge, noBand.hedge).fading, true);
+  assert.equal(hedgeBandFade(on.hedge, on.hedge).fading, false);
+  assert.equal(hedgeBandFade(empty.hedge, empty.hedge).fading, false);
+  assert.equal(hedgeBandFade(null, empty.hedge).fading, false);
+  assert.deepEqual(hedgeBandFade(empty.hedge, empty.hedge).ghosts, []);
+  assert.equal(emptyHedgeFade().fading, false);
+
+  const invented = hedgeBandFade({ proposed: true, ghosts: [] }, empty.hedge);
+  assert.equal(invented.fading, false);
+  assert.deepEqual(invented.ghosts, []);
+  assert.equal(invented.midPip, null);
+
+  const fadeHtml = renderPlayArena(empty, { hedgeFade: toEmpty });
+  assert.match(fadeHtml, /data-hedge-fade="1"/);
+  assert.match(fadeHtml, /is-hedge-fade/);
+  assert.match(fadeHtml, /data-hedge-rail="nedre"/);
+  assert.match(fadeHtml, /data-hedge-rail="övre"/);
+  assert.match(fadeHtml, /data-hedge-mid-pip="1"/);
+  assert.match(fadeHtml, /data-freq-saknas="1"/);
+  assert.match(fadeHtml, />saknas</);
+  assert.match(fadeHtml, /--hedge-fade-ms:1100ms/);
+  assert.ok(!/<button/i.test(fadeHtml));
+  assert.ok(!/<dialog/i.test(fadeHtml));
+  assert.doesNotMatch(fadeHtml, /P&L|pnl/);
+  assert.equal(LIVE_LOCKED, true);
+
+  const quietHtml = renderPlayArena(empty);
+  assert.match(quietHtml, /data-hedge-fade="0"/);
+  assert.ok(!/is-hedge-fade/.test(quietHtml));
+  assert.ok(!/data-hedge-rail=/.test(quietHtml));
+  assert.match(quietHtml, /data-freq-saknas="1"/);
 });
 
 test('tom-arena dry-run: W/S/F/[ ]/Space flyttar silhuett utan påhittade priser', () => {

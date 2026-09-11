@@ -32,6 +32,8 @@ Gate `hasCompletedFirstRide` / `RIDER_FIRST_RIDE_KEY`, «små belopp»-hint, imp
 
 **13:38 Sthlm 11 sep (ständig-process):** Magasin 8765 HTTP 200. PR #8 CLEAN/MERGEABLE, 0 behind (14 ahead). PR #11 update-branch. Status synkad. Cloud follow-up: mjuk band-fade när mitt-hedge går giltig→saknas (samma draft, ingen merge). Lamp = kväll. Merge väntar namngivet ja. No live/send/merge.
 
+**11 sep eftermiddag (draft PR #8, inte mergad):** band-fade landat. Giltig mitt-hedge som blir ogiltig (tom serie, saknas-band, övre≤nedre, frekvens-grind fail) tonar ut övre/nedre räls + mitt-pip i stället för abrupt cut. Empty-tell/saknas-pip kontinuerlig. Inga nya play-knappar. Paper. Väntar namngivet ÖB merge-ja.
+
 https://github.com/ARTIFICER-VAULT-HIVEMINDSYSOP/dirigentverket/pull/8
 https://github.com/ARTIFICER-VAULT-HIVEMINDSYSOP/dirigentverket/pull/4
 
@@ -40,7 +42,7 @@ När ÖB öppnar `#/rider` ska det kännas så här, i den ordningen:
 1. Arena först — grafen syns innan någon formvägg.
 2. Process-hint syns mjukt (inte skrikig varning).
 3. W/S flyttar räls direkt; F fäster; hävstång 1–4× syns som fart/pip, inte textmur.
-4. Space = lins; hopp har tell; trail-tell syns bara på struktur; rokad-tell (vänd sida, volym −25 %, ÖB-gate) när paper-rokad finns; mitt-hedge-tell + frekvens-pip när serien räcker, saknas-pip när serie/band tomt; band-räls + mitt-pip bara när planen finns; inga nya play-knappar på ytan.
+4. Space = lins; hopp har tell; trail-tell syns bara på struktur; rokad-tell (vänd sida, volym −25 %, ÖB-gate) när paper-rokad finns; mitt-hedge-tell + frekvens-pip när serien räcker, saknas-pip när serie/band tomt; band-räls + mitt-pip bara när planen finns; giltig→saknas tonar ut räls/pip (fade); inga nya play-knappar på ytan.
 5. En lyckad paper-ride krävs innan «små belopp» syns/öppnas.
 6. PAPER-badge sticky; live-knapp död.
 7. Tom arena = dry-run: silhuett rör sig före Räkna; tomma rutor stannar tomma.

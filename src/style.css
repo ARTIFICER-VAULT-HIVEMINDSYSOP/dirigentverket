@@ -1987,6 +1987,29 @@ body.view-rider .shell-artificer {
   box-shadow: inset 0 0 0 1px rgba(138, 154, 106, 0.12);
 }
 
+.rider-mark.is-hedge-fade {
+  animation: rider-hedge-fade var(--hedge-fade-ms, 1100ms) ease-out forwards;
+  pointer-events: none;
+}
+
+.rider-play[data-hedge-fade="1"] .rider-sil-freq-empty {
+  animation: rider-hedge-saknas-in var(--hedge-fade-ms, 1100ms) ease-out;
+}
+
+.rider-play[data-hedge-fade="1"] .rider-arena-field {
+  box-shadow: inset 0 0 0 1px rgba(138, 154, 106, 0.06);
+}
+
+@keyframes rider-hedge-fade {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@keyframes rider-hedge-saknas-in {
+  from { opacity: 0.35; }
+  to { opacity: 1; }
+}
+
 .rider-hop-path {
   font-size: 15px;
   color: var(--ink);

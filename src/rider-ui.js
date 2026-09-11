@@ -14,6 +14,7 @@ import {
   playRails,
   dryRunSlotTop,
   HOP_WINDOW_MS,
+  HEDGE_FADE_MS,
 } from './rider.js';
 import { escapeHtml, emptyFigure } from './format.js';
 import { emptyHudState, magazineView } from './contact-queue.js';
@@ -139,7 +140,7 @@ export function renderPlayArena(ride, play = {}) {
       })
       .join('');
     return `<div class="rider-play is-empty rider-bit is-dry-run" data-rider-play data-bit="32" data-dry-run="1" role="status"
-      data-freq-pip="${ride?.hedge?.freqPip ? '1' : '0'}" data-freq-saknas="${!ride || !ride.hedge || ride.hedge.saknas ? '1' : '0'}" data-hedge-ghost="0" data-hedge-band="0" data-hedge-mid-pip="0"
+      data-freq-pip="${ride?.hedge?.freqPip ? '1' : '0'}" data-freq-saknas="${!ride || !ride.hedge || ride.hedge.saknas ? '1' : '0'}" data-hedge-ghost="0" data-hedge-band="0" data-hedge-mid-pip="0" data-hedge-fade="0"
       data-leverage="${lev}" data-speed="${speed}" data-lens="${lens}" data-rail="${rail}" data-sit="${sit}"
       style="--rider-speed:${speed};--rider-lens:${lens};--rider-coast-ms:${coastPeriodMs(lev)}ms;">
       ${renderScanlines()}
@@ -160,6 +161,8 @@ export function renderPlayArena(ride, play = {}) {
   const lens = play.lens || 1;
   const rail = play.rail || 0;
   const sit = play.sit ?? rail;
+  const fade = play.hedgeFade && play.hedgeFade.fading ? play.hedgeFade : null;
+  const fadeGhosts = fade ? fade.ghosts || [] : [];
   const prices = [
     ride.tp,
     ride.sl,
@@ -169,6 +172,7 @@ export function renderPlayArena(ride, play = {}) {
     ride.jump?.jumped ? ride.jump.from : null,
     ride.jump?.jumped ? ride.jump.to : null,
     ...((ride.hedge && ride.hedge.ghosts) || []).map((g) => g.at),
+    ...fadeGhosts.map((g) => g.at),
   ].filter((n) => n !== null && n !== undefined);
   const scale = arenaScale(prices);
 
@@ -197,6 +201,19 @@ export function renderPlayArena(ride, play = {}) {
         });
       }
     }
+  } else if (fade && fadeGhosts.length) {
+    for (const g of fadeGhosts) {
+      if (g && g.at != null) {
+        marks.push({
+          kind: `hedge-${g.kind}`,
+          at: g.at,
+          label: g.kind === 'mid' ? 'mitt' : g.kind,
+          hedgeRail: g.kind === 'nedre' || g.kind === 'övre' ? g.kind : null,
+          hedgeMidPip: g.kind === 'mid',
+          hedgeFade: true,
+        });
+      }
+    }
   }
   marks.push({ kind: 'sl', at: ride.sl, label: 'SL' });
 
@@ -207,6 +224,7 @@ export function renderPlayArena(ride, play = {}) {
       const railAttr = railIndex >= 0 ? `data-rail-index="${railIndex}" data-rail-price="${row.at}"` : '';
       const hedgeRailAttr = row.hedgeRail ? ` data-hedge-rail="${escapeHtml(row.hedgeRail)}"` : '';
       const hedgeMidAttr = row.hedgeMidPip ? ' data-hedge-mid-pip="1"' : '';
+      const hedgeFadeAttr = row.hedgeFade ? ' data-hedge-fade="1"' : '';
       const cls = [
         'rider-mark',
         `rider-mark-${row.kind}`,
@@ -214,10 +232,11 @@ export function renderPlayArena(ride, play = {}) {
         railIndex === sit ? 'is-sit' : '',
         row.hedgeRail ? 'is-hedge-rail' : '',
         row.hedgeMidPip ? 'is-hedge-mid-pip' : '',
+        row.hedgeFade ? 'is-hedge-fade' : '',
       ]
         .filter(Boolean)
         .join(' ');
-      return `<div class="${cls}" ${railAttr}${hedgeRailAttr}${hedgeMidAttr} data-top="${top}%" style="top:${top}%">
+      return `<div class="${cls}" ${railAttr}${hedgeRailAttr}${hedgeMidAttr}${hedgeFadeAttr} data-top="${top}%" style="top:${top}%">
         <span class="rider-mark-label">${escapeHtml(row.label)}</span>
         <span class="rider-mark-line">${
           row.hedgeRail
@@ -288,11 +307,13 @@ export function renderPlayArena(ride, play = {}) {
   const ghostOn = Boolean(hedgeOn && ride.hedge.ghosts && ride.hedge.ghosts.length);
   const bandOn = Boolean(hedgeOn && ride.hedge.bandRails && ride.hedge.bandRails.length);
   const midPipOn = Boolean(hedgeOn && ride.hedge.midPip && ride.hedge.midPip.at != null);
-  return `<div class="rider-play rider-bit is-looking ${jumped ? 'has-hop' : 'has-hold'}${trailed ? ' has-trail' : ''}${rokadOn ? ' has-rokad' : ''}${hedgeOn ? ' has-hedge' : ''}" data-rider-play data-bit="32" data-look="1"
-      data-hop-tell="${tell ? '1' : '0'}" data-trail-tell="${trailed ? '1' : '0'}" data-rokad-tell="${rokadOn ? '1' : '0'}" data-hedge-tell="${hedgeOn ? '1' : '0'}" data-freq-pip="${ride.hedge && ride.hedge.freqPip ? '1' : '0'}" data-freq-saknas="${ride.hedge && ride.hedge.saknas ? '1' : '0'}" data-hedge-ghost="${ghostOn ? '1' : '0'}" data-hedge-band="${bandOn ? '1' : '0'}" data-hedge-mid-pip="${midPipOn ? '1' : '0'}"
+  const fadeOn = Boolean(fade && fadeGhosts.length);
+  const fadeMs = fade && fade.ms != null ? fade.ms : HEDGE_FADE_MS;
+  return `<div class="rider-play rider-bit is-looking ${jumped ? 'has-hop' : 'has-hold'}${trailed ? ' has-trail' : ''}${rokadOn ? ' has-rokad' : ''}${hedgeOn ? ' has-hedge' : ''}${fadeOn ? ' has-hedge-fade' : ''}" data-rider-play data-bit="32" data-look="1"
+      data-hop-tell="${tell ? '1' : '0'}" data-trail-tell="${trailed ? '1' : '0'}" data-rokad-tell="${rokadOn ? '1' : '0'}" data-hedge-tell="${hedgeOn ? '1' : '0'}" data-freq-pip="${ride.hedge && ride.hedge.freqPip ? '1' : '0'}" data-freq-saknas="${ride.hedge && ride.hedge.saknas ? '1' : '0'}" data-hedge-ghost="${ghostOn ? '1' : '0'}" data-hedge-band="${bandOn ? '1' : '0'}" data-hedge-mid-pip="${midPipOn ? '1' : '0'}" data-hedge-fade="${fadeOn ? '1' : '0'}"
       data-side="${escapeHtml(ride.input?.side || 'köp')}" data-rokad-from="${escapeHtml(ride.rokad?.from || ride.input?.side || 'köp')}" data-rokad-to="${escapeHtml(ride.rokad?.to || ride.input?.side || 'köp')}"
       data-leverage="${lev}" data-speed="${speed}" data-lens="${lens}" data-rail="${rail}" data-sit="${sit}"
-      style="--rider-speed:${speed};--rider-lens:${lens};--rider-coast-ms:${coastMs}ms;--hop-window:${HOP_WINDOW_MS}ms;"
+      style="--rider-speed:${speed};--rider-lens:${lens};--rider-coast-ms:${coastMs}ms;--hop-window:${HOP_WINDOW_MS}ms;--hedge-fade-ms:${fadeMs}ms;"
       role="img" aria-label="Paper-arena">
     ${renderScanlines()}
     ${renderBitHud(lev, speed, railText, rails, { ...play, side: ride.input?.side }, jumped, trailed, ride.rokad, ride.hedge)}

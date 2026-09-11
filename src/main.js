@@ -34,6 +34,8 @@ import {
   handleRiderKey,
   tempoToLens,
   HOP_WINDOW_MS,
+  hedgeBandFade,
+  emptyHedgeFade,
   LIVE_LOCKED,
   hasCompletedFirstRide,
   markFirstRideComplete,
@@ -392,7 +394,20 @@ root.addEventListener('submit', (ev) => {
     saveRideDraft(riderDraft);
     const now = Date.now();
     const midAir = riderPlay.hopping && now < riderPlay.hopUntil;
+    const prevHedge = riderResult && riderResult.hedge;
     riderResult = computeRide({ ...riderDraft, midAir });
+    const hedgeFade = hedgeBandFade(prevHedge, riderResult.hedge);
+    if (hedgeFade.fading) {
+      const until = now + hedgeFade.ms;
+      riderPlay = { ...riderPlay, hedgeFade: { ...hedgeFade, until } };
+      window.setTimeout(() => {
+        if (!riderPlay.hedgeFade || riderPlay.hedgeFade.until !== until) return;
+        riderPlay = { ...riderPlay, hedgeFade: emptyHedgeFade() };
+        render();
+      }, hedgeFade.ms);
+    } else {
+      riderPlay = { ...riderPlay, hedgeFade };
+    }
     if (riderResult.ok) {
       const wasDone = hasCompletedFirstRide();
       markFirstRideComplete();
