@@ -38,6 +38,8 @@ Gate `hasCompletedFirstRide` / `RIDER_FIRST_RIDE_KEY`, «små belopp»-hint, imp
 
 **11 sep kväll (draft PR #8, inte mergad):** frekvens-progress-pip landat. Räknade svängar under minFrequency = mjuk process-pip mot grind (plan saknas ännu). Tom serie / ogiltigt band / övre≤nedre = ingen progress-pip (saknas). När grind nås ger progress plats åt band-räls + mitt-pip. Inga dubbla mitt-markörer. Paper. Väntar namngivet ÖB merge-ja.
 
+**09:37 Sthlm 14 sep (ständig-process):** Magasin 8765 HTTP 200. PR #8 CLEAN/MERGEABLE, 0 behind (~18 ahead); frekvens-progress-pip redan landat (`3b3dc5c`). PR #11 update-branch → 0 behind. Cloud bc-61a38279: mjuk fade-in saknas→giltig för mitt-hedge-räls/mitt-pip (samma draft, ingen merge). PII-fri backup `/workspace/backups/dirigentverket-verktyg-kod-20260914-0939.tar.gz`. PR #9 lamp = kväll. Merge väntar namngivet ja. No live/send/merge.
+
 **14 sep ~09:37 Sthlm (ständig-process):** fade-in saknas→giltig landat. När frekvens-grind nås + giltiga band tonar övre/nedre räls + mitt-pip in (samma fade-tid som giltig→saknas, omvänd). Tom serie / saknas-band / övre≤nedre / under grind = ingen fade-in. PR #8 fortfarande draft. Merge väntar namngivet ja. No live/send/merge.
 
 https://github.com/ARTIFICER-VAULT-HIVEMINDSYSOP/dirigentverket/pull/8
