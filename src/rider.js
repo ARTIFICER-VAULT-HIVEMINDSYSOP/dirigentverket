@@ -18,7 +18,7 @@ export const LEVERAGE_MIN = 1;
 export const LEVERAGE_MAX = 4;
 export const LENS_STEPS = [1, 1.5, 2];
 export const COAST_PERIOD_MS = 1600;
-/** Soft band-fade when a mitt-hedge plan goes giltig → saknas. Feel, not a cut. */
+/** Soft band-fade both ways: giltig → saknas (out) and saknas → giltig (in). Feel, not a cut. */
 export const HEDGE_FADE_MS = 1100;
 export const LIVE_LOCKED = true;
 /** Nameless dry-run slots. Not prices — empty cells stay empty. */
@@ -493,6 +493,7 @@ export function rideHedge(raw = {}) {
 export function emptyHedgeFade() {
   return {
     fading: false,
+    fadingIn: false,
     ghosts: [],
     bandRails: [],
     midPip: null,
@@ -528,6 +529,31 @@ export function hedgeBandFade(prev, next) {
   if (bandRails.length < 2 || !midPip) return hold;
   return {
     fading: true,
+    fadingIn: false,
+    ghosts,
+    bandRails,
+    midPip,
+    ms: HEDGE_FADE_MS,
+    paper: true,
+  };
+}
+
+/**
+ * Soft fade-in only when a missing/invalid plan becomes giltig.
+ * Copies next user-typed band levels — never invents mid/OHLC.
+ * Tom serie / saknas-band / övre≤nedre / under grind = no fade-in.
+ */
+export function hedgeBandFadeIn(prev, next) {
+  const hold = emptyHedgeFade();
+  if (prev && prev.proposed) return hold;
+  if (!next || !next.proposed) return hold;
+  const ghosts = copyKnownHedgeGhosts(next.ghosts);
+  const bandRails = ghosts.filter((g) => g.kind === 'nedre' || g.kind === 'övre');
+  const midPip = ghosts.find((g) => g.kind === 'mid') || null;
+  if (bandRails.length < 2 || !midPip) return hold;
+  return {
+    fading: true,
+    fadingIn: true,
     ghosts,
     bandRails,
     midPip,

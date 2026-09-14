@@ -2006,12 +2006,20 @@ body.view-rider .shell-artificer {
   pointer-events: none;
 }
 
+.rider-mark.is-hedge-fade-in {
+  animation: rider-hedge-fade var(--hedge-fade-ms, 1100ms) ease-out reverse forwards;
+}
+
 .rider-play[data-hedge-fade="1"] .rider-sil-freq-empty {
   animation: rider-hedge-saknas-in var(--hedge-fade-ms, 1100ms) ease-out;
 }
 
 .rider-play[data-hedge-fade="1"] .rider-arena-field {
   box-shadow: inset 0 0 0 1px rgba(138, 154, 106, 0.06);
+}
+
+.rider-play[data-hedge-fade-in="1"] .rider-arena-field {
+  animation: rider-hedge-field-in var(--hedge-fade-ms, 1100ms) ease-out;
 }
 
 @keyframes rider-hedge-fade {
@@ -2022,6 +2030,11 @@ body.view-rider .shell-artificer {
 @keyframes rider-hedge-saknas-in {
   from { opacity: 0.35; }
   to { opacity: 1; }
+}
+
+@keyframes rider-hedge-field-in {
+  from { box-shadow: inset 0 0 0 1px rgba(138, 154, 106, 0); }
+  to { box-shadow: inset 0 0 0 1px rgba(138, 154, 106, 0.12); }
 }
 
 .rider-hop-path {

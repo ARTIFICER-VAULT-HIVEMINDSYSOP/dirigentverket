@@ -35,6 +35,7 @@ import {
   tempoToLens,
   HOP_WINDOW_MS,
   hedgeBandFade,
+  hedgeBandFadeIn,
   emptyHedgeFade,
   LIVE_LOCKED,
   hasCompletedFirstRide,
@@ -396,7 +397,10 @@ root.addEventListener('submit', (ev) => {
     const midAir = riderPlay.hopping && now < riderPlay.hopUntil;
     const prevHedge = riderResult && riderResult.hedge;
     riderResult = computeRide({ ...riderDraft, midAir });
-    const hedgeFade = hedgeBandFade(prevHedge, riderResult.hedge);
+    let hedgeFade = hedgeBandFade(prevHedge, riderResult.hedge);
+    if (!hedgeFade.fading) {
+      hedgeFade = hedgeBandFadeIn(prevHedge, riderResult.hedge);
+    }
     if (hedgeFade.fading) {
       const until = now + hedgeFade.ms;
       riderPlay = { ...riderPlay, hedgeFade: { ...hedgeFade, until } };
