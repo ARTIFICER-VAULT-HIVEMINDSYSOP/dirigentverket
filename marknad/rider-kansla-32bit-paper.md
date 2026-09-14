@@ -34,6 +34,10 @@ Gate `hasCompletedFirstRide` / `RIDER_FIRST_RIDE_KEY`, «små belopp»-hint, imp
 
 **09:37 Sthlm 14 sep (ständig-process):** Magasin 8765 HTTP 200. PR #8 CLEAN/MERGEABLE, 0 behind (~18 ahead); frekvens-progress-pip redan landat (`3b3dc5c`). PR #11 update-branch → 0 behind. Cloud bc-61a38279: mjuk fade-in saknas→giltig för mitt-hedge-räls/mitt-pip (samma draft, ingen merge). PII-fri backup `/workspace/backups/dirigentverket-verktyg-kod-20260914-0939.tar.gz`. PR #9 lamp = kväll. Merge väntar namngivet ja. No live/send/merge.
 
+**14:02 Sthlm 14 sep (ständig-process):** Magasin 8765 HTTP 200. PR #8 CLEAN/MERGEABLE, 0 behind (20 ahead); fade-in saknas→giltig landat (`66c6b7f`). PR #11 update-branch → 0 behind. Cloud follow-up: mjuk engångs-puls på mitt-pip efter fade-in (samma draft, ingen merge). PII-fri backup eftermiddag. PR #9 lamp = kväll. Merge väntar namngivet ja. No live/send/merge.
+
+**17:42 Sthlm 14 sep (ständig-process):** Magasin 8765 HTTP 200. PR #8 CLEAN/MERGEABLE, 0 behind (22 ahead); engångs-puls på mitt-pip landat (`49db9a9`). PR #11 1 behind → update-branch. Cloud follow-up: mjuka twin side-pips för köp+sälj när mitt-hedge är proposed (samma draft, ingen merge; bara befintliga planfält, inga påhittade nivåer). PII-fri backup kväll. PR #9 lamp = kväll. Merge väntar namngivet ja. No live/send/merge.
+
 https://github.com/ARTIFICER-VAULT-HIVEMINDSYSOP/dirigentverket/pull/8
 https://github.com/ARTIFICER-VAULT-HIVEMINDSYSOP/dirigentverket/pull/4
 
@@ -42,7 +46,7 @@ När ÖB öppnar `#/rider` ska det kännas så här, i den ordningen:
 1. Arena först — grafen syns innan någon formvägg.
 2. Process-hint syns mjukt (inte skrikig varning).
 3. W/S flyttar räls direkt; F fäster; hävstång 1–4× syns som fart/pip, inte textmur.
-4. Space = lins; hopp har tell; trail-tell syns bara på struktur; rokad-tell (vänd sida, volym −25 %, ÖB-gate) när paper-rokad finns; mitt-hedge-tell + frekvens-pip när serien räcker, saknas-pip när serie/band tomt; band-räls + mitt-pip bara när planen finns; band-fade när plan går giltig→saknas; inga nya play-knappar på ytan.
+4. Space = lins; hopp har tell; trail-tell syns bara på struktur; rokad-tell (vänd sida, volym −25 %, ÖB-gate) när paper-rokad finns; mitt-hedge-tell + frekvens-pip när serien räcker, saknas-pip när serie/band tomt; band-räls + mitt-pip bara när planen finns; band-fade giltig→saknas och fade-in saknas→giltig; engångs-puls på mitt-pip efter fade-in; inga nya play-knappar på ytan.
 5. En lyckad paper-ride krävs innan «små belopp» syns/öppnas.
 6. PAPER-badge sticky; live-knapp död.
 7. Tom arena = dry-run: silhuett rör sig före Räkna; tomma rutor stannar tomma.
