@@ -46,6 +46,8 @@ Gate `hasCompletedFirstRide` / `RIDER_FIRST_RIDE_KEY`, «små belopp»-hint, imp
 
 **14 sep eftermiddag (draft PR #8, inte mergad):** engångs-puls på mitt-pip efter fade-in saknas→giltig landat. Kort soft glow, sedan tyst. Tom serie / saknas-band / under grind = ingen puls. Inga nya play-knappar. Paper. Väntar namngivet ÖB merge-ja.
 
+**17:42 Sthlm 14 sep (ständig-process):** Magasin 8765 HTTP 200. PR #8 CLEAN/MERGEABLE, 0 behind (22 ahead); engångs-puls på mitt-pip landat (`49db9a9`). PR #11 1 behind → update-branch. Cloud follow-up: mjuka twin side-pips för köp+sälj när mitt-hedge är proposed (samma draft, ingen merge; bara befintliga planfält, inga påhittade nivåer). PII-fri backup kväll. PR #9 lamp = kväll. Merge väntar namngivet ja. No live/send/merge.
+
 https://github.com/ARTIFICER-VAULT-HIVEMINDSYSOP/dirigentverket/pull/8
 https://github.com/ARTIFICER-VAULT-HIVEMINDSYSOP/dirigentverket/pull/4
 
