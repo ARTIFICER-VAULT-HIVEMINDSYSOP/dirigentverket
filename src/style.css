@@ -2047,6 +2047,51 @@ body.view-rider .shell-artificer {
   100% { box-shadow: 0 0 0 0 rgba(196, 210, 168, 0); }
 }
 
+.rider-mark.is-hedge-side-pip .rider-mark-line {
+  height: 1px;
+  background: transparent;
+}
+
+.rider-hedge-side-pip {
+  position: absolute;
+  top: 50%;
+  width: 5px;
+  height: 5px;
+  margin-top: -3px;
+  background: rgba(196, 210, 168, 0.48);
+  border: 1px solid rgba(138, 154, 106, 0.55);
+  image-rendering: pixelated;
+}
+
+.rider-hedge-side-pip.is-kop {
+  left: 28%;
+}
+
+.rider-hedge-side-pip.is-salj {
+  left: 72%;
+}
+
+.rider-mark-hedge-side-köp .rider-mark-label,
+.rider-mark-hedge-side-sälj .rider-mark-label,
+.rider-mark-hedge-side-köp .rider-mark-px,
+.rider-mark-hedge-side-sälj .rider-mark-px {
+  color: #6e7a58;
+  opacity: 0.7;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rider-mark.is-hedge-fade,
+  .rider-mark.is-hedge-fade-in,
+  .rider-mark.is-hedge-mid-pulse .rider-hedge-mid-pip,
+  .rider-play[data-hedge-fade-in="1"] .rider-arena-field,
+  .rider-play[data-hedge-fade="1"] .rider-sil-freq-empty {
+    animation: none;
+  }
+  .rider-mark.is-hedge-fade {
+    opacity: 0;
+  }
+}
+
 .rider-hop-path {
   font-size: 15px;
   color: var(--ink);

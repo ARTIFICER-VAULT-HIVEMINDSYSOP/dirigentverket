@@ -395,6 +395,7 @@ export function emptyRideHedge() {
     ghosts: [],
     bandRails: [],
     midPip: null,
+    sidePips: [],
     note: 'saknas',
     paper: true,
     live: false,
@@ -423,6 +424,26 @@ function hedgeBandFeel(frequency, proposed) {
     bandRails: ghosts.filter((g) => g.kind === 'nedre' || g.kind === 'övre'),
     midPip: ghosts.find((g) => g.kind === 'mid') || null,
   };
+}
+
+function knownPlanPx(v) {
+  if (v === '' || v === null || v === undefined) return null;
+  const n = Number(v);
+  return Number.isFinite(n) ? n : null;
+}
+
+/**
+ * Twin side-pips from the proposed plan only: köp.tp (övre) + sälj.tp (nedre).
+ * Never invents levels. Missing kop/salj/tp → none.
+ */
+export function hedgeSidePips(kop, salj) {
+  const kopTp = kop && knownPlanPx(kop.tp);
+  const saljTp = salj && knownPlanPx(salj.tp);
+  if (kopTp == null || saljTp == null) return [];
+  return [
+    { kind: 'köp', at: kopTp },
+    { kind: 'sälj', at: saljTp },
+  ];
 }
 
 /**
@@ -467,6 +488,7 @@ export function rideHedge(raw = {}) {
     ghosts: [],
     bandRails: [],
     midPip: null,
+    sidePips: [],
     note: saknas ? 'saknas' : frequency.note || '',
   };
   if (!hedge.proposed) return base;
@@ -488,6 +510,7 @@ export function rideHedge(raw = {}) {
     ghosts: feel.ghosts,
     bandRails: feel.bandRails,
     midPip: feel.midPip,
+    sidePips: hedgeSidePips(hedge.kop, hedge.salj),
     note: 'mitt-hedge · köp + sälj i mitten. Process före fart. Ingen order.',
   };
 }
@@ -499,6 +522,7 @@ export function emptyHedgeFade() {
     ghosts: [],
     bandRails: [],
     midPip: null,
+    sidePips: [],
     ms: HEDGE_FADE_MS,
     paper: true,
   };
@@ -517,6 +541,19 @@ function copyKnownHedgeGhosts(list) {
   return out;
 }
 
+function copyKnownSidePips(list) {
+  if (!Array.isArray(list)) return [];
+  const out = [];
+  for (const p of list) {
+    if (!p) continue;
+    const kind = p.kind;
+    const at = Number(p.at);
+    if ((kind !== 'köp' && kind !== 'sälj') || !Number.isFinite(at)) continue;
+    out.push({ kind, at });
+  }
+  return out;
+}
+
 /**
  * Soft fade only when a known plan becomes invalid.
  * Copies last user-typed band levels — never invents mid/OHLC.
@@ -528,6 +565,7 @@ export function hedgeBandFade(prev, next) {
   const ghosts = copyKnownHedgeGhosts(prev.ghosts);
   const bandRails = ghosts.filter((g) => g.kind === 'nedre' || g.kind === 'övre');
   const midPip = ghosts.find((g) => g.kind === 'mid') || null;
+  const sidePips = copyKnownSidePips(prev.sidePips);
   if (bandRails.length < 2 || !midPip) return hold;
   return {
     fading: true,
@@ -535,6 +573,7 @@ export function hedgeBandFade(prev, next) {
     ghosts,
     bandRails,
     midPip,
+    sidePips,
     ms: HEDGE_FADE_MS,
     paper: true,
   };
@@ -552,6 +591,7 @@ export function hedgeBandFadeIn(prev, next) {
   const ghosts = copyKnownHedgeGhosts(next.ghosts);
   const bandRails = ghosts.filter((g) => g.kind === 'nedre' || g.kind === 'övre');
   const midPip = ghosts.find((g) => g.kind === 'mid') || null;
+  const sidePips = copyKnownSidePips(next.sidePips);
   if (bandRails.length < 2 || !midPip) return hold;
   return {
     fading: true,
@@ -559,6 +599,7 @@ export function hedgeBandFadeIn(prev, next) {
     ghosts,
     bandRails,
     midPip,
+    sidePips,
     ms: HEDGE_FADE_MS,
     paper: true,
   };

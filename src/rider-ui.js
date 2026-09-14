@@ -155,7 +155,7 @@ export function renderPlayArena(ride, play = {}) {
       })
       .join('');
     return `<div class="rider-play is-empty rider-bit is-dry-run" data-rider-play data-bit="32" data-dry-run="1" role="status"
-      data-freq-pip="${ride?.hedge?.freqPip ? '1' : '0'}" data-freq-saknas="${!ride || !ride.hedge || ride.hedge.saknas ? '1' : '0'}" data-freq-progress="${ride?.hedge?.freqProgress ? '1' : '0'}" data-hedge-ghost="0" data-hedge-band="0" data-hedge-mid-pip="0" data-hedge-fade="0" data-hedge-fade-in="0" data-hedge-mid-pulse="0"
+      data-freq-pip="${ride?.hedge?.freqPip ? '1' : '0'}" data-freq-saknas="${!ride || !ride.hedge || ride.hedge.saknas ? '1' : '0'}" data-freq-progress="${ride?.hedge?.freqProgress ? '1' : '0'}" data-hedge-ghost="0" data-hedge-band="0" data-hedge-mid-pip="0" data-hedge-fade="0" data-hedge-fade-in="0" data-hedge-mid-pulse="0" data-hedge-side-pips="0"
       data-leverage="${lev}" data-speed="${speed}" data-lens="${lens}" data-rail="${rail}" data-sit="${sit}"
       style="--rider-speed:${speed};--rider-lens:${lens};--rider-coast-ms:${coastPeriodMs(lev)}ms;">
       ${renderScanlines()}
@@ -190,7 +190,9 @@ export function renderPlayArena(ride, play = {}) {
     ride.jump?.jumped ? ride.jump.from : null,
     ride.jump?.jumped ? ride.jump.to : null,
     ...((ride.hedge && ride.hedge.ghosts) || []).map((g) => g.at),
+    ...((ride.hedge && ride.hedge.sidePips) || []).map((p) => p.at),
     ...fadeGhosts.map((g) => g.at),
+    ...((fade && fade.sidePips) || []).map((p) => p.at),
   ].filter((n) => n !== null && n !== undefined);
   const scale = arenaScale(prices);
 
@@ -223,6 +225,17 @@ export function renderPlayArena(ride, play = {}) {
         });
       }
     }
+    for (const p of ride.hedge.sidePips || []) {
+      if (p && p.at != null && (p.kind === 'köp' || p.kind === 'sälj')) {
+        marks.push({
+          kind: `hedge-side-${p.kind}`,
+          at: p.at,
+          label: p.kind,
+          hedgeSidePip: p.kind,
+          hedgeFadeIn: fadeIn,
+        });
+      }
+    }
   } else if (fade && fadeGhosts.length) {
     for (const g of fadeGhosts) {
       if (g && g.at != null) {
@@ -232,6 +245,17 @@ export function renderPlayArena(ride, play = {}) {
           label: g.kind === 'mid' ? 'mitt' : g.kind,
           hedgeRail: g.kind === 'nedre' || g.kind === 'övre' ? g.kind : null,
           hedgeMidPip: g.kind === 'mid',
+          hedgeFade: true,
+        });
+      }
+    }
+    for (const p of fade.sidePips || []) {
+      if (p && p.at != null && (p.kind === 'köp' || p.kind === 'sälj')) {
+        marks.push({
+          kind: `hedge-side-${p.kind}`,
+          at: p.at,
+          label: p.kind,
+          hedgeSidePip: p.kind,
           hedgeFade: true,
         });
       }
@@ -249,6 +273,9 @@ export function renderPlayArena(ride, play = {}) {
       const hedgeFadeAttr = row.hedgeFade ? ' data-hedge-fade="1"' : '';
       const hedgeFadeInAttr = row.hedgeFadeIn ? ' data-hedge-fade-in="1"' : '';
       const hedgePulseAttr = row.hedgeMidPulse ? ' data-hedge-mid-pulse="1"' : '';
+      const hedgeSideAttr = row.hedgeSidePip
+        ? ` data-hedge-side-pip="${escapeHtml(row.hedgeSidePip)}"`
+        : '';
       const cls = [
         'rider-mark',
         `rider-mark-${row.kind}`,
@@ -256,20 +283,23 @@ export function renderPlayArena(ride, play = {}) {
         railIndex === sit ? 'is-sit' : '',
         row.hedgeRail ? 'is-hedge-rail' : '',
         row.hedgeMidPip ? 'is-hedge-mid-pip' : '',
+        row.hedgeSidePip ? 'is-hedge-side-pip' : '',
         row.hedgeFade ? 'is-hedge-fade' : '',
         row.hedgeFadeIn ? 'is-hedge-fade-in' : '',
         row.hedgeMidPulse ? 'is-hedge-mid-pulse' : '',
       ]
         .filter(Boolean)
         .join(' ');
-      return `<div class="${cls}" ${railAttr}${hedgeRailAttr}${hedgeMidAttr}${hedgeFadeAttr}${hedgeFadeInAttr}${hedgePulseAttr} data-top="${top}%" style="top:${top}%">
+      return `<div class="${cls}" ${railAttr}${hedgeRailAttr}${hedgeMidAttr}${hedgeFadeAttr}${hedgeFadeInAttr}${hedgePulseAttr}${hedgeSideAttr} data-top="${top}%" style="top:${top}%">
         <span class="rider-mark-label">${escapeHtml(row.label)}</span>
         <span class="rider-mark-line">${
           row.hedgeRail
             ? '<span class="rider-hedge-rail" aria-hidden="true"></span>'
             : row.hedgeMidPip
               ? '<span class="rider-hedge-mid-pip" aria-hidden="true"></span>'
-              : '<span class="rider-mark-pip" aria-hidden="true"></span>'
+              : row.hedgeSidePip
+                ? `<span class="rider-hedge-side-pip is-${row.hedgeSidePip === 'sälj' ? 'salj' : 'kop'}" aria-hidden="true"></span>`
+                : '<span class="rider-mark-pip" aria-hidden="true"></span>'
         }</span>
         <span class="rider-mark-px">${escapeHtml(formatPx(row.at))}</span>
       </div>`;
@@ -333,13 +363,16 @@ export function renderPlayArena(ride, play = {}) {
   const ghostOn = Boolean(hedgeOn && ride.hedge.ghosts && ride.hedge.ghosts.length);
   const bandOn = Boolean(hedgeOn && ride.hedge.bandRails && ride.hedge.bandRails.length);
   const midPipOn = Boolean(hedgeOn && ride.hedge.midPip && ride.hedge.midPip.at != null);
+  const sidePipsOn = Boolean(
+    hedgeOn && ride.hedge.sidePips && ride.hedge.sidePips.length === 2,
+  );
   const fadeOn = Boolean(fade && !fadeIn && fadeGhosts.length);
   const fadeInOn = Boolean(fadeIn && hedgeOn && ghostOn);
   const pulseOn = Boolean(pulse && midPipOn && Number.isFinite(pulseAt));
   const fadeMs = fade && fade.ms != null ? fade.ms : HEDGE_FADE_MS;
   const pulseMs = pulse && pulse.ms != null ? pulse.ms : HEDGE_MID_PULSE_MS;
-  return `<div class="rider-play rider-bit is-looking ${jumped ? 'has-hop' : 'has-hold'}${trailed ? ' has-trail' : ''}${rokadOn ? ' has-rokad' : ''}${hedgeOn ? ' has-hedge' : ''}${fadeOn ? ' has-hedge-fade' : ''}${fadeInOn ? ' has-hedge-fade-in' : ''}${pulseOn ? ' has-hedge-mid-pulse' : ''}" data-rider-play data-bit="32" data-look="1"
-      data-hop-tell="${tell ? '1' : '0'}" data-trail-tell="${trailed ? '1' : '0'}" data-rokad-tell="${rokadOn ? '1' : '0'}" data-hedge-tell="${hedgeOn ? '1' : '0'}" data-freq-pip="${ride.hedge && ride.hedge.freqPip ? '1' : '0'}" data-freq-saknas="${ride.hedge && ride.hedge.saknas ? '1' : '0'}" data-freq-progress="${ride.hedge && ride.hedge.freqProgress ? '1' : '0'}" data-hedge-ghost="${ghostOn ? '1' : '0'}" data-hedge-band="${bandOn ? '1' : '0'}" data-hedge-mid-pip="${midPipOn ? '1' : '0'}" data-hedge-fade="${fadeOn ? '1' : '0'}" data-hedge-fade-in="${fadeInOn ? '1' : '0'}" data-hedge-mid-pulse="${pulseOn ? '1' : '0'}"
+  return `<div class="rider-play rider-bit is-looking ${jumped ? 'has-hop' : 'has-hold'}${trailed ? ' has-trail' : ''}${rokadOn ? ' has-rokad' : ''}${hedgeOn ? ' has-hedge' : ''}${fadeOn ? ' has-hedge-fade' : ''}${fadeInOn ? ' has-hedge-fade-in' : ''}${pulseOn ? ' has-hedge-mid-pulse' : ''}${sidePipsOn ? ' has-hedge-side-pips' : ''}" data-rider-play data-bit="32" data-look="1"
+      data-hop-tell="${tell ? '1' : '0'}" data-trail-tell="${trailed ? '1' : '0'}" data-rokad-tell="${rokadOn ? '1' : '0'}" data-hedge-tell="${hedgeOn ? '1' : '0'}" data-freq-pip="${ride.hedge && ride.hedge.freqPip ? '1' : '0'}" data-freq-saknas="${ride.hedge && ride.hedge.saknas ? '1' : '0'}" data-freq-progress="${ride.hedge && ride.hedge.freqProgress ? '1' : '0'}" data-hedge-ghost="${ghostOn ? '1' : '0'}" data-hedge-band="${bandOn ? '1' : '0'}" data-hedge-mid-pip="${midPipOn ? '1' : '0'}" data-hedge-fade="${fadeOn ? '1' : '0'}" data-hedge-fade-in="${fadeInOn ? '1' : '0'}" data-hedge-mid-pulse="${pulseOn ? '1' : '0'}" data-hedge-side-pips="${sidePipsOn ? '1' : '0'}"
       data-side="${escapeHtml(ride.input?.side || 'köp')}" data-rokad-from="${escapeHtml(ride.rokad?.from || ride.input?.side || 'köp')}" data-rokad-to="${escapeHtml(ride.rokad?.to || ride.input?.side || 'köp')}"
       data-leverage="${lev}" data-speed="${speed}" data-lens="${lens}" data-rail="${rail}" data-sit="${sit}"
       style="--rider-speed:${speed};--rider-lens:${lens};--rider-coast-ms:${coastMs}ms;--hop-window:${HOP_WINDOW_MS}ms;--hedge-fade-ms:${fadeMs}ms;--hedge-pulse-ms:${pulseMs}ms;"

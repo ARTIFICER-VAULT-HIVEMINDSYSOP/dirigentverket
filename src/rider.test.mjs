@@ -43,6 +43,7 @@ import {
   emptyHedgeFade,
   hedgeMidPulse,
   emptyHedgePulse,
+  hedgeSidePips,
   HEDGE_FADE_MS,
   HEDGE_MID_PULSE_MS,
   RIDER_ROKAD_GATE,
@@ -1470,6 +1471,84 @@ test('mitt-pip engångs-puls efter fade-in saknas→giltig; ingen puls under gri
   assert.match(emptyHtml, /data-hedge-mid-pulse="0"/);
   assert.ok(!/is-hedge-mid-pulse/.test(emptyHtml));
   assert.match(emptyHtml, /data-freq-saknas="1"/);
+});
+
+test('twin side-pips när mitt-hedge proposed; bara kop.tp + salj.tp', () => {
+  const on = computeRide({
+    entry: 105,
+    maxFel: 2,
+    rr: 2,
+    grav: 105,
+    bbLower: 100,
+    bbUpper: 110,
+    priceSeries: '100\n110\n100\n110',
+  });
+  assert.equal(on.hedge.proposed, true);
+  assert.equal(on.hedge.kop.tp, 110);
+  assert.equal(on.hedge.salj.tp, 100);
+  assert.equal(on.hedge.kop.entry, on.hedge.entry);
+  assert.equal(on.hedge.salj.entry, on.hedge.entry);
+  assert.equal(on.hedge.sidePips.length, 2);
+  assert.equal(on.hedge.sidePips[0].kind, 'köp');
+  assert.equal(on.hedge.sidePips[0].at, on.hedge.kop.tp);
+  assert.equal(on.hedge.sidePips[1].kind, 'sälj');
+  assert.equal(on.hedge.sidePips[1].at, on.hedge.salj.tp);
+  assert.equal(on.hedge.midPip.at, 105);
+  assert.deepEqual(hedgeSidePips(on.hedge.kop, on.hedge.salj), on.hedge.sidePips);
+
+  const html = renderPlayArena(on);
+  assert.match(html, /data-hedge-side-pips="1"/);
+  assert.match(html, /has-hedge-side-pips/);
+  assert.match(html, /data-hedge-side-pip="köp"/);
+  assert.match(html, /data-hedge-side-pip="sälj"/);
+  assert.match(html, /rider-hedge-side-pip is-kop/);
+  assert.match(html, /rider-hedge-side-pip is-salj/);
+  assert.match(html, /data-hedge-mid-pip="1"/);
+  assert.equal((html.match(/rider-hedge-side-pip/g) || []).length, 2);
+  assert.equal((html.match(/rider-hedge-mid-pip/g) || []).length, 1);
+  assert.ok(!/<button/i.test(html));
+  assert.ok(!/<dialog/i.test(html));
+  assert.doesNotMatch(html, /P&L|pnl/);
+  assert.equal(LIVE_LOCKED, true);
+
+  const empty = computeRide({ entry: 100, maxFel: 2, rr: 2, grav: 100 });
+  assert.deepEqual(empty.hedge.sidePips, []);
+  const emptyHtml = renderPlayArena(empty);
+  assert.match(emptyHtml, /data-hedge-side-pips="0"/);
+  assert.ok(!/data-hedge-side-pip=/.test(emptyHtml));
+  assert.ok(!/rider-hedge-side-pip/.test(emptyHtml));
+
+  const few = computeRide({
+    entry: 105,
+    maxFel: 2,
+    rr: 2,
+    grav: 105,
+    bbLower: 100,
+    bbUpper: 110,
+    priceSeries: '100\n110\n100',
+  });
+  assert.equal(few.hedge.proposed, false);
+  assert.deepEqual(few.hedge.sidePips, []);
+  const fewHtml = renderPlayArena(few);
+  assert.match(fewHtml, /data-hedge-side-pips="0"/);
+  assert.ok(!/rider-hedge-side-pip/.test(fewHtml));
+
+  const badBand = computeRide({
+    entry: 105,
+    maxFel: 2,
+    rr: 2,
+    grav: 105,
+    bbLower: 110,
+    bbUpper: 100,
+    priceSeries: '100\n110\n100\n110',
+  });
+  assert.deepEqual(badBand.hedge.sidePips, []);
+  assert.ok(!/rider-hedge-side-pip/.test(renderPlayArena(badBand)));
+
+  assert.deepEqual(hedgeSidePips(null, { tp: 100 }), []);
+  assert.deepEqual(hedgeSidePips({ tp: 110 }, null), []);
+  assert.deepEqual(hedgeSidePips({ tp: null }, { tp: 100 }), []);
+  assert.deepEqual(hedgeSidePips({ sl: 98 }, { sl: 112 }), []);
 });
 
 test('tom-arena dry-run: W/S/F/[ ]/Space flyttar silhuett utan påhittade priser', () => {
