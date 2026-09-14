@@ -37,6 +37,8 @@ import {
   hedgeBandFade,
   hedgeBandFadeIn,
   emptyHedgeFade,
+  hedgeMidPulse,
+  emptyHedgePulse,
   LIVE_LOCKED,
   hasCompletedFirstRide,
   markFirstRideComplete,
@@ -403,14 +405,26 @@ root.addEventListener('submit', (ev) => {
     }
     if (hedgeFade.fading) {
       const until = now + hedgeFade.ms;
-      riderPlay = { ...riderPlay, hedgeFade: { ...hedgeFade, until } };
+      riderPlay = { ...riderPlay, hedgeFade: { ...hedgeFade, until }, hedgePulse: emptyHedgePulse() };
       window.setTimeout(() => {
         if (!riderPlay.hedgeFade || riderPlay.hedgeFade.until !== until) return;
-        riderPlay = { ...riderPlay, hedgeFade: emptyHedgeFade() };
+        const pulse = hedgeFade.fadingIn
+          ? hedgeMidPulse(hedgeFade, riderResult && riderResult.hedge)
+          : emptyHedgePulse();
+        riderPlay = { ...riderPlay, hedgeFade: emptyHedgeFade(), hedgePulse: pulse };
+        if (pulse.pulsing) {
+          const pulseUntil = Date.now() + pulse.ms;
+          riderPlay = { ...riderPlay, hedgePulse: { ...pulse, until: pulseUntil } };
+          window.setTimeout(() => {
+            if (!riderPlay.hedgePulse || riderPlay.hedgePulse.until !== pulseUntil) return;
+            riderPlay = { ...riderPlay, hedgePulse: emptyHedgePulse() };
+            render();
+          }, pulse.ms);
+        }
         render();
       }, hedgeFade.ms);
     } else {
-      riderPlay = { ...riderPlay, hedgeFade };
+      riderPlay = { ...riderPlay, hedgeFade, hedgePulse: emptyHedgePulse() };
     }
     if (riderResult.ok) {
       const wasDone = hasCompletedFirstRide();

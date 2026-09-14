@@ -20,6 +20,8 @@ export const LENS_STEPS = [1, 1.5, 2];
 export const COAST_PERIOD_MS = 1600;
 /** Soft band-fade both ways: giltig → saknas (out) and saknas → giltig (in). Feel, not a cut. */
 export const HEDGE_FADE_MS = 1100;
+/** One-shot mid-pip pulse after fade-in lands. Same 32-bit ease-out family. */
+export const HEDGE_MID_PULSE_MS = 900;
 export const LIVE_LOCKED = true;
 /** Nameless dry-run slots. Not prices — empty cells stay empty. */
 export const DRY_RUN_SLOTS = 3;
@@ -562,6 +564,34 @@ export function hedgeBandFadeIn(prev, next) {
   };
 }
 
+export function emptyHedgePulse() {
+  return {
+    pulsing: false,
+    midPip: null,
+    ms: HEDGE_MID_PULSE_MS,
+    paper: true,
+  };
+}
+
+/**
+ * Soft one-shot mid-pip pulse only after fade-in saknas→giltig.
+ * Copies next user-typed mid — never invents. Tom serie / saknas-band / under grind = no pulse.
+ */
+export function hedgeMidPulse(fade, next) {
+  const hold = emptyHedgePulse();
+  if (!fade || !fade.fading || !fade.fadingIn) return hold;
+  if (!next || !next.proposed) return hold;
+  const ghosts = copyKnownHedgeGhosts(next.ghosts);
+  const midPip = ghosts.find((g) => g.kind === 'mid') || null;
+  if (!midPip) return hold;
+  return {
+    pulsing: true,
+    midPip,
+    ms: HEDGE_MID_PULSE_MS,
+    paper: true,
+  };
+}
+
 export function emptyRideRokad(side = 'köp') {
   const from = side === 'sälj' ? 'sälj' : 'köp';
   return {
@@ -761,6 +791,7 @@ export function emptyPlayState() {
     hopUntil: 0,
     robbanOpen: false,
     hedgeFade: emptyHedgeFade(),
+    hedgePulse: emptyHedgePulse(),
   };
 }
 
