@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>FU · Kundformulär (mötesbokare)</title>
+<title>FU · Interaktivt säljprotokoll</title>
 <style>
   :root {
     --navy:#0f1f2e; --navy2:#163042; --primary:#1b8a7e; --teal:#5dddd5;
@@ -12,339 +12,361 @@
   }
   * { box-sizing: border-box; }
   body { margin:0; font:400 14px "Segoe UI", system-ui, sans-serif; background:var(--sec); color:var(--text); }
-  .wrap { max-width:1200px; margin:0 auto; padding:1rem 1rem 3rem; }
-  header h1 { margin:0 0 .25rem; font-size:1.55rem; letter-spacing:-.02em; }
+  .wrap { max-width:1180px; margin:0 auto; padding:1rem 1rem 3rem; }
+  header h1 { margin:0 0 .2rem; font-size:1.5rem; letter-spacing:-.02em; }
   header p { margin:0 0 1rem; color:var(--muted); }
-  .layout { display:grid; grid-template-columns:380px 1fr; gap:1rem; }
-  @media (max-width:960px){ .layout { grid-template-columns:1fr; } }
-  .panel {
-    background:var(--white); border:1px solid var(--line); border-radius:14px;
-    padding:.9rem; max-height:calc(100vh - 5rem); overflow:auto; position:sticky; top:.6rem;
+  .steps-nav {
+    display:flex; flex-wrap:wrap; gap:6px; margin-bottom:1rem;
   }
-  .panel h2 {
-    margin:.85rem 0 .45rem; font-size:.72rem; letter-spacing:.1em; text-transform:uppercase; color:var(--primary);
+  .steps-nav button {
+    border:1px solid var(--line); background:var(--white); color:var(--muted);
+    border-radius:999px; padding:.35rem .75rem; font:700 .75rem inherit; cursor:pointer;
   }
-  .panel h2:first-child { margin-top:0; }
-  label { display:block; font-size:.78rem; color:var(--muted); margin:.4rem 0 .15rem; }
+  .steps-nav button.on { background:var(--primary); color:#fff; border-color:var(--primary); }
+  .steps-nav button.done { border-color:var(--teal); color:var(--navy); }
+  .layout { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+  @media (max-width:900px){ .layout { grid-template-columns:1fr; } }
+  .card {
+    background:var(--white); border:1px solid var(--line); border-radius:14px; padding:1rem 1.1rem;
+  }
+  .card h2 { margin:0 0 .35rem; font-size:1.15rem; color:var(--navy); }
+  .proto {
+    background:var(--accent); border:1px solid var(--line); border-radius:10px;
+    padding:10px 12px; margin:0 0 1rem; font-size:.9rem; color:var(--navy2); line-height:1.4;
+  }
+  .proto strong { color:var(--primary); }
+  label { display:block; font-size:.78rem; color:var(--muted); margin:.45rem 0 .15rem; }
   input, select, textarea {
-    width:100%; padding:.45rem .55rem; border:1px solid var(--line); border-radius:8px;
-    font:inherit; background:#fff; color:var(--text);
+    width:100%; padding:.5rem .6rem; border:1px solid var(--line); border-radius:8px; font:inherit;
   }
-  textarea { min-height:56px; resize:vertical; }
-  .row2 { display:grid; grid-template-columns:1fr 1fr; gap:.45rem; }
-  .checks { display:flex; flex-wrap:wrap; gap:.25rem .55rem; margin:.25rem 0 .4rem; }
-  .checks label { display:inline-flex; align-items:center; gap:.3rem; margin:0; color:var(--text); font-size:.82rem; }
+  textarea { min-height:64px; resize:vertical; }
+  .row2 { display:grid; grid-template-columns:1fr 1fr; gap:.5rem; }
+  .checks { display:flex; flex-wrap:wrap; gap:.3rem .65rem; margin:.3rem 0; }
+  .checks label { display:inline-flex; gap:.3rem; align-items:center; margin:0; color:var(--text); font-size:.85rem; }
   .checks input { width:auto; }
-  .btns { display:flex; flex-wrap:wrap; gap:.45rem; margin-top:.85rem; position:sticky; bottom:0; background:var(--white); padding-top:.5rem; }
-  button { border:0; border-radius:999px; padding:.55rem 1rem; font:700 .88rem inherit; cursor:pointer; }
-  button.primary { background:var(--primary); color:#fff; }
-  button.ghost { background:transparent; color:var(--primary); border:1px solid rgba(27,138,126,.4); }
-  .hint { font-size:.72rem; color:var(--muted); margin-top:.55rem; line-height:1.35; }
-  .preview-wrap { background:var(--navy); border-radius:14px; padding:1rem; border:1px solid var(--navy2); }
+  .nav-btns { display:flex; flex-wrap:wrap; gap:.5rem; margin-top:1rem; }
+  button.primary { background:var(--primary); color:#fff; border:0; border-radius:999px; padding:.55rem 1.1rem; font:700 .9rem inherit; cursor:pointer; }
+  button.ghost { background:transparent; color:var(--primary); border:1px solid rgba(27,138,126,.45); border-radius:999px; padding:.55rem 1.1rem; font:700 .9rem inherit; cursor:pointer; }
+  .hint { font-size:.72rem; color:var(--muted); margin-top:.6rem; }
+  .preview-head { display:flex; justify-content:space-between; align-items:center; gap:.5rem; margin-bottom:.6rem; }
+  .preview-head h2 { margin:0; font-size:1rem; color:var(--navy); }
   .sheet {
-    background:#fff; color:var(--text); border-radius:6px; max-width:190mm; margin:0 auto;
-    padding:12mm 12mm 10mm; font-size:10.5pt; line-height:1.4;
+    background:#fff; border:1px solid var(--line); border-radius:10px; padding:14px 16px;
+    font-size:10.5pt; line-height:1.4; max-height:70vh; overflow:auto;
   }
-  .brand { font:700 8pt inherit; letter-spacing:.12em; text-transform:uppercase; color:var(--primary); margin:0 0 4px; }
-  .sheet h1 { font-size:18pt; margin:0 0 4px; letter-spacing:-.02em; color:var(--navy); }
-  .meta { color:var(--muted); font-size:9.5pt; margin:0 0 12px; }
-  .sheet h2 {
-    font-size:11pt; margin:14px 0 6px; color:var(--navy); border-left:4px solid var(--primary);
-    padding-left:8px;
-  }
-  .box { background:var(--accent); border:1px solid var(--line); border-radius:10px; padding:10px 12px; margin:0 0 8px; }
-  .box strong { display:block; color:var(--primary); font-size:8.5pt; letter-spacing:.06em; text-transform:uppercase; margin-bottom:3px; }
-  .kv { display:grid; grid-template-columns:140px 1fr; gap:4px 10px; font-size:10pt; margin:0 0 6px; }
+  .brand { font:700 8pt inherit; letter-spacing:.1em; text-transform:uppercase; color:var(--primary); }
+  .sheet h1 { font-size:16pt; margin:4px 0 6px; color:var(--navy); }
+  .sheet h3 { font-size:10pt; margin:12px 0 4px; color:var(--navy); border-left:3px solid var(--primary); padding-left:7px; }
+  .box { background:var(--accent); border-radius:8px; padding:8px 10px; margin:4px 0; }
+  .box strong { display:block; font-size:8pt; letter-spacing:.06em; text-transform:uppercase; color:var(--primary); }
+  .tags { display:flex; flex-wrap:wrap; gap:5px; margin:4px 0; }
+  .tag { background:var(--navy); color:var(--teal); border-radius:999px; padding:2px 8px; font-size:8pt; font-weight:700; }
+  .kv { display:grid; grid-template-columns:120px 1fr; gap:2px 8px; font-size:10pt; }
   .kv span:first-child { color:var(--muted); }
-  .tags { display:flex; flex-wrap:wrap; gap:6px; margin:4px 0 0; }
-  .tag { background:var(--navy); color:var(--teal); border-radius:999px; padding:3px 9px; font-size:8.5pt; font-weight:700; }
-  .qual { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; }
-  .qual div { border:1px solid var(--line); border-radius:8px; padding:8px; text-align:center; background:#fff; }
-  .qual .l { font-size:8pt; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); }
-  .qual .v { font-size:13pt; font-weight:800; color:var(--navy); margin-top:2px; }
-  .foot { margin-top:12px; font-size:8pt; color:var(--muted); }
+  .qual { display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; margin-top:8px; }
+  .qual div { border:1px solid var(--line); border-radius:8px; text-align:center; padding:6px; }
+  .qual .l { font-size:7.5pt; text-transform:uppercase; color:var(--muted); }
+  .qual .v { font-weight:800; color:var(--navy); }
   .empty { color:#9aa; font-style:italic; }
+  .foot { margin-top:10px; font-size:8pt; color:var(--muted); }
+  .step-panel { display:none; }
+  .step-panel.on { display:block; }
   @media print {
     body { background:#fff; }
-    .panel, header p, .btns, .hint, .no-print { display:none !important; }
+    .no-print, .steps-nav, .nav-btns, .hint, header p, .proto { display:none !important; }
     .layout { display:block; }
-    .preview-wrap { background:transparent; border:0; padding:0; }
-    .sheet { max-width:none; padding:0; }
+    .card:first-child { display:none !important; }
+    .sheet { max-height:none; border:0; padding:0; overflow:visible; }
   }
 </style>
 </head>
 <body>
 <div class="wrap">
   <header class="no-print">
-    <h1>FU · Kundformulär</h1>
-    <p>Mötesbokare fyller in · förhandsgranska överlämning · exportera PDF. Utkast — ingen utlovad avkastning.</p>
+    <h1>FU · Interaktivt säljprotokoll</h1>
+    <p>Mötesbokare — steg för steg enligt strukturerad säljprocess · exporterbart utfall till säljare.</p>
   </header>
+
+  <nav class="steps-nav no-print" id="stepNav"></nav>
+
   <div class="layout">
-    <aside class="panel no-print" id="form">
-      <h2>A · Kund</h2>
-      <div class="row2">
-        <div><label>Förnamn</label><input id="fn" /></div>
-        <div><label>Efternamn</label><input id="ln" /></div>
-      </div>
-      <label>Personnummer</label><input id="pid" />
-      <label>Adress</label><input id="addr" />
-      <div class="row2">
-        <div><label>Postnr</label><input id="zip" /></div>
-        <div><label>Ort</label><input id="city" /></div>
-      </div>
-      <label>Land</label><input id="country" value="Sverige" />
-      <div class="row2">
-        <div><label>Telefon</label><input id="phone" /></div>
-        <div><label>E-post</label><input id="email" type="email" /></div>
-      </div>
-      <div class="row2">
-        <div><label>Civilstånd</label><input id="marital" /></div>
-        <div><label>Personer i hushåll</label><input id="household" type="number" min="0" /></div>
-      </div>
-      <label>Eventuell medköpare / partner</label><input id="cobuyer" />
-
-      <h2>B · Kontakt &amp; möte</h2>
-      <label>Mötesbokare</label><input id="setter" />
-      <div class="row2">
-        <div><label>Första kontakt</label><input id="firstContact" type="date" /></div>
-        <div><label>Bokat möte</label><input id="meetingDate" type="date" /></div>
-      </div>
-      <label>Mötesformat</label>
-      <select id="meetingFormat">
-        <option value="">—</option>
-        <option>Telefon</option><option>Teams</option><option>Zoom</option><option>På plats</option>
-      </select>
-      <label>Källa / lead</label><input id="source" />
-      <label>Hur kom kunden in?</label><textarea id="howCame"></textarea>
-      <label>Tidigare mäklare?</label>
-      <select id="prevAgent"><option value="">—</option><option>Ja</option><option>Nej</option></select>
-      <label>Har tittat på objekt tidigare?</label>
-      <select id="viewedBefore"><option value="">—</option><option>Ja</option><option>Nej</option></select>
-
-      <h2>C · Varför Cypern?</h2>
-      <div class="checks" id="whyCyprus"></div>
-      <label>Annat (fritext)</label><input id="whyOther" />
-      <label>Kundens egna ord</label><textarea id="whyOwn"></textarea>
-      <label>Vad hoppas kunden uppnå?</label><textarea id="achieve"></textarea>
-      <label>Varför är det viktigt?</label><textarea id="whyImportant"></textarea>
-
-      <h2>D · Plats</h2>
-      <label>Områden</label><textarea id="areas"></textarea>
-      <label>Varför just de områdena?</label><textarea id="areasWhy"></textarea>
-      <div class="checks" id="locMatters"></div>
-      <label>Annat läge</label><input id="locOther" />
-
-      <h2>E · Kapital &amp; budget</h2>
-      <div class="row2">
-        <div><label>Tillgängligt kapital (€)</label><input id="capital" type="number" min="0" step="1" /></div>
-        <div><label>Initialt (€)</label><input id="initial" type="number" min="0" step="1" /></div>
-      </div>
-      <label>Budget</label>
-      <select id="budgetFlex">
-        <option value="">—</option>
-        <option>Fast budget</option>
-        <option>Något flexibel</option>
-        <option>Mycket flexibel beroende på möjlighet</option>
-      </select>
-      <label>Kan öka vid bättre läge/uthyrning/värde?</label>
-      <select id="canIncrease"><option value="">—</option><option>Ja</option><option>Nej</option><option>Möjligen</option></select>
-      <label>Kommentar budget</label><textarea id="budgetComment"></textarea>
-      <label>Finansiering</label>
-      <select id="financing">
-        <option value="">—</option>
-        <option>Egna medel</option><option>Bankfinansiering</option>
-        <option>Kombination egna medel + finansiering</option><option>Annat</option>
-      </select>
-      <div class="row2">
-        <div><label>Finansieringsbehov (€)</label><input id="finNeed" type="number" min="0" step="1" /></div>
-        <div><label>Redan godkänd?</label>
-          <select id="finApproved"><option value="">—</option><option>Ja</option><option>Nej</option><option>Ej aktuellt</option></select>
+    <section class="card no-print">
+      <!-- STEP 0 meta -->
+      <div class="step-panel on" data-step="0">
+        <h2>0 · Kund &amp; möte</h2>
+        <div class="proto"><strong>Protokoll:</strong> Dokumentera vem du pratar med innan du går in i Varför.</div>
+        <div class="row2">
+          <div><label>Förnamn</label><input id="fn" /></div>
+          <div><label>Efternamn</label><input id="ln" /></div>
         </div>
-      </div>
-
-      <h2>F · Fastighetstyp</h2>
-      <div class="checks" id="propType"></div>
-      <label>Annat typ</label><input id="propOther" />
-      <label>Sovrum</label>
-      <select id="beds"><option value="">—</option><option>1</option><option>2</option><option>3</option><option>4+</option><option>Ej bestämt</option></select>
-      <label>Färdig / nyproduktion</label>
-      <select id="build"><option value="">—</option><option>Färdig</option><option>Nyproduktion</option><option>Öppen för båda</option></select>
-      <label>Använda direkt</label>
-      <select id="useNow"><option value="">—</option><option>Mycket viktigt</option><option>Ganska viktigt</option><option>Inte viktigt</option></select>
-
-      <h2>G · Eget bruk &amp; uthyrning</h2>
-      <label>Privata veckor / år (ca)</label><input id="weeks" type="number" min="0" />
-      <label>Intresserad av uthyrning?</label>
-      <select id="rentInterest"><option value="">—</option><option>Ja</option><option>Nej</option><option>Möjligen</option></select>
-      <label>Hur viktig är hyresintäkt?</label>
-      <select id="rentImportance">
-        <option value="">—</option><option>Huvudsyfte</option><option>Viktig del</option>
-        <option>Bonus</option><option>Inte relevant</option>
-      </select>
-      <label>Viktigast totalt</label>
-      <select id="mostImportant">
-        <option value="">—</option><option>Eget bruk</option><option>Hyresintäkt</option>
-        <option>Kombination</option><option>Kapitalvärde</option><option>Långsiktig värdeökning</option>
-      </select>
-
-      <h2>H · Motivation</h2>
-      <label>«Bra beslut om tre år» — kundens svar</label><textarea id="goodDecision"></textarea>
-      <label>Huvudskäl till investeringen</label><textarea id="mainReason"></textarea>
-      <label>Kompromissar absolut inte med</label><textarea id="noCompromise"></textarea>
-
-      <h2>I · Beslut</h2>
-      <label>Vem beslutar?</label>
-      <select id="decider"><option value="">—</option><option>Kunden ensam</option><option>Kund + partner</option><option>Familj</option><option>Annat</option></select>
-      <label>Andra som måste vara med?</label><textarea id="othersInvolved"></textarea>
-      <label>Tid till beslut</label>
-      <select id="decideWhen">
-        <option value="">—</option><option>0–30 dagar</option><option>1–3 månader</option>
-        <option>3–6 månader</option><option>6–12 månader</option><option>Ej bestämt</option>
-      </select>
-      <label>Hur långt har kunden kommit?</label>
-      <select id="stage">
-        <option value="">—</option><option>Nyfiken / research</option><option>Aktivt sökande</option>
-        <option>Jämför objekt</option><option>Redo att köpa rätt objekt</option>
-        <option>Har redan sett specifika objekt</option>
-      </select>
-
-      <h2>J · Överlämning till säljare</h2>
-      <label>Behov 1</label><input id="need1" />
-      <label>Behov 2</label><input id="need2" />
-      <label>Behov 3</label><input id="need3" />
-      <label>Emotionell drivkraft</label><textarea id="emotion"></textarea>
-      <label>Budget/kapital (sammanfattning)</label><textarea id="budgetSummary"></textarea>
-      <label>Rekommenderat fokus för säljare</label><textarea id="salesFocus"></textarea>
-      <label>Viktigt säljaren måste veta</label><textarea id="mustKnow"></textarea>
-      <div class="row2">
-        <div><label>Köpintention</label>
-          <select id="intentBuy"><option value="">—</option><option>Låg</option><option>Medel</option><option>Hög</option></select>
+        <label>Telefon</label><input id="phone" />
+        <label>E-post</label><input id="email" type="email" />
+        <label>Mötesbokare</label><input id="setter" />
+        <div class="row2">
+          <div><label>Första kontakt</label><input id="firstContact" type="date" /></div>
+          <div><label>Bokat möte</label><input id="meetingDate" type="date" /></div>
         </div>
-        <div><label>Kapitalberedskap</label>
-          <select id="intentCap"><option value="">—</option><option>Låg</option><option>Medel</option><option>Hög</option></select>
-        </div>
+        <label>Mötesformat</label>
+        <select id="meetingFormat"><option value="">—</option><option>Telefon</option><option>Teams</option><option>Zoom</option><option>På plats</option></select>
+        <label>Land / marknad (välj tidigt)</label>
+        <select id="countryFocus">
+          <option value="">—</option>
+          <option>Dubai</option>
+          <option>Portugal</option>
+          <option>Cypern</option>
+          <option>Bulgarien</option>
+          <option>Spanien</option>
+        </select>
+        <input id="countryOther" type="hidden" value="" />
+        <label>Källa / lead</label><input id="source" />
       </div>
-      <label>Tidsberedskap</label>
-      <select id="intentTime"><option value="">—</option><option>Låg</option><option>Medel</option><option>Hög</option></select>
 
-      <div class="btns">
-        <button type="button" class="primary" id="btnRender">Uppdatera</button>
-        <button type="button" class="ghost" id="btnPdf">Exportera PDF</button>
+      <div class="step-panel" data-step="1">
+        <h2>1 · Börja med VARFÖR</h2>
+        <div class="proto" id="whyProto"><strong>Fråga:</strong> «Vad är den främsta anledningen till att du överväger [land]?» — låt kunden prata. Välj land i steg 0.</div>
+        <div class="checks" id="whyReasons"></div>
+        <label>Annat</label><input id="whyOther" />
+        <label>Kundens egna ord</label><textarea id="whyOwn"></textarea>
+        <label>Vad hoppas kunden uppnå?</label><textarea id="achieve"></textarea>
+        <label>Varför är det viktigt?</label><textarea id="whyImportant"></textarea>
       </div>
-      <p class="hint">Bygger på «Strukturerad säljprocess» + Client Form (mötesbokare). PDF = Skriv ut → Spara som PDF. Utkast tills ÖB/chef säger ja att skicka.</p>
+
+      <div class="step-panel" data-step="2">
+        <h2>2 · Plats</h2>
+        <div class="proto" id="locProto"><strong>Fråga:</strong> «Vilka områden överväger du främst?» + «Vad gör just de intressanta?»</div>
+        <label>Områden</label><textarea id="areas"></textarea>
+        <label>Varför just de?</label><textarea id="areasWhy"></textarea>
+        <div class="checks" id="locMatters"></div>
+        <label>Annat läge</label><input id="locOther" />
+      </div>
+
+      <div class="step-panel" data-step="3">
+        <h2>3 · Budget utan att låsa</h2>
+        <div class="proto"><strong>Fråga:</strong> Specifik budget eller flexibel beroende på typ och potential? Skilj <b>budgetstyrd</b> vs <b>värdestyrd</b>.</div>
+        <div class="row2">
+          <div><label>Tillgängligt kapital (€)</label><input id="capital" type="number" min="0" /></div>
+          <div><label>Initialt (€)</label><input id="initial" type="number" min="0" /></div>
+        </div>
+        <label>Budget</label>
+        <select id="budgetFlex">
+          <option value="">—</option>
+          <option>Fast budget (budgetstyrd)</option>
+          <option>Något flexibel</option>
+          <option>Mycket flexibel / värdestyrd</option>
+        </select>
+        <label>Kan öka vid bättre läge/uthyrning/värde?</label>
+        <select id="canIncrease"><option value="">—</option><option>Ja</option><option>Nej</option><option>Möjligen</option></select>
+        <label>Finansiering</label>
+        <select id="financing">
+          <option value="">—</option><option>Egna medel</option><option>Bankfinansiering</option>
+          <option>Kombination</option><option>Annat</option>
+        </select>
+        <label>Kommentar</label><textarea id="budgetComment"></textarea>
+      </div>
+
+      <div class="step-panel" data-step="4">
+        <h2>4 · Fastighetstyp</h2>
+        <div class="proto"><strong>Fråga:</strong> Färdigt att använda direkt, eller nyproduktion där man kan påverka?</div>
+        <div class="checks" id="propType"></div>
+        <label>Annat</label><input id="propOther" />
+        <label>Sovrum</label>
+        <select id="beds"><option value="">—</option><option>1</option><option>2</option><option>3</option><option>4+</option><option>Ej bestämt</option></select>
+        <label>Färdig / nyproduktion</label>
+        <select id="build"><option value="">—</option><option>Färdig</option><option>Nyproduktion</option><option>Öppen för båda</option></select>
+        <label>Använda direkt</label>
+        <select id="useNow"><option value="">—</option><option>Mycket viktigt</option><option>Ganska viktigt</option><option>Inte viktigt</option></select>
+      </div>
+
+      <div class="step-panel" data-step="5">
+        <h2>5 · Eget bruk &amp; uthyrning</h2>
+        <div class="proto"><strong>Fråga:</strong> Kombinera eget användande med uthyrning när de själva inte är där?</div>
+        <label>Privata veckor / år (ca)</label><input id="weeks" type="number" min="0" />
+        <label>Intresserad av uthyrning?</label>
+        <select id="rentInterest"><option value="">—</option><option>Ja</option><option>Nej</option><option>Möjligen</option></select>
+        <label>Hur viktig är hyresintäkt?</label>
+        <select id="rentImportance">
+          <option value="">—</option><option>Huvudsyfte</option><option>Viktig del</option><option>Bonus</option><option>Inte relevant</option>
+        </select>
+        <label>Viktigast totalt</label>
+        <select id="mostImportant">
+          <option value="">—</option><option>Eget bruk</option><option>Hyresintäkt</option>
+          <option>Kombination</option><option>Kapitalvärde</option><option>Långsiktig värdeökning</option>
+        </select>
+      </div>
+
+      <div class="step-panel" data-step="6">
+        <h2>6 · Motivation &amp; beslut</h2>
+        <div class="proto"><strong>Fråga:</strong> «Vad skulle få dig att om tre år känna att du fattade rätt beslut?»</div>
+        <label>«Bra beslut om tre år»</label><textarea id="goodDecision"></textarea>
+        <label>Huvudskäl</label><textarea id="mainReason"></textarea>
+        <label>Kompromissar absolut inte med</label><textarea id="noCompromise"></textarea>
+        <label>Vem beslutar?</label>
+        <select id="decider"><option value="">—</option><option>Kunden ensam</option><option>Kund + partner</option><option>Familj</option><option>Annat</option></select>
+        <label>Tid till beslut</label>
+        <select id="decideWhen">
+          <option value="">—</option><option>0–30 dagar</option><option>1–3 månader</option>
+          <option>3–6 månader</option><option>6–12 månader</option><option>Ej bestämt</option>
+        </select>
+        <label>Stadium</label>
+        <select id="stage">
+          <option value="">—</option><option>Nyfiken / research</option><option>Aktivt sökande</option>
+          <option>Jämför objekt</option><option>Redo att köpa rätt objekt</option>
+          <option>Har redan sett specifika objekt</option>
+        </select>
+      </div>
+
+      <div class="step-panel" data-step="7">
+        <h2>7 · Överlämning till säljare</h2>
+        <div class="proto"><strong>Utfall:</strong> Tre behov + emotionell drivkraft + fokus. Säljaren börjar inte om från noll.</div>
+        <label>Behov 1</label><input id="need1" />
+        <label>Behov 2</label><input id="need2" />
+        <label>Behov 3</label><input id="need3" />
+        <label>Emotionell drivkraft</label><textarea id="emotion"></textarea>
+        <label>Budget/kapital (sammanfattning)</label><textarea id="budgetSummary"></textarea>
+        <label>Rekommenderat fokus för säljare</label><textarea id="salesFocus"></textarea>
+        <label>Måste veta</label><textarea id="mustKnow"></textarea>
+        <div class="row2">
+          <div><label>Köpintention</label>
+            <select id="intentBuy"><option value="">—</option><option>Låg</option><option>Medel</option><option>Hög</option></select>
+          </div>
+          <div><label>Kapitalberedskap</label>
+            <select id="intentCap"><option value="">—</option><option>Låg</option><option>Medel</option><option>Hög</option></select>
+          </div>
+        </div>
+        <label>Tidsberedskap</label>
+        <select id="intentTime"><option value="">—</option><option>Låg</option><option>Medel</option><option>Hög</option></select>
+      </div>
+
+      <div class="nav-btns">
+        <button type="button" class="ghost" id="btnPrev">Föregående</button>
+        <button type="button" class="primary" id="btnNext">Nästa</button>
+        <button type="button" class="ghost" id="btnPdf">Exportera utfall (PDF)</button>
+      </div>
+      <p class="hint">Sälj inte fastigheten — sälj lösningen på behovet. Tom = saknas. Ingen utlovad avkastning.</p>
+    </section>
+
+    <aside class="card">
+      <div class="preview-head no-print">
+        <h2>Exporterbart utfall</h2>
+        <button type="button" class="ghost" id="btnPdf2">PDF</button>
+      </div>
+      <div class="sheet" id="sheet"></div>
     </aside>
-    <main class="preview-wrap"><div class="sheet" id="sheet"></div></main>
   </div>
 </div>
 <script>
 (function () {
+  const STEPS = [
+    '0 Kund','1 Varför','2 Plats','3 Budget','4 Fastighet','5 Bruk','6 Motivation','7 Överlämning'
+  ];
   const WHY = ['Fritidsboende','Permanent boende','Pensionering','Investering','Hyresintäkt','Eget bruk + uthyrning','Klimat/livsstil','Skatt/bosättning'];
   const LOC = ['Hav/strand','Restauranger','Shopping','Golf','Nattliv','Lugnt område','Familjevänligt','Flygplats','Turistområde','Uthyrningspotential','Framtida värdeökning'];
   const PROP = ['Lägenhet','Villa','Radhus','Condo'];
+  let step = 0;
 
-  function mountChecks(id, items) {
-    const el = document.getElementById(id);
-    el.innerHTML = items.map((t,i) =>
+  function mount(id, items) {
+    document.getElementById(id).innerHTML = items.map(t =>
       '<label><input type="checkbox" data-g="'+id+'" value="'+t+'" /> '+t+'</label>'
     ).join('');
   }
-  mountChecks('whyCyprus', WHY);
-  mountChecks('locMatters', LOC);
-  mountChecks('propType', PROP);
+  mount('whyReasons', WHY); mount('locMatters', LOC); mount('propType', PROP);
+
+  const nav = document.getElementById('stepNav');
+  nav.innerHTML = STEPS.map((t,i) => '<button type="button" data-i="'+i+'">'+t+'</button>').join('');
 
   const $ = (id) => document.getElementById(id);
   const v = (id) => (($(id).value || '').trim());
-  const checked = (gid) =>
-    Array.from(document.querySelectorAll('input[data-g="'+gid+'"]:checked')).map(x => x.value);
-
-  function line(s) { return s ? s : '<span class="empty">saknas</span>'; }
-  function tags(arr, extra) {
-    const a = (arr || []).slice();
-    if (extra) a.push(extra);
+  const checked = (g) => Array.from(document.querySelectorAll('input[data-g="'+g+'"]:checked')).map(x => x.value);
+  const line = (s) => s ? s : '<span class="empty">saknas</span>';
+  const tags = (arr, extra) => {
+    const a = (arr||[]).slice(); if (extra) a.push(extra);
     if (!a.length) return '<span class="empty">saknas</span>';
-    return '<div class="tags">'+a.map(t => '<span class="tag">'+t+'</span>').join('')+'</div>';
+    return '<div class="tags">'+a.map(t=>'<span class="tag">'+t+'</span>').join('')+'</div>';
+  };
+  const euro = (n) => {
+    if (n===''||n==null||!isFinite(Number(n))) return 'saknas';
+    return Number(n).toLocaleString('sv-SE')+' €';
+  };
+
+  
+  function countryLabel() {
+    const c = v('countryFocus');
+    if (c === 'Annat' || c === 'Other') return v('countryOther') || c || 'saknas';
+    return c || 'saknas';
   }
-  function euro(n) {
-    if (n === '' || n == null || !isFinite(Number(n))) return 'saknas';
-    return Number(n).toLocaleString('sv-SE') + ' €';
+  function updateProto() {
+    const land = countryLabel();
+    const why = document.getElementById('whyProto');
+    const loc = document.getElementById('locProto');
+    if (why) why.innerHTML = '<strong>Fråga:</strong> «Vad är den främsta anledningen till att du överväger '+land+'?» — låt kunden prata.';
+    if (loc) loc.innerHTML = '<strong>Fråga:</strong> «Vilka områden i '+land+' överväger du främst?» + «Vad gör just de intressanta?»';
+  }
+
+  function showStep(i) {
+    step = Math.max(0, Math.min(STEPS.length-1, i));
+    document.querySelectorAll('.step-panel').forEach(p => p.classList.toggle('on', +p.dataset.step === step));
+    nav.querySelectorAll('button').forEach((b,j) => {
+      b.classList.toggle('on', j===step);
+      b.classList.toggle('done', j<step);
+    });
+    $('btnPrev').disabled = step===0;
+    $('btnNext').textContent = step===STEPS.length-1 ? 'Klart' : 'Nästa';
+    updateProto();
+    render();
   }
 
   function render() {
-    const name = [v('fn'), v('ln')].filter(Boolean).join(' ') || 'Kund';
-    const why = checked('whyCyprus');
-    const loc = checked('locMatters');
-    const prop = checked('propType');
-
+    const name = [v('fn'),v('ln')].filter(Boolean).join(' ') || 'Kund';
     $('sheet').innerHTML =
-      '<p class="brand">FastigheterUtomlands · mötesbokare → säljare</p>' +
-      '<h1>' + name + ' — kundformulär</h1>' +
-      '<p class="meta">Överlämning från strukturerad säljprocess · utkast</p>' +
-
-      '<h2>Kund &amp; kontakt</h2>' +
+      '<p class="brand">FastigheterUtomlands · protokollutfall · mötesbokare → säljare</p>' +
+      '<h1>'+name+'</h1>' +
       '<div class="kv">' +
-        '<span>Namn</span><span>'+line(name)+'</span>' +
-        '<span>Personnr</span><span>'+line(v('pid'))+'</span>' +
-        '<span>Adress</span><span>'+line([v('addr'),v('zip'),v('city'),v('country')].filter(Boolean).join(', '))+'</span>' +
         '<span>Telefon</span><span>'+line(v('phone'))+'</span>' +
         '<span>E-post</span><span>'+line(v('email'))+'</span>' +
-        '<span>Civilstånd</span><span>'+line(v('marital'))+'</span>' +
-        '<span>Hushåll</span><span>'+line(v('household'))+'</span>' +
-        '<span>Medköpare</span><span>'+line(v('cobuyer'))+'</span>' +
+        '<span>Mötesbokare</span><span>'+line(v('setter'))+'</span>' +
+        '<span>Möte</span><span>'+line([v('meetingDate'),v('meetingFormat')].filter(Boolean).join(' · '))+'</span>' +
+        '<span>Land</span><span>'+line(countryLabel())+'</span>' +
+        '<span>Källa</span><span>'+line(v('source'))+'</span>' +
       '</div>' +
-
-      '<div class="box"><strong>Möte</strong>' +
-        'Mötesbokare: <b>'+line(v('setter'))+'</b> · Första kontakt: <b>'+line(v('firstContact'))+'</b> · Bokat: <b>'+line(v('meetingDate'))+'</b> · Format: <b>'+line(v('meetingFormat'))+'</b><br/>' +
-        'Källa: <b>'+line(v('source'))+'</b><br/>'+line(v('howCame'))+'<br/>' +
-        'Tidigare mäklare: <b>'+line(v('prevAgent'))+'</b> · Sett objekt tidigare: <b>'+line(v('viewedBefore'))+'</b>' +
-      '</div>' +
-
-      '<h2>Varför Cypern</h2>' +
-      tags(why, v('whyOther')) +
+      '<h3>1 · Varför '+countryLabel()+'</h3>' +
+      tags(checked('whyReasons'), v('whyOther')) +
       '<div class="box"><strong>Egna ord</strong>'+line(v('whyOwn'))+'</div>' +
       '<div class="box"><strong>Uppnå</strong>'+line(v('achieve'))+'</div>' +
       '<div class="box"><strong>Varför viktigt</strong>'+line(v('whyImportant'))+'</div>' +
-
-      '<h2>Plats</h2>' +
+      '<h3>2 · Plats</h3>' +
       '<div class="box"><strong>Områden</strong>'+line(v('areas'))+'</div>' +
       '<div class="box"><strong>Varför</strong>'+line(v('areasWhy'))+'</div>' +
-      tags(loc, v('locOther')) +
-
-      '<h2>Kapital &amp; budget</h2>' +
+      tags(checked('locMatters'), v('locOther')) +
+      '<h3>3 · Budget</h3>' +
       '<div class="kv">' +
         '<span>Tillgängligt</span><span>'+euro(v('capital'))+'</span>' +
         '<span>Initialt</span><span>'+euro(v('initial'))+'</span>' +
-        '<span>Flexibilitet</span><span>'+line(v('budgetFlex'))+'</span>' +
-        '<span>Kan öka?</span><span>'+line(v('canIncrease'))+'</span>' +
+        '<span>Flex</span><span>'+line(v('budgetFlex'))+'</span>' +
+        '<span>Kan öka</span><span>'+line(v('canIncrease'))+'</span>' +
         '<span>Finansiering</span><span>'+line(v('financing'))+'</span>' +
-        '<span>Behov</span><span>'+euro(v('finNeed'))+'</span>' +
-        '<span>Godkänd</span><span>'+line(v('finApproved'))+'</span>' +
       '</div>' +
       '<div class="box"><strong>Kommentar</strong>'+line(v('budgetComment'))+'</div>' +
-
-      '<h2>Fastighet &amp; bruk</h2>' +
-      tags(prop, v('propOther')) +
+      '<h3>4–5 · Fastighet &amp; bruk</h3>' +
+      tags(checked('propType'), v('propOther')) +
       '<div class="kv">' +
         '<span>Sovrum</span><span>'+line(v('beds'))+'</span>' +
-        '<span>Byggstatus</span><span>'+line(v('build'))+'</span>' +
-        '<span>Använda direkt</span><span>'+line(v('useNow'))+'</span>' +
-        '<span>Privata veckor/år</span><span>'+line(v('weeks'))+'</span>' +
+        '<span>Bygg</span><span>'+line(v('build'))+'</span>' +
+        '<span>Direktbruk</span><span>'+line(v('useNow'))+'</span>' +
+        '<span>Veckor/år</span><span>'+line(v('weeks'))+'</span>' +
         '<span>Uthyrning</span><span>'+line(v('rentInterest'))+'</span>' +
         '<span>Hyresintäkt</span><span>'+line(v('rentImportance'))+'</span>' +
         '<span>Viktigast</span><span>'+line(v('mostImportant'))+'</span>' +
       '</div>' +
-
-      '<h2>Motivation &amp; beslut</h2>' +
+      '<h3>6 · Motivation &amp; beslut</h3>' +
       '<div class="box"><strong>Bra beslut om 3 år</strong>'+line(v('goodDecision'))+'</div>' +
       '<div class="box"><strong>Huvudskäl</strong>'+line(v('mainReason'))+'</div>' +
       '<div class="box"><strong>Ingen kompromiss</strong>'+line(v('noCompromise'))+'</div>' +
       '<div class="kv">' +
         '<span>Beslutare</span><span>'+line(v('decider'))+'</span>' +
-        '<span>Andra inblandade</span><span>'+line(v('othersInvolved'))+'</span>' +
-        '<span>Tid till beslut</span><span>'+line(v('decideWhen'))+'</span>' +
+        '<span>Tid</span><span>'+line(v('decideWhen'))+'</span>' +
         '<span>Stadium</span><span>'+line(v('stage'))+'</span>' +
       '</div>' +
-
-      '<h2>Överlämning — tre behov</h2>' +
+      '<h3>7 · Överlämning — tre behov</h3>' +
       '<div class="box"><strong>1</strong>'+line(v('need1'))+'</div>' +
       '<div class="box"><strong>2</strong>'+line(v('need2'))+'</div>' +
       '<div class="box"><strong>3</strong>'+line(v('need3'))+'</div>' +
@@ -352,28 +374,37 @@
       '<div class="box"><strong>Budget/kapital</strong>'+line(v('budgetSummary'))+'</div>' +
       '<div class="box"><strong>Fokus för säljare</strong>'+line(v('salesFocus'))+'</div>' +
       '<div class="box"><strong>Måste veta</strong>'+line(v('mustKnow'))+'</div>' +
-
       '<div class="qual">' +
         '<div><div class="l">Köpintention</div><div class="v">'+line(v('intentBuy'))+'</div></div>' +
         '<div><div class="l">Kapital</div><div class="v">'+line(v('intentCap'))+'</div></div>' +
         '<div><div class="l">Tid</div><div class="v">'+line(v('intentTime'))+'</div></div>' +
       '</div>' +
-
-      '<p class="foot">FastigheterUtomlands · strukturerad säljprocess · sälj inte objektet — sälj lösningen på behovet · ingen personlig investeringsrådgivning · utkast</p>';
+      '<p class="foot">Utkast · strukturerad säljprocess · sälj lösningen på behovet · ingen personlig investeringsrådgivning</p>';
   }
 
-  $('btnRender').addEventListener('click', render);
-  document.getElementById('form').addEventListener('input', render);
-  document.getElementById('form').addEventListener('change', render);
-  $('btnPdf').addEventListener('click', () => {
+  function pdf() {
     render();
     const n = ([v('fn'),v('ln')].filter(Boolean).join('-') || 'kund');
     const prev = document.title;
-    document.title = n + '-fu-kundformular';
+    document.title = n + '-fu-protokoll-utfall';
     window.print();
     document.title = prev;
+  }
+
+  nav.addEventListener('click', (e) => {
+    const b = e.target.closest('button[data-i]');
+    if (b) showStep(+b.dataset.i);
   });
-  render();
+  $('btnPrev').addEventListener('click', () => showStep(step-1));
+  $('btnNext').addEventListener('click', () => {
+    if (step < STEPS.length-1) showStep(step+1);
+    else render();
+  });
+  $('btnPdf').addEventListener('click', pdf);
+  $('btnPdf2').addEventListener('click', pdf);
+  document.querySelector('.card.no-print').addEventListener('input', () => { updateProto(); render(); });
+  document.querySelector('.card.no-print').addEventListener('change', () => { updateProto(); render(); });
+  showStep(0);
 })();
 </script>
 </body>
