@@ -6,6 +6,8 @@
 - Strukturerad säljprocess (SV)
 - Client Form – Appointment Setter (EN)
 
+**Landlista:** Dubai, Portugal, Cypern, Bulgarien, Spanien, Annat.
+
 ## Flöde
 1. Mötesbokare fyller formuläret
 2. Förhandsgranska överlämning till säljare

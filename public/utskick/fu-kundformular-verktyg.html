@@ -118,8 +118,8 @@
           <option>Spanien</option>
           <option>Annat</option>
         </select>
-        <label id="countryOtherLab" style="display:none">Annat land</label>
-        <input id="countryOther" style="display:none" placeholder="Ange land" />
+        <label id="countryOtherLab" for="countryOther" style="display:none">Ange land</label>
+        <input id="countryOther" type="text" style="display:none" />
         <label>Källa / lead</label><input id="source" />
       </div>
 
@@ -326,6 +326,7 @@
     });
     $('btnPrev').disabled = step===0;
     $('btnNext').textContent = step===STEPS.length-1 ? 'Klart' : 'Nästa';
+    updateProto();
     render();
   }
 
