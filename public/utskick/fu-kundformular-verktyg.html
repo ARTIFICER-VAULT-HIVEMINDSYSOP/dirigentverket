@@ -78,6 +78,8 @@
     .card:first-child { display:none !important; }
     .sheet { max-height:none; border:0; padding:0; overflow:visible; }
   }
+
+    .btn.secondary{background:#fff;color:inherit;border:1px solid #94a3b8}
 </style>
 </head>
 <body>
@@ -145,9 +147,31 @@
       <div class="step-panel" data-step="3">
         <h2>3 · Budget utan att låsa</h2>
         <div class="proto"><strong>Fråga:</strong> Specifik budget eller flexibel beroende på typ och potential? Skilj <b>budgetstyrd</b> vs <b>värdestyrd</b>.</div>
+        <label>Kundens valuta</label>
+        <select id="currency">
+          <option value="">—</option>
+          <option>SEK</option>
+          <option>DKK</option>
+          <option>GBP</option>
+          <option>EUR</option>
+        </select>
         <div class="row2">
           <div><label>Tillgängligt kapital (€)</label><input id="capital" type="number" min="0" /></div>
           <div><label>Initialt (€)</label><input id="initial" type="number" min="0" /></div>
+        </div>
+        <div class="proto" id="fxBox" style="margin-top:10px">
+          <strong>Räknesnurra</strong> — belopp i kundens valuta → €. Kurs fylls i manuellt (ingen automatisk kurs).
+          <div class="row2" style="margin-top:8px">
+            <div><label>Belopp (kundvaluta)</label><input id="fxAmount" type="number" min="0" step="any" /></div>
+            <div><label>Kurs (1 enhet → €)</label><input id="fxRate" type="number" min="0" step="any" placeholder="fyll i" /></div>
+          </div>
+          <div class="row2">
+            <div><label>≈ €</label><input id="fxEuro" type="text" readonly /></div>
+            <div style="display:flex;align-items:flex-end;gap:8px;padding-bottom:2px">
+              <button type="button" class="btn" id="fxToCapital">Sätt som kapital €</button>
+              <button type="button" class="btn secondary" id="fxToInitial">Sätt som initialt €</button>
+            </div>
+          </div>
         </div>
         <label>Budget</label>
         <select id="budgetFlex">
@@ -308,6 +332,44 @@
     if (c === 'Annat' || c === 'Other') return v('countryOther') || c || '—';
     return c || '—';
   }
+  
+  function recalcFx() {
+    const amt = parseFloat(document.getElementById('fxAmount').value);
+    const cur = document.getElementById('currency').value;
+    let rate = parseFloat(document.getElementById('fxRate').value);
+    const out = document.getElementById('fxEuro');
+    if (cur === 'EUR') {
+      if (!document.getElementById('fxRate').value) {
+        document.getElementById('fxRate').value = '1';
+        rate = 1;
+      }
+    }
+    if (!isFinite(amt) || amt < 0 || !isFinite(rate) || rate <= 0) {
+      out.value = '';
+      return;
+    }
+    out.value = (Math.round(amt * rate * 100) / 100).toLocaleString('sv-SE');
+  }
+  function wireFx() {
+    ['fxAmount','fxRate','currency'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.addEventListener('input', recalcFx);
+      if (el) el.addEventListener('change', recalcFx);
+    });
+    const c = document.getElementById('fxToCapital');
+    const i = document.getElementById('fxToInitial');
+    if (c) c.addEventListener('click', () => {
+      const n = parseFloat(String(document.getElementById('fxEuro').value).replace(/\s/g,'').replace(/\u00a0/g,'').replace(',','.'));
+      if (isFinite(n)) document.getElementById('capital').value = n;
+      render();
+    });
+    if (i) i.addEventListener('click', () => {
+      const n = parseFloat(String(document.getElementById('fxEuro').value).replace(/\s/g,'').replace(/\u00a0/g,'').replace(',','.'));
+      if (isFinite(n)) document.getElementById('initial').value = n;
+      render();
+    });
+  }
+
   function updateProto() {
     syncCountryOther();
     const land = countryLabel();
@@ -354,6 +416,7 @@
       tags(checked('locMatters'), v('locOther')) +
       '<h3>3 · Budget</h3>' +
       '<div class="kv">' +
+        '<span>Valuta</span><span>'+line(v('currency'))+'</span>' +
         '<span>Tillgängligt</span><span>'+euro(v('capital'))+'</span>' +
         '<span>Initialt</span><span>'+euro(v('initial'))+'</span>' +
         '<span>Flex</span><span>'+line(v('budgetFlex'))+'</span>' +
@@ -420,8 +483,10 @@
   document.querySelector('.card.no-print').addEventListener('input', () => { updateProto(); render(); });
   document.querySelector('.card.no-print').addEventListener('change', () => { updateProto(); render(); });
   document.getElementById('countryFocus').addEventListener('change', updateProto);
+  wireFx();
   showStep(0);
 })();
+wireFx();
 </script>
 </body>
 </html>
