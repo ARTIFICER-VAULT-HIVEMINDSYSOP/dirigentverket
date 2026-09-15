@@ -34,6 +34,11 @@ import {
   handleRiderKey,
   tempoToLens,
   HOP_WINDOW_MS,
+  hedgeBandFade,
+  hedgeBandFadeIn,
+  emptyHedgeFade,
+  hedgeMidPulse,
+  emptyHedgePulse,
   LIVE_LOCKED,
   hasCompletedFirstRide,
   markFirstRideComplete,
@@ -392,7 +397,35 @@ root.addEventListener('submit', (ev) => {
     saveRideDraft(riderDraft);
     const now = Date.now();
     const midAir = riderPlay.hopping && now < riderPlay.hopUntil;
+    const prevHedge = riderResult && riderResult.hedge;
     riderResult = computeRide({ ...riderDraft, midAir });
+    let hedgeFade = hedgeBandFade(prevHedge, riderResult.hedge);
+    if (!hedgeFade.fading) {
+      hedgeFade = hedgeBandFadeIn(prevHedge, riderResult.hedge);
+    }
+    if (hedgeFade.fading) {
+      const until = now + hedgeFade.ms;
+      riderPlay = { ...riderPlay, hedgeFade: { ...hedgeFade, until }, hedgePulse: emptyHedgePulse() };
+      window.setTimeout(() => {
+        if (!riderPlay.hedgeFade || riderPlay.hedgeFade.until !== until) return;
+        const pulse = hedgeFade.fadingIn
+          ? hedgeMidPulse(hedgeFade, riderResult && riderResult.hedge)
+          : emptyHedgePulse();
+        riderPlay = { ...riderPlay, hedgeFade: emptyHedgeFade(), hedgePulse: pulse };
+        if (pulse.pulsing) {
+          const pulseUntil = Date.now() + pulse.ms;
+          riderPlay = { ...riderPlay, hedgePulse: { ...pulse, until: pulseUntil } };
+          window.setTimeout(() => {
+            if (!riderPlay.hedgePulse || riderPlay.hedgePulse.until !== pulseUntil) return;
+            riderPlay = { ...riderPlay, hedgePulse: emptyHedgePulse() };
+            render();
+          }, pulse.ms);
+        }
+        render();
+      }, hedgeFade.ms);
+    } else {
+      riderPlay = { ...riderPlay, hedgeFade, hedgePulse: emptyHedgePulse() };
+    }
     if (riderResult.ok) {
       const wasDone = hasCompletedFirstRide();
       markFirstRideComplete();

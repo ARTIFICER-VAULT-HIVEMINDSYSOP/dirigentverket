@@ -5,6 +5,7 @@
  */
 
 import { formatPx, structureSignal, seasonPlan } from './robot.js';
+import { measureFrequency, parseMinFrequency, proposeMittHedge } from './hedge.js';
 
 export { formatPx };
 
@@ -17,6 +18,10 @@ export const LEVERAGE_MIN = 1;
 export const LEVERAGE_MAX = 4;
 export const LENS_STEPS = [1, 1.5, 2];
 export const COAST_PERIOD_MS = 1600;
+/** Soft band-fade both ways: giltig → saknas (out) and saknas → giltig (in). Feel, not a cut. */
+export const HEDGE_FADE_MS = 1100;
+/** One-shot mid-pip pulse after fade-in lands. Same 32-bit ease-out family. */
+export const HEDGE_MID_PULSE_MS = 900;
 export const LIVE_LOCKED = true;
 /** Nameless dry-run slots. Not prices — empty cells stay empty. */
 export const DRY_RUN_SLOTS = 3;
@@ -44,6 +49,8 @@ const TEMPLATE_FIELDS = [
   'prognosRr',
   'hallaRr',
   'nastaSasong',
+  'priceSeries',
+  'minFrequency',
 ];
 
 function num(v) {
@@ -115,6 +122,8 @@ export function parseRideInput(raw) {
     prognosRr: num(raw.prognosRr),
     hallaRr: num(raw.hallaRr),
     nastaSasong: String(raw.nastaSasong || '').trim(),
+    priceSeries: raw.priceSeries,
+    minFrequency: raw.minFrequency,
     midAir: Boolean(raw.midAir),
   };
 }
@@ -302,6 +311,7 @@ export function computeRide(raw) {
       jump: { jumped: false, from: null, to: null, windowMs: HOP_WINDOW_MS, tell: false },
       trail: emptyRideTrail(null),
       rokad: rideRokad(raw),
+      hedge: rideHedge(raw),
       tillgang: input.tillgang,
       pilotVolume: inheritPilotVolume(input.pilotVolume, null),
       input,
@@ -314,6 +324,7 @@ export function computeRide(raw) {
   const jump = rideJump(input, grav, structure);
   const trail = rideTrail(input, levels, structure);
   const rokad = rideRokad(raw);
+  const hedge = rideHedge(raw);
   const coast = input.coast;
 
   return paperStamp({
@@ -333,6 +344,7 @@ export function computeRide(raw) {
     jump,
     trail,
     rokad,
+    hedge,
     tillgang: input.tillgang,
     pilotVolume: inheritPilotVolume(input.pilotVolume, null),
     input,
@@ -362,6 +374,264 @@ export function rokadVolume(pilot) {
   const n = Number(pilot);
   if (!Number.isFinite(n) || n <= 0) return null;
   return inheritPilotVolume(n, n * 0.75);
+}
+
+export function emptyRideHedge() {
+  return {
+    tell: false,
+    proposed: false,
+    freqPip: false,
+    freqProgress: false,
+    freqNeed: null,
+    freqHave: null,
+    saknas: true,
+    saknasKind: 'serie',
+    mode: null,
+    entry: null,
+    count: null,
+    lastSide: null,
+    lower: null,
+    upper: null,
+    ghosts: [],
+    bandRails: [],
+    midPip: null,
+    sidePips: [],
+    note: 'saknas',
+    paper: true,
+    live: false,
+  };
+}
+
+function hedgeGhosts(frequency, proposed) {
+  if (!proposed) return [];
+  const mid = frequency.mid;
+  const lower = frequency.lower;
+  const upper = frequency.upper;
+  if (mid == null || lower == null || upper == null) return [];
+  if (frequency.width == null || frequency.width <= 0) return [];
+  return [
+    { kind: 'nedre', at: lower },
+    { kind: 'mid', at: mid },
+    { kind: 'övre', at: upper },
+  ];
+}
+
+/** Weak silhouette rails + mid pip only when a mitt-hedge plan exists. Never invents levels. */
+function hedgeBandFeel(frequency, proposed) {
+  const ghosts = hedgeGhosts(frequency, proposed);
+  return {
+    ghosts,
+    bandRails: ghosts.filter((g) => g.kind === 'nedre' || g.kind === 'övre'),
+    midPip: ghosts.find((g) => g.kind === 'mid') || null,
+  };
+}
+
+function knownPlanPx(v) {
+  if (v === '' || v === null || v === undefined) return null;
+  const n = Number(v);
+  return Number.isFinite(n) ? n : null;
+}
+
+/**
+ * Twin side-pips from the proposed plan only: köp.tp (övre) + sälj.tp (nedre).
+ * Never invents levels. Missing kop/salj/tp → none.
+ */
+export function hedgeSidePips(kop, salj) {
+  const kopTp = kop && knownPlanPx(kop.tp);
+  const saljTp = salj && knownPlanPx(salj.tp);
+  if (kopTp == null || saljTp == null) return [];
+  return [
+    { kind: 'köp', at: kopTp },
+    { kind: 'sälj', at: saljTp },
+  ];
+}
+
+/**
+ * Soft mitt-hedge tell. Same Artificer lock: user-typed series + bands.
+ * Empty series or invalid band = saknas. Never invents OHLC. Never places an order.
+ */
+export function rideHedge(raw = {}) {
+  const input = parseRideInput(raw);
+  const hold = emptyRideHedge();
+  const frequency = measureFrequency(input.priceSeries, input.bbLower, input.bbUpper);
+  const hedge = proposeMittHedge(frequency, {
+    minFrequency: input.minFrequency,
+    stopDist: input.maxFel,
+  });
+  const freqPip = Boolean(frequency.known);
+  const saknas = Boolean(!frequency.known || frequency.error || frequency.saknas);
+  const saknasKind = frequency.error ? 'band' : saknas ? 'serie' : null;
+  const minN = parseMinFrequency(input.minFrequency);
+  const have = frequency.known ? frequency.count : null;
+  const freqProgress = Boolean(
+    frequency.known &&
+      !frequency.error &&
+      !saknas &&
+      !hedge.proposed &&
+      have != null &&
+      have >= 1 &&
+      minN != null &&
+      have < minN,
+  );
+  const base = {
+    ...hold,
+    freqPip,
+    freqProgress,
+    freqNeed: freqProgress ? minN : null,
+    freqHave: freqProgress ? have : null,
+    saknas,
+    saknasKind,
+    count: frequency.known ? frequency.count : null,
+    lastSide: frequency.lastSide,
+    lower: frequency.known || frequency.width != null ? frequency.lower : null,
+    upper: frequency.known || frequency.width != null ? frequency.upper : null,
+    ghosts: [],
+    bandRails: [],
+    midPip: null,
+    sidePips: [],
+    note: saknas ? 'saknas' : frequency.note || '',
+  };
+  if (!hedge.proposed) return base;
+  const feel = hedgeBandFeel(frequency, true);
+  return {
+    ...base,
+    tell: true,
+    proposed: true,
+    freqProgress: false,
+    freqNeed: null,
+    freqHave: null,
+    saknas: false,
+    saknasKind: null,
+    mode: 'mitt_hedge',
+    entry: hedge.entry,
+    count: hedge.count,
+    kop: hedge.kop,
+    salj: hedge.salj,
+    ghosts: feel.ghosts,
+    bandRails: feel.bandRails,
+    midPip: feel.midPip,
+    sidePips: hedgeSidePips(hedge.kop, hedge.salj),
+    note: 'mitt-hedge · köp + sälj i mitten. Process före fart. Ingen order.',
+  };
+}
+
+export function emptyHedgeFade() {
+  return {
+    fading: false,
+    fadingIn: false,
+    ghosts: [],
+    bandRails: [],
+    midPip: null,
+    sidePips: [],
+    ms: HEDGE_FADE_MS,
+    paper: true,
+  };
+}
+
+function copyKnownHedgeGhosts(list) {
+  if (!Array.isArray(list)) return [];
+  const out = [];
+  for (const g of list) {
+    if (!g) continue;
+    const kind = g.kind;
+    const at = Number(g.at);
+    if ((kind !== 'nedre' && kind !== 'övre' && kind !== 'mid') || !Number.isFinite(at)) continue;
+    out.push({ kind, at });
+  }
+  return out;
+}
+
+function copyKnownSidePips(list) {
+  if (!Array.isArray(list)) return [];
+  const out = [];
+  for (const p of list) {
+    if (!p) continue;
+    const kind = p.kind;
+    const at = Number(p.at);
+    if ((kind !== 'köp' && kind !== 'sälj') || !Number.isFinite(at)) continue;
+    out.push({ kind, at });
+  }
+  return out;
+}
+
+/**
+ * Soft fade only when a known plan becomes invalid.
+ * Copies last user-typed band levels and last known twin side-pips
+ * (kop.tp övre / salj.tp nedre) — never invents mid/OHLC/sides.
+ */
+export function hedgeBandFade(prev, next) {
+  const hold = emptyHedgeFade();
+  if (!prev || !prev.proposed) return hold;
+  if (next && next.proposed) return hold;
+  const ghosts = copyKnownHedgeGhosts(prev.ghosts);
+  const bandRails = ghosts.filter((g) => g.kind === 'nedre' || g.kind === 'övre');
+  const midPip = ghosts.find((g) => g.kind === 'mid') || null;
+  const sidePips = copyKnownSidePips(prev.sidePips);
+  if (bandRails.length < 2 || !midPip) return hold;
+  return {
+    fading: true,
+    fadingIn: false,
+    ghosts,
+    bandRails,
+    midPip,
+    sidePips,
+    ms: HEDGE_FADE_MS,
+    paper: true,
+  };
+}
+
+/**
+ * Soft fade-in only when a missing/invalid plan becomes giltig.
+ * Copies next user-typed band levels — never invents mid/OHLC.
+ * Tom serie / saknas-band / övre≤nedre / under grind = no fade-in.
+ */
+export function hedgeBandFadeIn(prev, next) {
+  const hold = emptyHedgeFade();
+  if (prev && prev.proposed) return hold;
+  if (!next || !next.proposed) return hold;
+  const ghosts = copyKnownHedgeGhosts(next.ghosts);
+  const bandRails = ghosts.filter((g) => g.kind === 'nedre' || g.kind === 'övre');
+  const midPip = ghosts.find((g) => g.kind === 'mid') || null;
+  const sidePips = copyKnownSidePips(next.sidePips);
+  if (bandRails.length < 2 || !midPip) return hold;
+  return {
+    fading: true,
+    fadingIn: true,
+    ghosts,
+    bandRails,
+    midPip,
+    sidePips,
+    ms: HEDGE_FADE_MS,
+    paper: true,
+  };
+}
+
+export function emptyHedgePulse() {
+  return {
+    pulsing: false,
+    midPip: null,
+    ms: HEDGE_MID_PULSE_MS,
+    paper: true,
+  };
+}
+
+/**
+ * Soft one-shot mid-pip pulse only after fade-in saknas→giltig.
+ * Copies next user-typed mid — never invents. Tom serie / saknas-band / under grind = no pulse.
+ */
+export function hedgeMidPulse(fade, next) {
+  const hold = emptyHedgePulse();
+  if (!fade || !fade.fading || !fade.fadingIn) return hold;
+  if (!next || !next.proposed) return hold;
+  const ghosts = copyKnownHedgeGhosts(next.ghosts);
+  const midPip = ghosts.find((g) => g.kind === 'mid') || null;
+  if (!midPip) return hold;
+  return {
+    pulsing: true,
+    midPip,
+    ms: HEDGE_MID_PULSE_MS,
+    paper: true,
+  };
 }
 
 export function emptyRideRokad(side = 'köp') {
@@ -536,6 +806,8 @@ export function emptyRideDraft() {
     prognosRr: '',
     hallaRr: '',
     nastaSasong: '',
+    priceSeries: '',
+    minFrequency: '',
   };
 }
 
@@ -560,6 +832,8 @@ export function emptyPlayState() {
     hopping: false,
     hopUntil: 0,
     robbanOpen: false,
+    hedgeFade: emptyHedgeFade(),
+    hedgePulse: emptyHedgePulse(),
   };
 }
 

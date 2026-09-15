@@ -37,6 +37,15 @@ import {
   inheritPilotVolume,
   rokadVolume,
   rideRokad,
+  rideHedge,
+  hedgeBandFade,
+  hedgeBandFadeIn,
+  emptyHedgeFade,
+  hedgeMidPulse,
+  emptyHedgePulse,
+  hedgeSidePips,
+  HEDGE_FADE_MS,
+  HEDGE_MID_PULSE_MS,
   RIDER_ROKAD_GATE,
   rideImpulse,
   RIDER_IMPULSE_NOTE,
@@ -314,7 +323,7 @@ test('arena-UI A–E: tom play-rad, kicker inte lampa, hopp from→to', () => {
   for (const name of ['tillgang', 'side', 'pilotVolume', 'entry', 'maxFel', 'rr', 'grav']) {
     assert.match(page, new RegExp(`id="rider-core"[\\s\\S]*name="${name}"`));
   }
-  for (const name of ['requested', 'current', 'rsi', 'bbLower', 'bbUpper', 'bounce', 'ovre', 'undre', 'havstang', 'cluster', 'prognos', 'prognosRr', 'hallaRr']) {
+  for (const name of ['requested', 'current', 'rsi', 'bbLower', 'bbUpper', 'bounce', 'ovre', 'undre', 'havstang', 'cluster', 'prognos', 'prognosRr', 'hallaRr', 'priceSeries', 'minFrequency']) {
     assert.match(page, new RegExp(`id="rider-advanced"[\\s\\S]*name="${name}"`));
     assert.ok(!new RegExp(`id="rider-core"[\\s\\S]*name="${name}"[\\s\\S]*id="rider-advanced"`).test(page));
   }
@@ -901,6 +910,758 @@ test('rokad-tell syns mjukt på arena och silhuett-HUD', () => {
   assert.match(quiet, /data-rokad-tell="0"/);
   assert.ok(!/data-rider-rokad-tell/.test(quiet));
   assert.ok(!/data-mode="rokad"/.test(quiet));
+});
+
+test('mitt-hedge-tell: kursserie + band, tom serie = ingen tell', () => {
+  const on = computeRide({
+    entry: 105,
+    maxFel: 2,
+    rr: 2,
+    grav: 105,
+    bbLower: 100,
+    bbUpper: 110,
+    priceSeries: '100\n110\n100\n110',
+  });
+  assert.equal(on.ok, true);
+  assert.equal(on.hedge.tell, true);
+  assert.equal(on.hedge.proposed, true);
+  assert.equal(on.hedge.mode, 'mitt_hedge');
+  assert.equal(on.hedge.entry, 105);
+  assert.equal(on.hedge.paper, true);
+  assert.equal(on.hedge.live, false);
+  assert.equal(LIVE_LOCKED, true);
+
+  const quiet = computeRide({ entry: 100, maxFel: 2, rr: 2, grav: 100, bbLower: 100, bbUpper: 110 });
+  assert.equal(quiet.hedge.tell, false);
+  assert.equal(quiet.hedge.proposed, false);
+  assert.equal(quiet.hedge.freqPip, false);
+  assert.equal(quiet.hedge.saknas, true);
+  assert.deepEqual(quiet.hedge.ghosts, []);
+
+  const few = computeRide({
+    entry: 105,
+    maxFel: 2,
+    rr: 2,
+    grav: 105,
+    bbLower: 100,
+    bbUpper: 110,
+    priceSeries: '100\n110\n100',
+  });
+  assert.equal(few.hedge.tell, false);
+  assert.equal(few.hedge.freqPip, true);
+  assert.equal(few.hedge.saknas, false);
+  assert.equal(few.hedge.count, 2);
+  assert.deepEqual(few.hedge.ghosts, []);
+
+  const onlyHedge = rideHedge({
+    bbLower: 100,
+    bbUpper: 110,
+    priceSeries: '100\n110\n100\n110',
+    maxFel: 2,
+  });
+  assert.equal(onlyHedge.tell, true);
+  assert.equal(onlyHedge.entry, 105);
+});
+
+test('mitt-hedge-tell syns mjukt på arena och silhuett-HUD', () => {
+  const ride = computeRide({
+    entry: 105,
+    maxFel: 2,
+    rr: 2,
+    grav: 105,
+    bbLower: 100,
+    bbUpper: 110,
+    priceSeries: '100\n110\n100\n110',
+  });
+  const html = renderPlayArena(ride);
+  assert.match(html, /data-hedge-tell="1"/);
+  assert.match(html, /data-rider-hedge-tell/);
+  assert.match(html, /data-hedge="1"/);
+  assert.match(html, /data-mode="hedge"/);
+  assert.match(html, /köp \+ sälj/);
+  assert.match(html, /process före fart/);
+  assert.match(html, /ingen order/);
+  assert.ok(!/<button/i.test(html));
+  assert.ok(!/<dialog/i.test(html));
+  assert.ok(!/data-rider-pad|data-action="rider-key"/i.test(html));
+  assert.ok(!/WATCHERS|anden i lampan/i.test(html));
+  assert.ok(!/\d+\s*kr/i.test(html));
+  assert.doesNotMatch(html, /P&L|pnl/);
+  assert.equal(LIVE_LOCKED, true);
+
+  const quiet = renderPlayArena(computeRide({ entry: 100, maxFel: 2, rr: 2, grav: 100 }));
+  assert.match(quiet, /data-hedge-tell="0"/);
+  assert.ok(!/data-rider-hedge-tell/.test(quiet));
+  assert.ok(!/data-mode="hedge"/.test(quiet));
+});
+
+test('frekvens-pip när svängar är mätbara; saknas när serie/band tomt', () => {
+  const on = computeRide({
+    entry: 105,
+    maxFel: 2,
+    rr: 2,
+    grav: 105,
+    bbLower: 100,
+    bbUpper: 110,
+    priceSeries: '100\n110\n100\n110',
+  });
+  assert.equal(on.hedge.freqPip, true);
+  assert.equal(on.hedge.saknas, false);
+  assert.equal(on.hedge.count, 3);
+  assert.equal(on.hedge.ghosts.length, 3);
+  assert.equal(on.hedge.ghosts[1].kind, 'mid');
+  assert.equal(on.hedge.ghosts[1].at, 105);
+  const html = renderPlayArena(on);
+  assert.match(html, /data-freq-pip="1"/);
+  assert.match(html, /data-freq-saknas="0"/);
+  assert.match(html, /data-freq-count="3"/);
+  assert.match(html, /data-rider-freq/);
+  assert.match(html, /data-hedge-ghost="1"/);
+  assert.match(html, /rider-mark-hedge-mid/);
+  assert.match(html, /rider-mark-hedge-nedre/);
+  assert.ok(!/<button/i.test(html));
+  assert.ok(!/<dialog/i.test(html));
+  assert.equal(LIVE_LOCKED, true);
+
+  const empty = computeRide({ entry: 100, maxFel: 2, rr: 2, grav: 100 });
+  assert.equal(empty.hedge.freqPip, false);
+  assert.equal(empty.hedge.saknas, true);
+  assert.deepEqual(empty.hedge.ghosts, []);
+  const emptyHtml = renderPlayArena(empty);
+  assert.match(emptyHtml, /data-freq-saknas="1"/);
+  assert.match(emptyHtml, />saknas</);
+  assert.match(emptyHtml, /data-hedge-ghost="0"/);
+  assert.ok(!/rider-mark-hedge-mid/.test(emptyHtml));
+
+  const badBand = computeRide({
+    entry: 105,
+    maxFel: 2,
+    rr: 2,
+    grav: 105,
+    bbLower: 110,
+    bbUpper: 100,
+    priceSeries: '100\n110\n100\n110',
+  });
+  assert.equal(badBand.hedge.saknas, true);
+  assert.equal(badBand.hedge.freqPip, false);
+  assert.deepEqual(badBand.hedge.ghosts, []);
+  const badHtml = renderPlayArena(badBand);
+  assert.match(badHtml, /data-freq-saknas="1"/);
+  assert.ok(!/rider-mark-hedge-mid/.test(badHtml));
+  assert.ok(!/data-hedge-ghost="1"/.test(badHtml));
+});
+
+test('band-silhuett + mitt-pip när mitt-hedge-plan finns; saknas annars', () => {
+  const on = computeRide({
+    entry: 105,
+    maxFel: 2,
+    rr: 2,
+    grav: 105,
+    bbLower: 100,
+    bbUpper: 110,
+    priceSeries: '100\n110\n100\n110',
+  });
+  assert.equal(on.hedge.proposed, true);
+  assert.equal(on.hedge.bandRails.length, 2);
+  assert.equal(on.hedge.bandRails[0].kind, 'nedre');
+  assert.equal(on.hedge.bandRails[0].at, 100);
+  assert.equal(on.hedge.bandRails[1].kind, 'övre');
+  assert.equal(on.hedge.bandRails[1].at, 110);
+  assert.equal(on.hedge.midPip.at, 105);
+  const html = renderPlayArena(on);
+  assert.match(html, /data-hedge-band="1"/);
+  assert.match(html, /data-hedge-rail="nedre"/);
+  assert.match(html, /data-hedge-rail="övre"/);
+  assert.match(html, /data-hedge-mid-pip="1"/);
+  assert.match(html, /rider-hedge-rail/);
+  assert.match(html, /rider-hedge-mid-pip/);
+  assert.ok(!/<button/i.test(html));
+  assert.ok(!/<dialog/i.test(html));
+  assert.ok(!/data-rider-pad|data-action="rider-key"/i.test(html));
+  assert.doesNotMatch(html, /P&L|pnl/);
+  assert.equal(LIVE_LOCKED, true);
+
+  const empty = computeRide({ entry: 100, maxFel: 2, rr: 2, grav: 100 });
+  assert.deepEqual(empty.hedge.bandRails, []);
+  assert.equal(empty.hedge.midPip, null);
+  const emptyHtml = renderPlayArena(empty);
+  assert.match(emptyHtml, /data-hedge-band="0"/);
+  assert.match(emptyHtml, /data-freq-saknas="1"/);
+  assert.ok(!/data-hedge-rail=/.test(emptyHtml));
+  assert.ok(!/<span class="rider-hedge-rail"/.test(emptyHtml));
+  assert.ok(!/<span class="rider-hedge-mid-pip"/.test(emptyHtml));
+
+  const few = computeRide({
+    entry: 105,
+    maxFel: 2,
+    rr: 2,
+    grav: 105,
+    bbLower: 100,
+    bbUpper: 110,
+    priceSeries: '100\n110\n100',
+  });
+  assert.equal(few.hedge.freqPip, true);
+  assert.equal(few.hedge.proposed, false);
+  assert.deepEqual(few.hedge.bandRails, []);
+  assert.equal(few.hedge.midPip, null);
+  const fewHtml = renderPlayArena(few);
+  assert.match(fewHtml, /data-hedge-band="0"/);
+  assert.match(fewHtml, /data-hedge-mid-pip="0"/);
+  assert.ok(!/data-hedge-rail=/.test(fewHtml));
+
+  const badBand = computeRide({
+    entry: 105,
+    maxFel: 2,
+    rr: 2,
+    grav: 105,
+    bbLower: 110,
+    bbUpper: 100,
+    priceSeries: '100\n110\n100\n110',
+  });
+  assert.equal(badBand.hedge.saknas, true);
+  assert.deepEqual(badBand.hedge.bandRails, []);
+  assert.equal(badBand.hedge.midPip, null);
+  const badHtml = renderPlayArena(badBand);
+  assert.match(badHtml, /data-hedge-band="0"/);
+  assert.ok(!/data-hedge-rail=/.test(badHtml));
+  assert.ok(!/<span class="rider-hedge-mid-pip"/.test(badHtml));
+});
+
+test('frekvens-progress-pip under grind; ger plats när plan blir giltig', () => {
+  const few = computeRide({
+    entry: 105,
+    maxFel: 2,
+    rr: 2,
+    grav: 105,
+    bbLower: 100,
+    bbUpper: 110,
+    priceSeries: '100\n110\n100',
+  });
+  assert.equal(few.hedge.proposed, false);
+  assert.equal(few.hedge.freqPip, true);
+  assert.equal(few.hedge.freqProgress, true);
+  assert.equal(few.hedge.freqHave, 2);
+  assert.equal(few.hedge.freqNeed, 3);
+  assert.equal(few.hedge.midPip, null);
+  assert.deepEqual(few.hedge.ghosts, []);
+  const fewHtml = renderPlayArena(few);
+  assert.match(fewHtml, /data-freq-progress="1"/);
+  assert.match(fewHtml, /data-freq-have="2"/);
+  assert.match(fewHtml, /data-freq-need="3"/);
+  assert.match(fewHtml, /rider-sil-freq is-progress/);
+  assert.match(fewHtml, /data-hedge-band="0"/);
+  assert.match(fewHtml, /data-hedge-mid-pip="0"/);
+  assert.ok(!/rider-mark-hedge-mid/.test(fewHtml));
+  assert.ok(!/<span class="rider-hedge-mid-pip"/.test(fewHtml));
+  assert.ok(!/<button/i.test(fewHtml));
+  assert.doesNotMatch(fewHtml, /P&L|pnl/);
+  assert.equal(LIVE_LOCKED, true);
+
+  const on = computeRide({
+    entry: 105,
+    maxFel: 2,
+    rr: 2,
+    grav: 105,
+    bbLower: 100,
+    bbUpper: 110,
+    priceSeries: '100\n110\n100\n110',
+  });
+  assert.equal(on.hedge.proposed, true);
+  assert.equal(on.hedge.freqProgress, false);
+  assert.equal(on.hedge.freqNeed, null);
+  assert.equal(on.hedge.freqHave, null);
+  assert.equal(on.hedge.midPip.at, 105);
+  const onHtml = renderPlayArena(on);
+  assert.match(onHtml, /data-freq-progress="0"/);
+  assert.match(onHtml, /data-hedge-mid-pip="1"/);
+  assert.match(onHtml, /rider-mark-hedge-mid/);
+  assert.ok(!/rider-sil-freq is-progress/.test(onHtml));
+  assert.equal((onHtml.match(/rider-mark-hedge-mid/g) || []).length, 1);
+
+  const empty = computeRide({ entry: 100, maxFel: 2, rr: 2, grav: 100 });
+  assert.equal(empty.hedge.freqProgress, false);
+  const emptyHtml = renderPlayArena(empty);
+  assert.match(emptyHtml, /data-freq-progress="0"/);
+  assert.match(emptyHtml, /data-freq-saknas="1"/);
+  assert.ok(!/rider-sil-freq is-progress/.test(emptyHtml));
+
+  const badBand = computeRide({
+    entry: 105,
+    maxFel: 2,
+    rr: 2,
+    grav: 105,
+    bbLower: 110,
+    bbUpper: 100,
+    priceSeries: '100\n110\n100\n110',
+  });
+  assert.equal(badBand.hedge.freqProgress, false);
+  const badHtml = renderPlayArena(badBand);
+  assert.match(badHtml, /data-freq-progress="0"/);
+  assert.ok(!/rider-sil-freq is-progress/.test(badHtml));
+
+  const zeroSwing = computeRide({
+    entry: 105,
+    maxFel: 2,
+    rr: 2,
+    grav: 105,
+    bbLower: 100,
+    bbUpper: 110,
+    priceSeries: '100\n101\n100',
+  });
+  assert.equal(zeroSwing.hedge.count, 0);
+  assert.equal(zeroSwing.hedge.freqProgress, false);
+});
+
+test('band-fade när giltig mitt-hedge blir saknas; ingen påhittad mitt', () => {
+  const on = computeRide({
+    entry: 105,
+    maxFel: 2,
+    rr: 2,
+    grav: 105,
+    bbLower: 100,
+    bbUpper: 110,
+    priceSeries: '100\n110\n100\n110',
+  });
+  const empty = computeRide({ entry: 100, maxFel: 2, rr: 2, grav: 100 });
+  const few = computeRide({
+    entry: 105,
+    maxFel: 2,
+    rr: 2,
+    grav: 105,
+    bbLower: 100,
+    bbUpper: 110,
+    priceSeries: '100\n110\n100',
+  });
+  const badBand = computeRide({
+    entry: 105,
+    maxFel: 2,
+    rr: 2,
+    grav: 105,
+    bbLower: 110,
+    bbUpper: 100,
+    priceSeries: '100\n110\n100\n110',
+  });
+  const noBand = computeRide({
+    entry: 105,
+    maxFel: 2,
+    rr: 2,
+    grav: 105,
+    priceSeries: '100\n110\n100\n110',
+  });
+
+  const toEmpty = hedgeBandFade(on.hedge, empty.hedge);
+  assert.equal(toEmpty.fading, true);
+  assert.equal(toEmpty.paper, true);
+  assert.equal(toEmpty.ms, HEDGE_FADE_MS);
+  assert.equal(toEmpty.bandRails.length, 2);
+  assert.equal(toEmpty.bandRails[0].at, 100);
+  assert.equal(toEmpty.bandRails[1].at, 110);
+  assert.equal(toEmpty.midPip.at, 105);
+  assert.equal(toEmpty.ghosts.length, 3);
+
+  assert.equal(hedgeBandFade(on.hedge, few.hedge).fading, true);
+  assert.equal(hedgeBandFade(on.hedge, badBand.hedge).fading, true);
+  assert.equal(hedgeBandFade(on.hedge, noBand.hedge).fading, true);
+  assert.equal(hedgeBandFade(on.hedge, on.hedge).fading, false);
+  assert.equal(hedgeBandFade(empty.hedge, empty.hedge).fading, false);
+  assert.equal(hedgeBandFade(null, empty.hedge).fading, false);
+  assert.deepEqual(hedgeBandFade(empty.hedge, empty.hedge).ghosts, []);
+  assert.equal(emptyHedgeFade().fading, false);
+
+  const invented = hedgeBandFade({ proposed: true, ghosts: [] }, empty.hedge);
+  assert.equal(invented.fading, false);
+  assert.deepEqual(invented.ghosts, []);
+  assert.equal(invented.midPip, null);
+
+  const fadeHtml = renderPlayArena(empty, { hedgeFade: toEmpty });
+  assert.match(fadeHtml, /data-hedge-fade="1"/);
+  assert.match(fadeHtml, /is-hedge-fade/);
+  assert.match(fadeHtml, /data-hedge-rail="nedre"/);
+  assert.match(fadeHtml, /data-hedge-rail="övre"/);
+  assert.match(fadeHtml, /data-hedge-mid-pip="1"/);
+  assert.match(fadeHtml, /data-freq-saknas="1"/);
+  assert.match(fadeHtml, />saknas</);
+  assert.match(fadeHtml, /--hedge-fade-ms:1100ms/);
+  assert.ok(!/<button/i.test(fadeHtml));
+  assert.ok(!/<dialog/i.test(fadeHtml));
+  assert.doesNotMatch(fadeHtml, /P&L|pnl/);
+  assert.equal(LIVE_LOCKED, true);
+
+  const quietHtml = renderPlayArena(empty);
+  assert.match(quietHtml, /data-hedge-fade="0"/);
+  assert.ok(!/is-hedge-fade/.test(quietHtml));
+  assert.ok(!/data-hedge-rail=/.test(quietHtml));
+  assert.match(quietHtml, /data-freq-saknas="1"/);
+});
+
+test('band-fade-in när mitt-hedge går saknas→giltig; ingen fade under grind', () => {
+  const on = computeRide({
+    entry: 105,
+    maxFel: 2,
+    rr: 2,
+    grav: 105,
+    bbLower: 100,
+    bbUpper: 110,
+    priceSeries: '100\n110\n100\n110',
+  });
+  const empty = computeRide({ entry: 100, maxFel: 2, rr: 2, grav: 100 });
+  const few = computeRide({
+    entry: 105,
+    maxFel: 2,
+    rr: 2,
+    grav: 105,
+    bbLower: 100,
+    bbUpper: 110,
+    priceSeries: '100\n110\n100',
+  });
+  const badBand = computeRide({
+    entry: 105,
+    maxFel: 2,
+    rr: 2,
+    grav: 105,
+    bbLower: 110,
+    bbUpper: 100,
+    priceSeries: '100\n110\n100\n110',
+  });
+  const noBand = computeRide({
+    entry: 105,
+    maxFel: 2,
+    rr: 2,
+    grav: 105,
+    priceSeries: '100\n110\n100\n110',
+  });
+
+  const fromEmpty = hedgeBandFadeIn(empty.hedge, on.hedge);
+  assert.equal(fromEmpty.fading, true);
+  assert.equal(fromEmpty.fadingIn, true);
+  assert.equal(fromEmpty.paper, true);
+  assert.equal(fromEmpty.ms, HEDGE_FADE_MS);
+  assert.equal(fromEmpty.bandRails.length, 2);
+  assert.equal(fromEmpty.bandRails[0].at, 100);
+  assert.equal(fromEmpty.bandRails[1].at, 110);
+  assert.equal(fromEmpty.midPip.at, 105);
+  assert.equal(fromEmpty.ghosts.length, 3);
+
+  assert.equal(hedgeBandFadeIn(few.hedge, on.hedge).fading, true);
+  assert.equal(hedgeBandFadeIn(few.hedge, on.hedge).fadingIn, true);
+  assert.equal(hedgeBandFadeIn(badBand.hedge, on.hedge).fading, true);
+  assert.equal(hedgeBandFadeIn(noBand.hedge, on.hedge).fading, true);
+  assert.equal(hedgeBandFadeIn(null, on.hedge).fading, true);
+
+  assert.equal(hedgeBandFadeIn(on.hedge, on.hedge).fading, false);
+  assert.equal(hedgeBandFadeIn(empty.hedge, empty.hedge).fading, false);
+  assert.equal(hedgeBandFadeIn(empty.hedge, few.hedge).fading, false);
+  assert.equal(hedgeBandFadeIn(few.hedge, few.hedge).fading, false);
+  assert.equal(hedgeBandFadeIn(empty.hedge, badBand.hedge).fading, false);
+  assert.equal(hedgeBandFadeIn(empty.hedge, noBand.hedge).fading, false);
+  assert.equal(hedgeBandFadeIn(on.hedge, empty.hedge).fading, false);
+  assert.deepEqual(hedgeBandFadeIn(empty.hedge, empty.hedge).ghosts, []);
+  assert.equal(emptyHedgeFade().fadingIn, false);
+
+  const invented = hedgeBandFadeIn(empty.hedge, { proposed: true, ghosts: [] });
+  assert.equal(invented.fading, false);
+  assert.equal(invented.fadingIn, false);
+  assert.deepEqual(invented.ghosts, []);
+  assert.equal(invented.midPip, null);
+
+  const fadeInHtml = renderPlayArena(on, { hedgeFade: fromEmpty });
+  assert.match(fadeInHtml, /data-hedge-fade-in="1"/);
+  assert.match(fadeInHtml, /is-hedge-fade-in/);
+  assert.match(fadeInHtml, /has-hedge-fade-in/);
+  assert.match(fadeInHtml, /data-hedge-rail="nedre"/);
+  assert.match(fadeInHtml, /data-hedge-rail="övre"/);
+  assert.match(fadeInHtml, /data-hedge-mid-pip="1"/);
+  assert.match(fadeInHtml, /data-freq-saknas="0"/);
+  assert.match(fadeInHtml, /--hedge-fade-ms:1100ms/);
+  assert.match(fadeInHtml, /data-hedge-fade="0"/);
+  assert.ok(!/\bis-hedge-fade\b/.test(fadeInHtml.replace(/is-hedge-fade-in/g, '')));
+  assert.ok(!/<button/i.test(fadeInHtml));
+  assert.ok(!/<dialog/i.test(fadeInHtml));
+  assert.doesNotMatch(fadeInHtml, /P&L|pnl/);
+  assert.equal(LIVE_LOCKED, true);
+
+  const quietOn = renderPlayArena(on);
+  assert.match(quietOn, /data-hedge-fade-in="0"/);
+  assert.ok(!/is-hedge-fade-in/.test(quietOn));
+  assert.match(quietOn, /data-hedge-band="1"/);
+
+  const fewHtml = renderPlayArena(few, { hedgeFade: hedgeBandFadeIn(empty.hedge, few.hedge) });
+  assert.match(fewHtml, /data-hedge-fade-in="0"/);
+  assert.ok(!/is-hedge-fade-in/.test(fewHtml));
+  assert.match(fewHtml, /data-freq-progress="1"/);
+  assert.match(fewHtml, /data-hedge-mid-pip="0"/);
+});
+
+test('mitt-pip engångs-puls efter fade-in saknas→giltig; ingen puls under grind', () => {
+  const on = computeRide({
+    entry: 105,
+    maxFel: 2,
+    rr: 2,
+    grav: 105,
+    bbLower: 100,
+    bbUpper: 110,
+    priceSeries: '100\n110\n100\n110',
+  });
+  const empty = computeRide({ entry: 100, maxFel: 2, rr: 2, grav: 100 });
+  const few = computeRide({
+    entry: 105,
+    maxFel: 2,
+    rr: 2,
+    grav: 105,
+    bbLower: 100,
+    bbUpper: 110,
+    priceSeries: '100\n110\n100',
+  });
+  const badBand = computeRide({
+    entry: 105,
+    maxFel: 2,
+    rr: 2,
+    grav: 105,
+    bbLower: 110,
+    bbUpper: 100,
+    priceSeries: '100\n110\n100\n110',
+  });
+
+  const fadeIn = hedgeBandFadeIn(empty.hedge, on.hedge);
+  const pulse = hedgeMidPulse(fadeIn, on.hedge);
+  assert.equal(pulse.pulsing, true);
+  assert.equal(pulse.paper, true);
+  assert.equal(pulse.ms, HEDGE_MID_PULSE_MS);
+  assert.equal(pulse.midPip.at, 105);
+  assert.equal(pulse.midPip.kind, 'mid');
+
+  assert.equal(hedgeMidPulse(hedgeBandFadeIn(few.hedge, on.hedge), on.hedge).pulsing, true);
+  assert.equal(hedgeMidPulse(null, on.hedge).pulsing, false);
+  assert.equal(hedgeMidPulse(emptyHedgeFade(), on.hedge).pulsing, false);
+  assert.equal(hedgeMidPulse(hedgeBandFade(on.hedge, empty.hedge), empty.hedge).pulsing, false);
+  assert.equal(hedgeMidPulse(fadeIn, few.hedge).pulsing, false);
+  assert.equal(hedgeMidPulse(fadeIn, empty.hedge).pulsing, false);
+  assert.equal(hedgeMidPulse(fadeIn, badBand.hedge).pulsing, false);
+  assert.equal(hedgeMidPulse(fadeIn, { proposed: true, ghosts: [] }).pulsing, false);
+  assert.equal(emptyHedgePulse().pulsing, false);
+  assert.equal(emptyHedgePulse().midPip, null);
+
+  const pulseHtml = renderPlayArena(on, { hedgePulse: pulse });
+  assert.match(pulseHtml, /data-hedge-mid-pulse="1"/);
+  assert.match(pulseHtml, /is-hedge-mid-pulse/);
+  assert.match(pulseHtml, /has-hedge-mid-pulse/);
+  assert.match(pulseHtml, /data-hedge-mid-pip="1"/);
+  assert.match(pulseHtml, /--hedge-pulse-ms:900ms/);
+  assert.match(pulseHtml, /data-hedge-fade-in="0"/);
+  assert.ok(!/<button/i.test(pulseHtml));
+  assert.ok(!/<dialog/i.test(pulseHtml));
+  assert.doesNotMatch(pulseHtml, /P&L|pnl/);
+  assert.equal(LIVE_LOCKED, true);
+
+  const duringFadeIn = renderPlayArena(on, { hedgeFade: fadeIn, hedgePulse: pulse });
+  assert.match(duringFadeIn, /data-hedge-fade-in="1"/);
+  assert.match(duringFadeIn, /data-hedge-mid-pulse="0"/);
+  assert.ok(!/is-hedge-mid-pulse/.test(duringFadeIn));
+
+  const quietOn = renderPlayArena(on);
+  assert.match(quietOn, /data-hedge-mid-pulse="0"/);
+  assert.ok(!/is-hedge-mid-pulse/.test(quietOn));
+
+  const fewHtml = renderPlayArena(few, { hedgePulse: hedgeMidPulse(fadeIn, few.hedge) });
+  assert.match(fewHtml, /data-hedge-mid-pulse="0"/);
+  assert.ok(!/is-hedge-mid-pulse/.test(fewHtml));
+  assert.match(fewHtml, /data-freq-progress="1"/);
+
+  const emptyHtml = renderPlayArena(empty, { hedgePulse: hedgeMidPulse(fadeIn, empty.hedge) });
+  assert.match(emptyHtml, /data-hedge-mid-pulse="0"/);
+  assert.ok(!/is-hedge-mid-pulse/.test(emptyHtml));
+  assert.match(emptyHtml, /data-freq-saknas="1"/);
+});
+
+test('twin side-pips när mitt-hedge proposed; bara kop.tp + salj.tp', () => {
+  const on = computeRide({
+    entry: 105,
+    maxFel: 2,
+    rr: 2,
+    grav: 105,
+    bbLower: 100,
+    bbUpper: 110,
+    priceSeries: '100\n110\n100\n110',
+  });
+  assert.equal(on.hedge.proposed, true);
+  assert.equal(on.hedge.kop.tp, 110);
+  assert.equal(on.hedge.salj.tp, 100);
+  assert.equal(on.hedge.kop.entry, on.hedge.entry);
+  assert.equal(on.hedge.salj.entry, on.hedge.entry);
+  assert.equal(on.hedge.sidePips.length, 2);
+  assert.equal(on.hedge.sidePips[0].kind, 'köp');
+  assert.equal(on.hedge.sidePips[0].at, on.hedge.kop.tp);
+  assert.equal(on.hedge.sidePips[1].kind, 'sälj');
+  assert.equal(on.hedge.sidePips[1].at, on.hedge.salj.tp);
+  assert.equal(on.hedge.midPip.at, 105);
+  assert.deepEqual(hedgeSidePips(on.hedge.kop, on.hedge.salj), on.hedge.sidePips);
+
+  const html = renderPlayArena(on);
+  assert.match(html, /data-hedge-side-pips="1"/);
+  assert.match(html, /has-hedge-side-pips/);
+  assert.match(html, /data-hedge-side-pip="köp"/);
+  assert.match(html, /data-hedge-side-pip="sälj"/);
+  assert.match(html, /rider-hedge-side-pip is-kop/);
+  assert.match(html, /rider-hedge-side-pip is-salj/);
+  assert.match(html, /data-hedge-mid-pip="1"/);
+  assert.equal((html.match(/rider-hedge-side-pip/g) || []).length, 2);
+  assert.equal((html.match(/rider-hedge-mid-pip/g) || []).length, 1);
+  assert.ok(!/<button/i.test(html));
+  assert.ok(!/<dialog/i.test(html));
+  assert.doesNotMatch(html, /P&L|pnl/);
+  assert.equal(LIVE_LOCKED, true);
+
+  const empty = computeRide({ entry: 100, maxFel: 2, rr: 2, grav: 100 });
+  assert.deepEqual(empty.hedge.sidePips, []);
+  const emptyHtml = renderPlayArena(empty);
+  assert.match(emptyHtml, /data-hedge-side-pips="0"/);
+  assert.ok(!/data-hedge-side-pip=/.test(emptyHtml));
+  assert.ok(!/rider-hedge-side-pip/.test(emptyHtml));
+
+  const few = computeRide({
+    entry: 105,
+    maxFel: 2,
+    rr: 2,
+    grav: 105,
+    bbLower: 100,
+    bbUpper: 110,
+    priceSeries: '100\n110\n100',
+  });
+  assert.equal(few.hedge.proposed, false);
+  assert.deepEqual(few.hedge.sidePips, []);
+  const fewHtml = renderPlayArena(few);
+  assert.match(fewHtml, /data-hedge-side-pips="0"/);
+  assert.ok(!/rider-hedge-side-pip/.test(fewHtml));
+
+  const badBand = computeRide({
+    entry: 105,
+    maxFel: 2,
+    rr: 2,
+    grav: 105,
+    bbLower: 110,
+    bbUpper: 100,
+    priceSeries: '100\n110\n100\n110',
+  });
+  assert.deepEqual(badBand.hedge.sidePips, []);
+  assert.ok(!/rider-hedge-side-pip/.test(renderPlayArena(badBand)));
+
+  assert.deepEqual(hedgeSidePips(null, { tp: 100 }), []);
+  assert.deepEqual(hedgeSidePips({ tp: 110 }, null), []);
+  assert.deepEqual(hedgeSidePips({ tp: null }, { tp: 100 }), []);
+  assert.deepEqual(hedgeSidePips({ sl: 98 }, { sl: 112 }), []);
+});
+
+test('twin side-pips fade när giltig mitt-hedge blir saknas; ingen påhittad nivå', () => {
+  const on = computeRide({
+    entry: 105,
+    maxFel: 2,
+    rr: 2,
+    grav: 105,
+    bbLower: 100,
+    bbUpper: 110,
+    priceSeries: '100\n110\n100\n110',
+  });
+  const empty = computeRide({ entry: 100, maxFel: 2, rr: 2, grav: 100 });
+  const few = computeRide({
+    entry: 105,
+    maxFel: 2,
+    rr: 2,
+    grav: 105,
+    bbLower: 100,
+    bbUpper: 110,
+    priceSeries: '100\n110\n100',
+  });
+  const badBand = computeRide({
+    entry: 105,
+    maxFel: 2,
+    rr: 2,
+    grav: 105,
+    bbLower: 110,
+    bbUpper: 100,
+    priceSeries: '100\n110\n100\n110',
+  });
+  const noBand = computeRide({
+    entry: 105,
+    maxFel: 2,
+    rr: 2,
+    grav: 105,
+    priceSeries: '100\n110\n100\n110',
+  });
+
+  const toEmpty = hedgeBandFade(on.hedge, empty.hedge);
+  assert.equal(toEmpty.fading, true);
+  assert.equal(toEmpty.fadingIn, false);
+  assert.equal(toEmpty.paper, true);
+  assert.equal(toEmpty.ms, HEDGE_FADE_MS);
+  assert.equal(toEmpty.sidePips.length, 2);
+  assert.equal(toEmpty.sidePips[0].kind, 'köp');
+  assert.equal(toEmpty.sidePips[0].at, on.hedge.kop.tp);
+  assert.equal(toEmpty.sidePips[1].kind, 'sälj');
+  assert.equal(toEmpty.sidePips[1].at, on.hedge.salj.tp);
+  assert.equal(toEmpty.sidePips[0].at, 110);
+  assert.equal(toEmpty.sidePips[1].at, 100);
+  assert.equal(toEmpty.midPip.at, 105);
+
+  assert.equal(hedgeBandFade(on.hedge, few.hedge).sidePips.length, 2);
+  assert.equal(hedgeBandFade(on.hedge, badBand.hedge).sidePips.length, 2);
+  assert.equal(hedgeBandFade(on.hedge, noBand.hedge).sidePips.length, 2);
+  assert.deepEqual(hedgeBandFade(on.hedge, on.hedge).sidePips, []);
+  assert.deepEqual(hedgeBandFade(empty.hedge, empty.hedge).sidePips, []);
+  assert.deepEqual(hedgeBandFade(few.hedge, empty.hedge).sidePips, []);
+  assert.deepEqual(emptyHedgeFade().sidePips, []);
+
+  const invented = hedgeBandFade({ proposed: true, ghosts: [], sidePips: [] }, empty.hedge);
+  assert.equal(invented.fading, false);
+  assert.deepEqual(invented.sidePips, []);
+
+  const noSides = hedgeBandFade(
+    { proposed: true, ghosts: on.hedge.ghosts, sidePips: [] },
+    empty.hedge,
+  );
+  assert.equal(noSides.fading, true);
+  assert.deepEqual(noSides.sidePips, []);
+
+  const fadeHtml = renderPlayArena(empty, { hedgeFade: toEmpty });
+  assert.match(fadeHtml, /data-hedge-fade="1"/);
+  assert.match(fadeHtml, /data-hedge-side-fade="1"/);
+  assert.match(fadeHtml, /data-hedge-side-pips="1"/);
+  assert.match(fadeHtml, /has-hedge-fade/);
+  assert.match(fadeHtml, /has-hedge-side-pips/);
+  assert.match(fadeHtml, /has-hedge-side-fade/);
+  assert.match(fadeHtml, /is-hedge-fade/);
+  assert.match(fadeHtml, /data-hedge-side-pip="köp"/);
+  assert.match(fadeHtml, /data-hedge-side-pip="sälj"/);
+  assert.match(fadeHtml, /rider-hedge-side-pip is-kop/);
+  assert.match(fadeHtml, /rider-hedge-side-pip is-salj/);
+  assert.equal((fadeHtml.match(/rider-hedge-side-pip/g) || []).length, 2);
+  assert.match(fadeHtml, /data-hedge-mid-pip="1"/);
+  assert.match(fadeHtml, /data-freq-saknas="1"/);
+  assert.match(fadeHtml, />saknas</);
+  assert.match(fadeHtml, /--hedge-fade-ms:1100ms/);
+  assert.ok(!/<button/i.test(fadeHtml));
+  assert.ok(!/<dialog/i.test(fadeHtml));
+  assert.doesNotMatch(fadeHtml, /P&L|pnl/);
+  assert.equal(LIVE_LOCKED, true);
+
+  const quietHtml = renderPlayArena(empty);
+  assert.match(quietHtml, /data-hedge-fade="0"/);
+  assert.match(quietHtml, /data-hedge-side-fade="0"/);
+  assert.match(quietHtml, /data-hedge-side-pips="0"/);
+  assert.ok(!/has-hedge-side-fade/.test(quietHtml));
+  assert.ok(!/data-hedge-side-pip=/.test(quietHtml));
+  assert.ok(!/rider-hedge-side-pip/.test(quietHtml));
+  assert.match(quietHtml, /data-freq-saknas="1"/);
+
+  const fewHtml = renderPlayArena(few, { hedgeFade: hedgeBandFade(few.hedge, empty.hedge) });
+  assert.match(fewHtml, /data-hedge-side-fade="0"/);
+  assert.match(fewHtml, /data-hedge-side-pips="0"/);
+  assert.ok(!/rider-hedge-side-pip/.test(fewHtml));
+  assert.match(fewHtml, /data-freq-progress="1"/);
+
+  const onQuiet = renderPlayArena(on);
+  assert.match(onQuiet, /data-hedge-side-pips="1"/);
+  assert.match(onQuiet, /data-hedge-side-fade="0"/);
+  assert.ok(!/has-hedge-side-fade/.test(onQuiet));
 });
 
 test('tom-arena dry-run: W/S/F/[ ]/Space flyttar silhuett utan påhittade priser', () => {
