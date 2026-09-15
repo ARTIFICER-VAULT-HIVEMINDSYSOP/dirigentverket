@@ -13,8 +13,9 @@
 1. Öppna `kundjamforelse-verktyg.html`
 2. Mata: namn, id, varumärke, insatt, saldo, valuta, start-antagande (valfritt), markera nivå, datum
 3. %-ökning och Brons/Silver/Guld-illustration räknas automatiskt
-4. **Exportera PDF** → Skriv ut → Spara som PDF
-5. Utkast tills ÖB ja att skicka
+4. Valfritt: kryssa «Visa handelskredit-överenskommelse». Mål-saldo default = markerad nivå. IPO-notis valfri (en rad).
+5. **Exportera PDF** → Skriv ut → Spara som PDF
+6. Utkast tills ÖB ja att skicka. Ingen utlovad avkastning. Tom cell visar — (regeln tom = saknas, hitta inte på).
 
 ## Platshållare (manuell mall)
 

@@ -237,7 +237,6 @@
       const ipoLine = ipo
         ? ('Vid noteringar får du förtur. ' + ipo + ' En notering är inte ett löfte om avkastning.')
         : 'Vid noteringar får du förtur. Kapital och skydd är på plats så du kan gå in när fönstret är öppet. En notering är inte ett löfte om avkastning.';
-      const unit = valuta === 'USD' ? 'dollar' : (valuta === 'EUR' ? 'euro' : valuta);
       avtalHtml =
         '<div class="avtal">' +
         '<p class="brand">Kapital &amp; Strategi AB · Intern överenskommelse</p>' +
@@ -319,7 +318,7 @@
 
   $('btnRender').addEventListener('click', render);
   $('visaAvtal').addEventListener('change', render);
-  ['namn','kid','brand','insatt','saldo','valuta','startant','highlight','datum'].forEach((id) => {
+  ['namn','kid','brand','insatt','saldo','valuta','startant','highlight','datum','avtalMal','ipoNotis'].forEach((id) => {
     $(id).addEventListener('input', render);
     $(id).addEventListener('change', render);
   });
