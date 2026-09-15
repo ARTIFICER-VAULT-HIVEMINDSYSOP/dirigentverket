@@ -155,7 +155,7 @@ export function renderPlayArena(ride, play = {}) {
       })
       .join('');
     return `<div class="rider-play is-empty rider-bit is-dry-run" data-rider-play data-bit="32" data-dry-run="1" role="status"
-      data-freq-pip="${ride?.hedge?.freqPip ? '1' : '0'}" data-freq-saknas="${!ride || !ride.hedge || ride.hedge.saknas ? '1' : '0'}" data-freq-progress="${ride?.hedge?.freqProgress ? '1' : '0'}" data-hedge-ghost="0" data-hedge-band="0" data-hedge-mid-pip="0" data-hedge-fade="0" data-hedge-fade-in="0" data-hedge-mid-pulse="0" data-hedge-side-pips="0" data-hedge-side-fade="0" data-hedge-side-fade-in="0"
+      data-freq-pip="${ride?.hedge?.freqPip ? '1' : '0'}" data-freq-saknas="${!ride || !ride.hedge || ride.hedge.saknas ? '1' : '0'}" data-freq-progress="${ride?.hedge?.freqProgress ? '1' : '0'}" data-hedge-ghost="0" data-hedge-band="0" data-hedge-mid-pip="0" data-hedge-fade="0" data-hedge-fade-in="0" data-hedge-mid-pulse="0" data-hedge-side-pips="0" data-hedge-side-fade="0" data-hedge-side-fade-in="0" data-hedge-side-pulse="0"
       data-leverage="${lev}" data-speed="${speed}" data-lens="${lens}" data-rail="${rail}" data-sit="${sit}"
       style="--rider-speed:${speed};--rider-lens:${lens};--rider-coast-ms:${coastPeriodMs(lev)}ms;">
       ${renderScanlines()}
@@ -181,6 +181,7 @@ export function renderPlayArena(ride, play = {}) {
   const fadeGhosts = fade && !fadeIn ? fade.ghosts || [] : [];
   const pulse = play.hedgePulse && play.hedgePulse.pulsing && !fadeIn ? play.hedgePulse : null;
   const pulseAt = pulse && pulse.midPip != null ? Number(pulse.midPip.at) : null;
+  const pulseSides = pulse && Array.isArray(pulse.sidePips) ? pulse.sidePips : [];
   const prices = [
     ride.tp,
     ride.sl,
@@ -233,6 +234,16 @@ export function renderPlayArena(ride, play = {}) {
           label: p.kind,
           hedgeSidePip: p.kind,
           hedgeFadeIn: fadeIn,
+          hedgeSidePulse: Boolean(
+            pulse &&
+              pulseSides.some(
+                (sp) =>
+                  sp &&
+                  sp.kind === p.kind &&
+                  Number.isFinite(Number(sp.at)) &&
+                  Number(sp.at) === Number(p.at),
+              ),
+          ),
         });
       }
     }
@@ -273,6 +284,7 @@ export function renderPlayArena(ride, play = {}) {
       const hedgeFadeAttr = row.hedgeFade ? ' data-hedge-fade="1"' : '';
       const hedgeFadeInAttr = row.hedgeFadeIn ? ' data-hedge-fade-in="1"' : '';
       const hedgePulseAttr = row.hedgeMidPulse ? ' data-hedge-mid-pulse="1"' : '';
+      const hedgeSidePulseAttr = row.hedgeSidePulse ? ' data-hedge-side-pulse="1"' : '';
       const hedgeSideAttr = row.hedgeSidePip
         ? ` data-hedge-side-pip="${escapeHtml(row.hedgeSidePip)}"`
         : '';
@@ -287,10 +299,11 @@ export function renderPlayArena(ride, play = {}) {
         row.hedgeFade ? 'is-hedge-fade' : '',
         row.hedgeFadeIn ? 'is-hedge-fade-in' : '',
         row.hedgeMidPulse ? 'is-hedge-mid-pulse' : '',
+        row.hedgeSidePulse ? 'is-hedge-side-pulse' : '',
       ]
         .filter(Boolean)
         .join(' ');
-      return `<div class="${cls}" ${railAttr}${hedgeRailAttr}${hedgeMidAttr}${hedgeFadeAttr}${hedgeFadeInAttr}${hedgePulseAttr}${hedgeSideAttr} data-top="${top}%" style="top:${top}%">
+      return `<div class="${cls}" ${railAttr}${hedgeRailAttr}${hedgeMidAttr}${hedgeFadeAttr}${hedgeFadeInAttr}${hedgePulseAttr}${hedgeSidePulseAttr}${hedgeSideAttr} data-top="${top}%" style="top:${top}%">
         <span class="rider-mark-label">${escapeHtml(row.label)}</span>
         <span class="rider-mark-line">${
           row.hedgeRail
@@ -375,10 +388,30 @@ export function renderPlayArena(ride, play = {}) {
   const fadeOn = Boolean(fade && !fadeIn && fadeGhosts.length);
   const fadeInOn = Boolean(fadeIn && hedgeOn && ghostOn);
   const pulseOn = Boolean(pulse && midPipOn && Number.isFinite(pulseAt));
+  const rideSides = hedgeOn && ride.hedge.sidePips ? ride.hedge.sidePips : [];
+  const sidePulseOn = Boolean(
+    pulse &&
+      sidePipsOn &&
+      rideSides.length === 2 &&
+      pulseSides.length === 2 &&
+      rideSides.every(
+        (p) =>
+          p &&
+          (p.kind === 'köp' || p.kind === 'sälj') &&
+          Number.isFinite(Number(p.at)) &&
+          pulseSides.some(
+            (sp) =>
+              sp &&
+              sp.kind === p.kind &&
+              Number.isFinite(Number(sp.at)) &&
+              Number(sp.at) === Number(p.at),
+          ),
+      ),
+  );
   const fadeMs = fade && fade.ms != null ? fade.ms : HEDGE_FADE_MS;
   const pulseMs = pulse && pulse.ms != null ? pulse.ms : HEDGE_MID_PULSE_MS;
-  return `<div class="rider-play rider-bit is-looking ${jumped ? 'has-hop' : 'has-hold'}${trailed ? ' has-trail' : ''}${rokadOn ? ' has-rokad' : ''}${hedgeOn ? ' has-hedge' : ''}${fadeOn ? ' has-hedge-fade' : ''}${fadeInOn ? ' has-hedge-fade-in' : ''}${pulseOn ? ' has-hedge-mid-pulse' : ''}${sidePipsOn ? ' has-hedge-side-pips' : ''}${sideFadeOn ? ' has-hedge-side-fade' : ''}${sideFadeInOn ? ' has-hedge-side-fade-in' : ''}" data-rider-play data-bit="32" data-look="1"
-      data-hop-tell="${tell ? '1' : '0'}" data-trail-tell="${trailed ? '1' : '0'}" data-rokad-tell="${rokadOn ? '1' : '0'}" data-hedge-tell="${hedgeOn ? '1' : '0'}" data-freq-pip="${ride.hedge && ride.hedge.freqPip ? '1' : '0'}" data-freq-saknas="${ride.hedge && ride.hedge.saknas ? '1' : '0'}" data-freq-progress="${ride.hedge && ride.hedge.freqProgress ? '1' : '0'}" data-hedge-ghost="${ghostOn ? '1' : '0'}" data-hedge-band="${bandOn ? '1' : '0'}" data-hedge-mid-pip="${midPipOn ? '1' : '0'}" data-hedge-fade="${fadeOn ? '1' : '0'}" data-hedge-fade-in="${fadeInOn ? '1' : '0'}" data-hedge-mid-pulse="${pulseOn ? '1' : '0'}" data-hedge-side-pips="${sidePipsOn ? '1' : '0'}" data-hedge-side-fade="${sideFadeOn ? '1' : '0'}" data-hedge-side-fade-in="${sideFadeInOn ? '1' : '0'}"
+  return `<div class="rider-play rider-bit is-looking ${jumped ? 'has-hop' : 'has-hold'}${trailed ? ' has-trail' : ''}${rokadOn ? ' has-rokad' : ''}${hedgeOn ? ' has-hedge' : ''}${fadeOn ? ' has-hedge-fade' : ''}${fadeInOn ? ' has-hedge-fade-in' : ''}${pulseOn ? ' has-hedge-mid-pulse' : ''}${sidePipsOn ? ' has-hedge-side-pips' : ''}${sideFadeOn ? ' has-hedge-side-fade' : ''}${sideFadeInOn ? ' has-hedge-side-fade-in' : ''}${sidePulseOn ? ' has-hedge-side-pulse' : ''}" data-rider-play data-bit="32" data-look="1"
+      data-hop-tell="${tell ? '1' : '0'}" data-trail-tell="${trailed ? '1' : '0'}" data-rokad-tell="${rokadOn ? '1' : '0'}" data-hedge-tell="${hedgeOn ? '1' : '0'}" data-freq-pip="${ride.hedge && ride.hedge.freqPip ? '1' : '0'}" data-freq-saknas="${ride.hedge && ride.hedge.saknas ? '1' : '0'}" data-freq-progress="${ride.hedge && ride.hedge.freqProgress ? '1' : '0'}" data-hedge-ghost="${ghostOn ? '1' : '0'}" data-hedge-band="${bandOn ? '1' : '0'}" data-hedge-mid-pip="${midPipOn ? '1' : '0'}" data-hedge-fade="${fadeOn ? '1' : '0'}" data-hedge-fade-in="${fadeInOn ? '1' : '0'}" data-hedge-mid-pulse="${pulseOn ? '1' : '0'}" data-hedge-side-pips="${sidePipsOn ? '1' : '0'}" data-hedge-side-fade="${sideFadeOn ? '1' : '0'}" data-hedge-side-fade-in="${sideFadeInOn ? '1' : '0'}" data-hedge-side-pulse="${sidePulseOn ? '1' : '0'}"
       data-side="${escapeHtml(ride.input?.side || 'köp')}" data-rokad-from="${escapeHtml(ride.rokad?.from || ride.input?.side || 'köp')}" data-rokad-to="${escapeHtml(ride.rokad?.to || ride.input?.side || 'köp')}"
       data-leverage="${lev}" data-speed="${speed}" data-lens="${lens}" data-rail="${rail}" data-sit="${sit}"
       style="--rider-speed:${speed};--rider-lens:${lens};--rider-coast-ms:${coastMs}ms;--hop-window:${HOP_WINDOW_MS}ms;--hedge-fade-ms:${fadeMs}ms;--hedge-pulse-ms:${pulseMs}ms;"

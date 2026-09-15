@@ -38,6 +38,7 @@ import {
   hedgeBandFadeIn,
   emptyHedgeFade,
   hedgeMidPulse,
+  hedgeTwinPulse,
   emptyHedgePulse,
   LIVE_LOCKED,
   hasCompletedFirstRide,
@@ -408,9 +409,16 @@ root.addEventListener('submit', (ev) => {
       riderPlay = { ...riderPlay, hedgeFade: { ...hedgeFade, until }, hedgePulse: emptyHedgePulse() };
       window.setTimeout(() => {
         if (!riderPlay.hedgeFade || riderPlay.hedgeFade.until !== until) return;
-        const pulse = hedgeFade.fadingIn
-          ? hedgeMidPulse(hedgeFade, riderResult && riderResult.hedge)
-          : emptyHedgePulse();
+        const nextHedge = riderResult && riderResult.hedge;
+        const midPulse = hedgeFade.fadingIn ? hedgeMidPulse(hedgeFade, nextHedge) : emptyHedgePulse();
+        const twinPulse = hedgeFade.fadingIn ? hedgeTwinPulse(hedgeFade, nextHedge) : emptyHedgePulse();
+        const pulse = {
+          pulsing: Boolean(midPulse.pulsing || twinPulse.pulsing),
+          midPip: midPulse.midPip,
+          sidePips: twinPulse.sidePips || [],
+          ms: midPulse.pulsing ? midPulse.ms : twinPulse.ms,
+          paper: true,
+        };
         riderPlay = { ...riderPlay, hedgeFade: emptyHedgeFade(), hedgePulse: pulse };
         if (pulse.pulsing) {
           const pulseUntil = Date.now() + pulse.ms;

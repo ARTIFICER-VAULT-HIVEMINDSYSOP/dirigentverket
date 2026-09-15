@@ -611,6 +611,7 @@ export function emptyHedgePulse() {
   return {
     pulsing: false,
     midPip: null,
+    sidePips: [],
     ms: HEDGE_MID_PULSE_MS,
     paper: true,
   };
@@ -630,6 +631,28 @@ export function hedgeMidPulse(fade, next) {
   return {
     pulsing: true,
     midPip,
+    sidePips: [],
+    ms: HEDGE_MID_PULSE_MS,
+    paper: true,
+  };
+}
+
+/**
+ * Soft one-shot twin side-pip pulse only after fade-in saknas→giltig.
+ * Same 32-bit ease-out family as mitt-pip pulse. Copies next kop.tp / salj.tp — never invents.
+ * Tom serie / saknas-band / under grind / !proposed = no twin pulse.
+ */
+export function hedgeTwinPulse(fade, next) {
+  const hold = emptyHedgePulse();
+  if (!fade || !fade.fading || !fade.fadingIn) return hold;
+  if (!next || !next.proposed) return hold;
+  const sidePips = copyKnownSidePips(next.sidePips);
+  if (sidePips.length !== 2) return hold;
+  if (!sidePips.some((p) => p.kind === 'köp') || !sidePips.some((p) => p.kind === 'sälj')) return hold;
+  return {
+    pulsing: true,
+    midPip: null,
+    sidePips,
     ms: HEDGE_MID_PULSE_MS,
     paper: true,
   };

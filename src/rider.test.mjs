@@ -42,6 +42,7 @@ import {
   hedgeBandFadeIn,
   emptyHedgeFade,
   hedgeMidPulse,
+  hedgeTwinPulse,
   emptyHedgePulse,
   hedgeSidePips,
   HEDGE_FADE_MS,
@@ -1440,6 +1441,7 @@ test('mitt-pip engångs-puls efter fade-in saknas→giltig; ingen puls under gri
   assert.equal(hedgeMidPulse(fadeIn, { proposed: true, ghosts: [] }).pulsing, false);
   assert.equal(emptyHedgePulse().pulsing, false);
   assert.equal(emptyHedgePulse().midPip, null);
+  assert.deepEqual(emptyHedgePulse().sidePips, []);
 
   const pulseHtml = renderPlayArena(on, { hedgePulse: pulse });
   assert.match(pulseHtml, /data-hedge-mid-pulse="1"/);
@@ -1448,6 +1450,8 @@ test('mitt-pip engångs-puls efter fade-in saknas→giltig; ingen puls under gri
   assert.match(pulseHtml, /data-hedge-mid-pip="1"/);
   assert.match(pulseHtml, /--hedge-pulse-ms:900ms/);
   assert.match(pulseHtml, /data-hedge-fade-in="0"/);
+  assert.match(pulseHtml, /data-hedge-side-pulse="0"/);
+  assert.ok(!/is-hedge-side-pulse/.test(pulseHtml));
   assert.ok(!/<button/i.test(pulseHtml));
   assert.ok(!/<dialog/i.test(pulseHtml));
   assert.doesNotMatch(pulseHtml, /P&L|pnl/);
@@ -1789,6 +1793,122 @@ test('twin side-pips fade-in när mitt-hedge går saknas→giltig; ingen påhitt
   assert.match(emptyHtml, /data-hedge-side-pips="0"/);
   assert.ok(!/rider-hedge-side-pip/.test(emptyHtml));
   assert.match(emptyHtml, /data-freq-saknas="1"/);
+});
+
+test('twin side-pip engångs-puls efter fade-in saknas→giltig; ingen puls under grind', () => {
+  const on = computeRide({
+    entry: 105,
+    maxFel: 2,
+    rr: 2,
+    grav: 105,
+    bbLower: 100,
+    bbUpper: 110,
+    priceSeries: '100\n110\n100\n110',
+  });
+  const empty = computeRide({ entry: 100, maxFel: 2, rr: 2, grav: 100 });
+  const few = computeRide({
+    entry: 105,
+    maxFel: 2,
+    rr: 2,
+    grav: 105,
+    bbLower: 100,
+    bbUpper: 110,
+    priceSeries: '100\n110\n100',
+  });
+  const badBand = computeRide({
+    entry: 105,
+    maxFel: 2,
+    rr: 2,
+    grav: 105,
+    bbLower: 110,
+    bbUpper: 100,
+    priceSeries: '100\n110\n100\n110',
+  });
+
+  const fadeIn = hedgeBandFadeIn(empty.hedge, on.hedge);
+  const pulse = hedgeTwinPulse(fadeIn, on.hedge);
+  assert.equal(pulse.pulsing, true);
+  assert.equal(pulse.paper, true);
+  assert.equal(pulse.ms, HEDGE_MID_PULSE_MS);
+  assert.equal(pulse.sidePips.length, 2);
+  assert.equal(pulse.sidePips[0].kind, 'köp');
+  assert.equal(pulse.sidePips[0].at, on.hedge.kop.tp);
+  assert.equal(pulse.sidePips[1].kind, 'sälj');
+  assert.equal(pulse.sidePips[1].at, on.hedge.salj.tp);
+  assert.equal(pulse.sidePips[0].at, 110);
+  assert.equal(pulse.sidePips[1].at, 100);
+  assert.equal(pulse.midPip, null);
+
+  assert.equal(hedgeTwinPulse(hedgeBandFadeIn(few.hedge, on.hedge), on.hedge).pulsing, true);
+  assert.equal(hedgeTwinPulse(null, on.hedge).pulsing, false);
+  assert.equal(hedgeTwinPulse(emptyHedgeFade(), on.hedge).pulsing, false);
+  assert.equal(hedgeTwinPulse(hedgeBandFade(on.hedge, empty.hedge), empty.hedge).pulsing, false);
+  assert.equal(hedgeTwinPulse(fadeIn, few.hedge).pulsing, false);
+  assert.equal(hedgeTwinPulse(fadeIn, empty.hedge).pulsing, false);
+  assert.equal(hedgeTwinPulse(fadeIn, badBand.hedge).pulsing, false);
+  assert.equal(hedgeTwinPulse(fadeIn, { proposed: true, sidePips: [] }).pulsing, false);
+  assert.equal(hedgeTwinPulse(fadeIn, { proposed: true, sidePips: [{ kind: 'köp', at: 110 }] }).pulsing, false);
+  assert.deepEqual(emptyHedgePulse().sidePips, []);
+
+  const pulseHtml = renderPlayArena(on, { hedgePulse: pulse });
+  assert.match(pulseHtml, /data-hedge-side-pulse="1"/);
+  assert.match(pulseHtml, /is-hedge-side-pulse/);
+  assert.match(pulseHtml, /has-hedge-side-pulse/);
+  assert.match(pulseHtml, /data-hedge-side-pips="1"/);
+  assert.match(pulseHtml, /data-hedge-side-pip="köp"/);
+  assert.match(pulseHtml, /data-hedge-side-pip="sälj"/);
+  assert.match(pulseHtml, /rider-hedge-side-pip is-kop/);
+  assert.match(pulseHtml, /rider-hedge-side-pip is-salj/);
+  assert.equal((pulseHtml.match(/is-hedge-side-pulse/g) || []).length, 2);
+  assert.match(pulseHtml, /--hedge-pulse-ms:900ms/);
+  assert.match(pulseHtml, /data-hedge-fade-in="0"/);
+  assert.match(pulseHtml, /data-hedge-side-fade-in="0"/);
+  assert.match(pulseHtml, /data-hedge-mid-pulse="0"/);
+  assert.ok(!/is-hedge-mid-pulse/.test(pulseHtml));
+  assert.ok(!/<button/i.test(pulseHtml));
+  assert.ok(!/<dialog/i.test(pulseHtml));
+  assert.doesNotMatch(pulseHtml, /P&L|pnl/);
+  assert.equal(LIVE_LOCKED, true);
+
+  const both = {
+    pulsing: true,
+    midPip: hedgeMidPulse(fadeIn, on.hedge).midPip,
+    sidePips: pulse.sidePips,
+    ms: HEDGE_MID_PULSE_MS,
+    paper: true,
+  };
+  const bothHtml = renderPlayArena(on, { hedgePulse: both });
+  assert.match(bothHtml, /data-hedge-mid-pulse="1"/);
+  assert.match(bothHtml, /data-hedge-side-pulse="1"/);
+  assert.match(bothHtml, /has-hedge-mid-pulse/);
+  assert.match(bothHtml, /has-hedge-side-pulse/);
+
+  const duringFadeIn = renderPlayArena(on, { hedgeFade: fadeIn, hedgePulse: pulse });
+  assert.match(duringFadeIn, /data-hedge-fade-in="1"/);
+  assert.match(duringFadeIn, /data-hedge-side-fade-in="1"/);
+  assert.match(duringFadeIn, /data-hedge-side-pulse="0"/);
+  assert.ok(!/is-hedge-side-pulse/.test(duringFadeIn));
+
+  const quietOn = renderPlayArena(on);
+  assert.match(quietOn, /data-hedge-side-pulse="0"/);
+  assert.ok(!/is-hedge-side-pulse/.test(quietOn));
+  assert.match(quietOn, /data-hedge-side-pips="1"/);
+
+  const fewHtml = renderPlayArena(few, { hedgePulse: hedgeTwinPulse(fadeIn, few.hedge) });
+  assert.match(fewHtml, /data-hedge-side-pulse="0"/);
+  assert.ok(!/is-hedge-side-pulse/.test(fewHtml));
+  assert.match(fewHtml, /data-freq-progress="1"/);
+
+  const emptyHtml = renderPlayArena(empty, { hedgePulse: hedgeTwinPulse(fadeIn, empty.hedge) });
+  assert.match(emptyHtml, /data-hedge-side-pulse="0"/);
+  assert.ok(!/is-hedge-side-pulse/.test(emptyHtml));
+  assert.match(emptyHtml, /data-freq-saknas="1"/);
+
+  const inventedHtml = renderPlayArena(on, {
+    hedgePulse: hedgeTwinPulse(fadeIn, { proposed: true, sidePips: [] }),
+  });
+  assert.match(inventedHtml, /data-hedge-side-pulse="0"/);
+  assert.ok(!/is-hedge-side-pulse/.test(inventedHtml));
 });
 
 test('tom-arena dry-run: W/S/F/[ ]/Space flyttar silhuett utan påhittade priser', () => {
