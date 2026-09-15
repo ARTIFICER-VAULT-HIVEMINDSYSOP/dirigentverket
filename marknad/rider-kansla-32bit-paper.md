@@ -59,8 +59,9 @@ Gate `hasCompletedFirstRide` / `RIDER_FIRST_RIDE_KEY`, «små belopp»-hint, imp
 **2026-09-15:** PR #8 mergad till main `c56dbd3`. Mitt-hedge paper UX ovan är i main. `LIVE_LOCKED` true. Ingen live-order. Ingen kurs-hämtning.
 
 ## Ny draft — twin fade-in saknas→giltig
-**15 sep (ny draft från main, inte reopen #8):** mjuk twin side-pip fade-in när mitt-hedge går saknas→giltig / blir proposed. Samma fade-tid som räls fade-in och twin fade-out (`HEDGE_FADE_MS` 1100). Bara befintliga planfält (`kop.tp` / `salj.tp`) — inga påhittade nivåer. Tom serie / saknas-band / under grind / !proposed = inga twin-pips. Inga nya play-knappar. Paper. Väntar namngivet ÖB merge-ja. No live/send/merge.
+**15 sep (draft PR #13 från main, inte reopen #8):** mjuk twin side-pip fade-in när mitt-hedge går saknas→giltig / blir proposed. Samma fade-tid som räls fade-in och twin fade-out (`HEDGE_FADE_MS` 1100). Bara befintliga planfält (`kop.tp` / `salj.tp`) — inga påhittade nivåer. Tom serie / saknas-band / under grind / !proposed = inga twin-pips. Inga nya play-knappar. Paper. Väntar namngivet ÖB merge-ja. No live/send/merge.
 
+https://github.com/ARTIFICER-VAULT-HIVEMINDSYSOP/dirigentverket/pull/13
 https://github.com/ARTIFICER-VAULT-HIVEMINDSYSOP/dirigentverket/pull/8
 https://github.com/ARTIFICER-VAULT-HIVEMINDSYSOP/dirigentverket/pull/4
 
