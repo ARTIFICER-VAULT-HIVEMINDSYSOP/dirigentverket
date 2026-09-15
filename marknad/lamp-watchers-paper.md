@@ -4,6 +4,8 @@
 
 **Fönster:** kvällstid per ÖB 9 sep 2026. Inte dagtid R&D.
 
+**Synk 15 sep kväll:** merge `origin/main` (`82b8e8e`, PR #8 mergad). `LIVE_LOCKED` kvar. Draft. Ingen merge.
+
 ## Vad som landat
 
 Paper-skinn på befintlig Artificer-yta (`#/robot`) i Dirigentverket-nexus. Inte en sidapp.

@@ -1,12 +1,12 @@
 # ÖB — ofärdigt (påminns vardagar)
 
-Uppdaterad 2026-09-11. Bocka av när bevis finns. Lampan = **kvällstid**.
+Uppdaterad 2026-09-15. Bocka av när bevis finns. Lampan = **kvällstid**.
 
 ## Du (ÖB) måste
 
 - [ ] DNS: `kapitalstrategi.com` → GitHub Pages (CNAME www + apex) — sedan HTTPS/200
 - [x] PR #4 mergad (Trade Rider) `a8ea411`
-- [ ] Namngivet **merge-ja** PR #8 (mitt-hedge/rokad) när du vill
+- [x] PR #8 mergad (mitt-hedge/rokad) `c56dbd3` 2026-09-15
 - [ ] Live-order (bara efter ja på namngivna rader): LMT 4%, Klein USDCHF+EURCHF, North 3+3, ROBOT 1% NI
 - [ ] Intro-mejl: riktig inloggningslänk (OTP `OTP123456` redan satt)
 - [ ] Bjuda in `william@kapitalstrategi.com` till Cursor

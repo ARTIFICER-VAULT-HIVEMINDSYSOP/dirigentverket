@@ -24,15 +24,37 @@ Gate `hasCompletedFirstRide` / `RIDER_FIRST_RIDE_KEY`, «små belopp»-hint, imp
 
 **13:39 Sthlm 10 sep (ständig-process):** Draft PR #8 mitt-hedge — mjuk Rider mitt-hedge-tell redan på branchen (`c4c5df4`); update-branch mot main klar (0 behind). Cloud follow-up: frekvens-pip + saknas-band empty-tell (samma draft, ingen merge). Lamp/WATCHERS-skin = bara kvällstid. Merge PR #8 väntar namngivet ÖB-ja.
 
+**10 sep eftermiddag (draft PR #8, inte mergad):** frekvens-pip + saknas-band landat på branchen (`2a396fa`). Pip när svängfrekvens är mätbar. Tom serie eller ogiltigt band = saknas (inga påhittade mitt-markörer). Ghost-silhuett för köp+sälj i mitten bara när banden är ifyllda. Väntar namngivet ÖB merge-ja.
+
 **09:42 Sthlm 11 sep (ständig-process):** Magasin 8765 HTTP 200. PR #8 + #11 update-branch → 0 behind. Cloud follow-up bc-7a6a7541: mjuk band-silhuett + mitt-pip när mitt-hedge-plan finns (samma draft, ingen merge). PR #9 lamp CONFLICTING — kväll. PII-fri backup `/workspace/backups/dirigentverket-verktyg-kod-20260911-0743.tar.gz`. Merge väntar namngivet ja. No live/send/merge.
 
 **11 sep förmiddag (draft PR #8, inte mergad):** band-silhuett + mitt-pip landat (`8bc4fcc`). Giltig mitt-hedge-plan ritar svaga övre/nedre räls och mitt-pip (entry) på `#/rider`. Tom serie / saknas-band = ingen plan. Väntar namngivet ÖB merge-ja.
 
 **13:38 Sthlm 11 sep (ständig-process):** Magasin 8765 HTTP 200. PR #8 CLEAN/MERGEABLE, 0 behind (14 ahead). PR #11 update-branch. Status synkad. Cloud follow-up: mjuk band-fade när mitt-hedge går giltig→saknas (samma draft, ingen merge). Lamp = kväll. Merge väntar namngivet ja. No live/send/merge.
 
+**11 sep eftermiddag (draft PR #8, inte mergad):** band-fade landat. Giltig mitt-hedge som blir ogiltig (tom serie, saknas-band, övre≤nedre, frekvens-grind fail) tonar ut övre/nedre räls + mitt-pip i stället för abrupt cut. Empty-tell/saknas-pip kontinuerlig. Inga nya play-knappar. Paper. Väntar namngivet ÖB merge-ja.
+
 **18:02 Sthlm 11 sep (ständig-process):** Magasin 8765 HTTP 200. PR #8 CLEAN/MERGEABLE, 0 behind (16 ahead). Band-fade giltig→saknas landat (`cb2badc`). Status synkad. Cloud follow-up: mjuk frekvens-progress-pip mot minFrequency innan plan (samma draft, ingen merge). PII-fri backup `/workspace/backups/dirigentverket-verktyg-kod-20260911-1804.tar.gz`. PR #9 lamp CONFLICTING — kväll rebase. Merge väntar namngivet ja. No live/send/merge.
 
-**Kväll 11 sep (PR #9):** lamp-branch synkad mot main. Draft kvar. `LIVE_LOCKED`. Ingen merge.
+**11 sep kväll (draft PR #8, inte mergad):** frekvens-progress-pip landat. Räknade svängar under minFrequency = mjuk process-pip mot grind (plan saknas ännu). Tom serie / ogiltigt band / övre≤nedre = ingen progress-pip (saknas). När grind nås ger progress plats åt band-räls + mitt-pip. Inga dubbla mitt-markörer. Paper. Väntar namngivet ÖB merge-ja.
+
+**09:37 Sthlm 14 sep (ständig-process):** Magasin 8765 HTTP 200. PR #8 CLEAN/MERGEABLE, 0 behind (~18 ahead); frekvens-progress-pip redan landat (`3b3dc5c`). PR #11 update-branch → 0 behind. Cloud bc-61a38279: mjuk fade-in saknas→giltig för mitt-hedge-räls/mitt-pip (samma draft, ingen merge). PII-fri backup `/workspace/backups/dirigentverket-verktyg-kod-20260914-0939.tar.gz`. PR #9 lamp = kväll. Merge väntar namngivet ja. No live/send/merge.
+
+**14 sep ~09:37 Sthlm (ständig-process):** fade-in saknas→giltig landat. När frekvens-grind nås + giltiga band tonar övre/nedre räls + mitt-pip in (samma fade-tid som giltig→saknas, omvänd). Tom serie / saknas-band / övre≤nedre / under grind = ingen fade-in. PR #8 fortfarande draft. Merge väntar namngivet ja. No live/send/merge.
+
+**14:02 Sthlm 14 sep (ständig-process):** Magasin 8765 HTTP 200. PR #8 CLEAN/MERGEABLE, 0 behind (20 ahead); fade-in saknas→giltig landat (`66c6b7f`). PR #11 update-branch → 0 behind. Cloud follow-up: mjuk engångs-puls på mitt-pip efter fade-in (samma draft, ingen merge). PII-fri backup eftermiddag. PR #9 lamp = kväll. Merge väntar namngivet ja. No live/send/merge.
+
+**14 sep eftermiddag (draft PR #8, inte mergad):** engångs-puls på mitt-pip efter fade-in saknas→giltig landat. Kort soft glow, sedan tyst. Tom serie / saknas-band / under grind = ingen puls. Inga nya play-knappar. Paper. Väntar namngivet ÖB merge-ja.
+
+**17:42 Sthlm 14 sep (ständig-process):** Magasin 8765 HTTP 200. PR #8 CLEAN/MERGEABLE, 0 behind (22 ahead); engångs-puls på mitt-pip landat (`49db9a9`). PR #11 1 behind → update-branch. Cloud follow-up: mjuka twin side-pips för köp+sälj när mitt-hedge är proposed (samma draft, ingen merge; bara befintliga planfält, inga påhittade nivåer). PII-fri backup kväll. PR #9 lamp = kväll. Merge väntar namngivet ja. No live/send/merge.
+
+**14 sep kväll (draft PR #8, inte mergad):** twin side-pips landat. När mitt-hedge är proposed syns mjuka köp+sälj-pips på `kop.tp` (övre) och `salj.tp` (nedre). Entry stannar mitt-pip. Tom serie / saknas-band / under grind / !proposed = inga twin-pips. Inga nya play-knappar. Paper. Väntar namngivet ÖB merge-ja.
+
+**09:51 Sthlm 15 sep (ständig-process):** Magasin 8765 HTTP 200. PR #8 CLEAN/MERGEABLE, 0 behind (24 ahead); twin side-pips landat (`eceb9ff`). PR #11 0 behind. Cloud: mjuk twin-pip fade giltig→saknas (samma draft, ingen merge). PII-fri backup `/workspace/backups/dirigentverket-verktyg-kod-20260915-0654.tar.gz`. PR #9 lamp = kväll. Merge väntar namngivet ja. No live/send/merge.
+
+**15 sep morgon Europe/Sofia (draft PR #8, inte mergad):** twin-fade giltig→saknas landat. Twin side-pips (`eceb9ff`) tonar ut mjukt med räls/mitt-pip när planen blir saknas (samma fade-tid). Tom serie / saknas-band / under grind = inga twin-pips. Inga nya play-knappar. Paper. Väntar namngivet ÖB merge-ja.
+
+**Kväll 15 sep (PR #9):** lamp-branch synkad mot main (`82b8e8e`, PR #8 mergad `c56dbd3`). Konflikter i `robot.js` + rider-status lösta: `LIVE_LOCKED`/`paperLock` kvar, mitt-hedge/rokad från main behållen. Draft kvar. Ingen merge.
 
 https://github.com/ARTIFICER-VAULT-HIVEMINDSYSOP/dirigentverket/pull/8
 https://github.com/ARTIFICER-VAULT-HIVEMINDSYSOP/dirigentverket/pull/4
@@ -42,7 +64,7 @@ När ÖB öppnar `#/rider` ska det kännas så här, i den ordningen:
 1. Arena först — grafen syns innan någon formvägg.
 2. Process-hint syns mjukt (inte skrikig varning).
 3. W/S flyttar räls direkt; F fäster; hävstång 1–4× syns som fart/pip, inte textmur.
-4. Space = lins; hopp har tell; trail-tell syns bara på struktur; rokad-tell (vänd sida, volym −25 %, ÖB-gate) när paper-rokad finns; mitt-hedge-tell + frekvens-pip när serien räcker, saknas-pip när serie/band tomt; band-räls + mitt-pip bara när planen finns; band-fade när plan går giltig→saknas; inga nya play-knappar på ytan.
+4. Space = lins; hopp har tell; trail-tell syns bara på struktur; rokad-tell (vänd sida, volym −25 %, ÖB-gate) när paper-rokad finns; mitt-hedge-tell + frekvens-pip när serien räcker, saknas-pip när serie/band tomt; frekvens-progress-pip mot grind när svängar räknas men under minFrequency; band-räls + mitt-pip bara när planen finns; giltig→saknas tonar ut räls/pip (fade); saknas→giltig tonar in räls/pip; engångs-puls på mitt-pip efter fade-in; twin side-pips (köp mot taket, sälj mot golvet) när planen är proposed; twin side-pips tonar ut mjukt giltig→saknas (samma fade-tid som räls); inga nya play-knappar på ytan.
 5. En lyckad paper-ride krävs innan «små belopp» syns/öppnas.
 6. PAPER-badge sticky; live-knapp död.
 7. Tom arena = dry-run: silhuett rör sig före Räkna; tomma rutor stannar tomma.
