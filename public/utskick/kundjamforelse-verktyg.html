@@ -80,6 +80,31 @@
     .preview-wrap { background: transparent; border: 0; padding: 0; }
     .sheet { box-shadow: none; max-width: none; padding: 0; }
   }
+
+  .avtal {
+    margin-top: 16px; padding: 14px; border: 2px solid #c9a24a; border-radius: 12px;
+    background: #fffdf6; page-break-inside: avoid;
+  }
+  .avtal h2 { margin-top: 0; }
+  .avtal .grid3 {
+    display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin: 10px 0 12px;
+  }
+  .avtal .cell {
+    background: #1a1206; color: #f7eccf; border-radius: 8px; padding: 10px; text-align: center;
+  }
+  .avtal .cell .lbl { font: 600 8pt "Source Sans 3", sans-serif; letter-spacing: .08em; text-transform: uppercase; color: #d4b06a; }
+  .avtal .cell .val { font: 700 13pt Fraunces, serif; color: #f0d59a; margin-top: 4px; }
+  .avtal ol { margin: 8px 0 0; padding-left: 1.2em; font-size: 10.5pt; line-height: 1.4; }
+  .avtal ol li { margin-bottom: 8px; }
+  .avtal .sign {
+    margin-top: 14px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+    border-top: 1px solid #c9a24a; padding-top: 12px; font-size: 10pt;
+  }
+  .avtal .sign .line { border-bottom: 1px solid #8a7044; min-height: 28px; margin-top: 18px; }
+  .chkrow { display: flex; align-items: center; gap: .5rem; margin: .75rem 0 .25rem; }
+  .chkrow input { width: auto; }
+  .chkrow label { margin: 0; color: var(--ink); font-size: .85rem; }
+
 </style>
 </head>
 <body>
@@ -117,6 +142,15 @@
         <option value="silver">Silver</option>
         <option value="guld" selected>Guld</option>
       </select>
+      
+      <div class="chkrow">
+        <input type="checkbox" id="visaAvtal" />
+        <label for="visaAvtal">Visa handelskredit-överenskommelse</label>
+      </div>
+      <label for="avtalMal">Mål-saldo (tröskel, tal — tom = markerad nivå)</label>
+      <input id="avtalMal" type="number" step="0.01" min="0" placeholder="t.ex. 5000" />
+      <label for="ipoNotis">Notering / förtur (valfritt, en rad)</label>
+      <input id="ipoNotis" placeholder="t.ex. namngiven notering — ingen avkastningsgaranti" />
       <label for="datum">Datum</label>
       <input id="datum" type="date" />
       <div class="btns">
@@ -127,7 +161,7 @@
       <p class="hint">
         North-trösklar är låsta: Brons 5 000 € · Silver 25 000 € · Guld 50 000 €.
         %-ökning räknas automatiskt från insatt→saldo och speglas på trösklarna.
-        PDF = Skriv ut → Spara som PDF i dialogen.
+        PDF = Skriv ut → Spara som PDF i dialogen. Kryssa «Visa handelskredit-överenskommelse» för papperet (saldo → kredit → mål, fem punkter).
       </p>
     </aside>
     <main class="preview-wrap">
@@ -140,7 +174,7 @@
   const BRONS = 5000, SILVER = 25000, GULD = 50000;
   const $ = (id) => document.getElementById(id);
   function money(n, cur) {
-    if (!isFinite(n)) return 'saknas';
+    if (!isFinite(n)) return '—';
     const s = n.toLocaleString('sv-SE', { maximumFractionDigits: 2, minimumFractionDigits: 0 });
     return cur ? (cur === 'USD' ? '$' + s.replace(/\s/g, '\u202f') : s + ' ' + cur) : s;
   }
@@ -158,7 +192,7 @@
     const err = $('err');
     err.textContent = '';
     const namn = $('namn').value.trim() || 'Kund';
-    const kid = $('kid').value.trim() || 'saknas';
+    const kid = $('kid').value.trim() || '—';
     const brand = $('brand').value.trim() || 'North Investment';
     const insatt = parseFloat($('insatt').value);
     const saldo = parseFloat($('saldo').value);
@@ -188,6 +222,53 @@
         '<div>' + eur(thr) + '</div>' +
         '<div class="big">→ ca ' + eur(end) + '</div></div></div>';
     };
+
+
+    // Handelskredit-överenskommelse (mall: Lena Bronskonto-pappret)
+    let avtalHtml = '';
+    if ($('visaAvtal').checked) {
+      const thrMap = { brons: BRONS, silver: SILVER, guld: GULD };
+      const malRaw = parseFloat($('avtalMal').value);
+      const mal = (isFinite(malRaw) && malRaw > 0) ? malRaw : thrMap[hi];
+      const kredit = Math.max(0, mal - saldo);
+      const tierName = hi === 'brons' ? 'Brons' : (hi === 'silver' ? 'Silver' : 'Guld');
+      const fn = (namn.split(/\s+/)[0] || namn);
+      const ipo = $('ipoNotis').value.trim();
+      const ipoLine = ipo
+        ? ('Vid noteringar får du förtur. ' + ipo + ' En notering är inte ett löfte om avkastning.')
+        : 'Vid noteringar får du förtur. Kapital och skydd är på plats så du kan gå in när fönstret är öppet. En notering är inte ett löfte om avkastning.';
+      const unit = valuta === 'USD' ? 'dollar' : (valuta === 'EUR' ? 'euro' : valuta);
+      avtalHtml =
+        '<div class="avtal">' +
+        '<p class="brand">Kapital &amp; Strategi AB · Intern överenskommelse</p>' +
+        '<h2>' + namn + ' — ' + tierName + 'konto</h2>' +
+        '<p style="font-size:10.5pt;line-height:1.4;margin:0 0 10px">' + fn +
+        ', du har redan <strong>' + money(saldo, valuta) + '</strong> på kontot. Det är ditt. Till ' +
+        tierName.toLowerCase() + 'nivån på <strong>' + money(mal, valuta) +
+        '</strong> fattas <strong>' + money(kredit, valuta) +
+        '</strong>. Det beloppet är inte ett krav på mer egna pengar. Det är en <strong>handelskredit</strong> — så att du kan gå in med mer kapacitet, och med lägre egen risk.</p>' +
+        '<div class="grid3">' +
+        '<div class="cell"><div class="lbl">Saldo</div><div class="val">' + money(saldo, valuta) + '</div></div>' +
+        '<div class="cell"><div class="lbl">Handelskredit</div><div class="val">' + money(kredit, valuta) + '</div></div>' +
+        '<div class="cell"><div class="lbl">Mål · ' + tierName + '</div><div class="val">' + money(mal, valuta) + '</div></div>' +
+        '</div>' +
+        '<p style="font-size:10pt;margin:0 0 8px"><strong>Vad pappret är till för</strong><br>' +
+        'Det här är inte till för att låsa dig. Det är till för att du ska veta vad som skyddar dig: krediten, rätten att backa, hur risken styrs, förturen i noteringar och tillgången till poolen.</p>' +
+        '<ol>' +
+        '<li><strong>Handelskredit.</strong> ' + money(kredit, valuta) + ' läggs in så att kontot når ' + money(mal, valuta) +
+        ' och ' + tierName.toLowerCase() + 'nivån. Du lägger inte in hela beloppet själv. Uttag är spärrade tills krediten är återställd. Spärren släpps när krediten är noll.</li>' +
+        '<li><strong>Backa om minus.</strong> Går det minus kan du häva krediten. Då återställs den. Du är inte låst. Förmåner som bara hänger på krediten upphör om du backar.</li>' +
+        '<li><strong>Dynamisk riskhantering.</strong> Stop loss och take profit flyttas med marknaden. Vi tittar löpande om affären går åt rätt håll. Det är inte en fast spärr som sitter still — risken styrs så länge positionen är öppen.</li>' +
+        '<li><strong>Särskild prio i börsnoteringar.</strong> ' + ipoLine + '</li>' +
+        '<li><strong>Likviditetspoolen.</strong> Du får tillgång till likviditetspoolen. Uttag sker i turordning efter insättningsdatum, högre nivå först. Poolen kan stängas tillfälligt vid extrema rörelser.</li>' +
+        '</ol>' +
+        '<p style="font-size:10pt;margin:12px 0 0">Det här är en intern överenskommelse (utkast). Du kan backa när som helst. Målet är ett resultat som gör att du vill stanna. Ingen framtida avkastning garanteras.</p>' +
+        '<div class="sign"><div><div>NAMN</div><div class="line">' + namn + '</div></div>' +
+        '<div><div>DATUM</div><div class="line">' + datum + '</div></div></div>' +
+        '<div class="sign" style="border:0;padding-top:4px"><div><div>UNDERSKRIFT</div><div class="line"></div></div><div></div></div>' +
+        '</div>';
+    }
+
 
     $('sheet').innerHTML =
       '<p class="brand">Kapital och Strategi · ' + brand + '</p>' +
@@ -232,10 +313,12 @@
       '<div class="ro"><strong>Mer förtroende · mer utrymme</strong>' +
       'När du placerar mer förtroende i kontot — mer kapital som får jobba där — får du mer utrymme: större marginal och mer andrum att följa planen.</div>' +
       '<p class="tagline">Mer hjälp. Fler robotar. Mer serverutrymme. Förtur. Mer utrymme.</p>' +
-      '<p class="foot">Utkast · ' + datum + ' · North 5 000 / 25 000 / 50 000 € · inte intro-aktivering · ingen ForceX-jargong</p>';
+      '<p class="foot">Utkast · ' + datum + ' · North 5 000 / 25 000 / 50 000 € · inte intro-aktivering · ingen ForceX-jargong</p>' +
+      avtalHtml;
   }
 
   $('btnRender').addEventListener('click', render);
+  $('visaAvtal').addEventListener('change', render);
   ['namn','kid','brand','insatt','saldo','valuta','startant','highlight','datum'].forEach((id) => {
     $(id).addEventListener('input', render);
     $(id).addEventListener('change', render);
