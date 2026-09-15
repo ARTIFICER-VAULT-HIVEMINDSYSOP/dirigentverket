@@ -8,6 +8,8 @@
 
 **Landlista:** Dubai, Portugal, Cypern, Bulgarien, Spanien, Annat.
 
+**Valuta:** SEK / DKK / GBP / EUR + räknesnurra (manuell kurs → €). Ingen automatisk kurs. Tom = saknas.
+
 ## Flöde
 1. Mötesbokare fyller formuläret
 2. Förhandsgranska överlämning till säljare
