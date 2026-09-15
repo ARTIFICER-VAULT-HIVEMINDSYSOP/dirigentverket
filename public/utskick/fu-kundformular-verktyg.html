@@ -116,8 +116,10 @@
           <option>Cypern</option>
           <option>Bulgarien</option>
           <option>Spanien</option>
+          <option>Annat</option>
         </select>
-        <input id="countryOther" type="hidden" value="" />
+        <label id="countryOtherLab" style="display:none">Annat land</label>
+        <input id="countryOther" style="display:none" placeholder="Ange land" />
         <label>Källa / lead</label><input id="source" />
       </div>
 
@@ -289,12 +291,25 @@
   };
 
   
+
+  function syncCountryOther() {
+    const c = v('countryFocus');
+    const show = (c === 'Annat' || c === 'Other');
+    const lab = document.getElementById('countryOtherLab');
+    const inp = document.getElementById('countryOther');
+    if (lab) lab.style.display = show ? '' : 'none';
+    if (inp) {
+      inp.style.display = show ? '' : 'none';
+      if (!show) inp.value = '';
+    }
+  }
   function countryLabel() {
     const c = v('countryFocus');
     if (c === 'Annat' || c === 'Other') return v('countryOther') || c || '—';
     return c || '—';
   }
   function updateProto() {
+    syncCountryOther();
     const land = countryLabel();
     const why = document.getElementById('whyProto');
     const loc = document.getElementById('locProto');
@@ -311,7 +326,6 @@
     });
     $('btnPrev').disabled = step===0;
     $('btnNext').textContent = step===STEPS.length-1 ? 'Klart' : 'Nästa';
-    updateProto();
     render();
   }
 
@@ -404,6 +418,7 @@
   $('btnPdf2').addEventListener('click', pdf);
   document.querySelector('.card.no-print').addEventListener('input', () => { updateProto(); render(); });
   document.querySelector('.card.no-print').addEventListener('change', () => { updateProto(); render(); });
+  document.getElementById('countryFocus').addEventListener('change', updateProto);
   showStep(0);
 })();
 </script>
