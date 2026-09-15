@@ -61,7 +61,7 @@ Gate `hasCompletedFirstRide` / `RIDER_FIRST_RIDE_KEY`, «små belopp»-hint, imp
 ## Ny draft — PR #13 twin fade-in + twin-pip puls
 **15 sep (draft PR #13 från main, inte reopen #8):** twin side-pip fade-in saknas→giltig landat (`38141fa`). Samma fade-tid som räls fade-in och twin fade-out (`HEDGE_FADE_MS` 1100).
 
-**15 sep (samma draft, nästa paper-steg):** mjuk engångs-puls på twin side-pips (köp+sälj) efter fade-in saknas→giltig. Samma feel-family som mitt-pip-pulsen (`HEDGE_MID_PULSE_MS` 900, ease-out). Kort soft glow, sedan tyst. Bara befintliga planfält (`kop.tp` / `salj.tp`) — inga påhittade nivåer. Tom serie / saknas-band / under grind / !proposed = ingen twin-puls. Inga nya play-knappar. Paper. `LIVE_LOCKED` true. Väntar namngivet ÖB merge-ja. No live/send/merge.
+**15 sep (samma draft, nästa paper-steg):** twin side-pip engångs-puls landat (`3777228`). Mjuk glow på köp+sälj efter fade-in saknas→giltig. Samma feel-family som mitt-pip-pulsen (`HEDGE_MID_PULSE_MS` 900, ease-out). Kort soft glow, sedan tyst. Bara befintliga planfält (`kop.tp` / `salj.tp`) — inga påhittade nivåer. Tom serie / saknas-band / under grind / !proposed = ingen twin-puls. Inga nya play-knappar. Paper. `LIVE_LOCKED` true. Väntar namngivet ÖB merge-ja. No live/send/merge.
 
 https://github.com/ARTIFICER-VAULT-HIVEMINDSYSOP/dirigentverket/pull/13
 https://github.com/ARTIFICER-VAULT-HIVEMINDSYSOP/dirigentverket/pull/8
