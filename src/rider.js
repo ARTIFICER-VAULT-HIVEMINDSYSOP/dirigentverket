@@ -556,7 +556,8 @@ function copyKnownSidePips(list) {
 
 /**
  * Soft fade only when a known plan becomes invalid.
- * Copies last user-typed band levels — never invents mid/OHLC.
+ * Copies last user-typed band levels and last known twin side-pips
+ * (kop.tp övre / salj.tp nedre) — never invents mid/OHLC/sides.
  */
 export function hedgeBandFade(prev, next) {
   const hold = emptyHedgeFade();
