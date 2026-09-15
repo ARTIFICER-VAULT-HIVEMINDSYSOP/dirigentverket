@@ -582,8 +582,9 @@ export function hedgeBandFade(prev, next) {
 
 /**
  * Soft fade-in only when a missing/invalid plan becomes giltig.
- * Copies next user-typed band levels — never invents mid/OHLC.
- * Tom serie / saknas-band / övre≤nedre / under grind = no fade-in.
+ * Copies next user-typed band levels and next known twin side-pips
+ * (kop.tp övre / salj.tp nedre) — never invents mid/OHLC/sides.
+ * Tom serie / saknas-band / övre≤nedre / under grind / !proposed = no fade-in.
  */
 export function hedgeBandFadeIn(prev, next) {
   const hold = emptyHedgeFade();

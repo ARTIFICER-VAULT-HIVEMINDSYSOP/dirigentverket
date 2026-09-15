@@ -2007,7 +2007,8 @@ body.view-rider .shell-artificer {
   pointer-events: none;
 }
 
-.rider-mark.is-hedge-fade-in {
+.rider-mark.is-hedge-fade-in,
+.rider-play.has-hedge-side-fade-in .rider-mark.is-hedge-side-pip {
   animation: rider-hedge-fade var(--hedge-fade-ms, 1100ms) ease-out reverse forwards;
 }
 
@@ -2084,6 +2085,7 @@ body.view-rider .shell-artificer {
   .rider-mark.is-hedge-fade,
   .rider-play.has-hedge-side-fade .rider-mark.is-hedge-side-pip,
   .rider-mark.is-hedge-fade-in,
+  .rider-play.has-hedge-side-fade-in .rider-mark.is-hedge-side-pip,
   .rider-mark.is-hedge-mid-pulse .rider-hedge-mid-pip,
   .rider-play[data-hedge-fade-in="1"] .rider-arena-field,
   .rider-play[data-hedge-fade="1"] .rider-sil-freq-empty {

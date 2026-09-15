@@ -155,7 +155,7 @@ export function renderPlayArena(ride, play = {}) {
       })
       .join('');
     return `<div class="rider-play is-empty rider-bit is-dry-run" data-rider-play data-bit="32" data-dry-run="1" role="status"
-      data-freq-pip="${ride?.hedge?.freqPip ? '1' : '0'}" data-freq-saknas="${!ride || !ride.hedge || ride.hedge.saknas ? '1' : '0'}" data-freq-progress="${ride?.hedge?.freqProgress ? '1' : '0'}" data-hedge-ghost="0" data-hedge-band="0" data-hedge-mid-pip="0" data-hedge-fade="0" data-hedge-fade-in="0" data-hedge-mid-pulse="0" data-hedge-side-pips="0" data-hedge-side-fade="0"
+      data-freq-pip="${ride?.hedge?.freqPip ? '1' : '0'}" data-freq-saknas="${!ride || !ride.hedge || ride.hedge.saknas ? '1' : '0'}" data-freq-progress="${ride?.hedge?.freqProgress ? '1' : '0'}" data-hedge-ghost="0" data-hedge-band="0" data-hedge-mid-pip="0" data-hedge-fade="0" data-hedge-fade-in="0" data-hedge-mid-pulse="0" data-hedge-side-pips="0" data-hedge-side-fade="0" data-hedge-side-fade-in="0"
       data-leverage="${lev}" data-speed="${speed}" data-lens="${lens}" data-rail="${rail}" data-sit="${sit}"
       style="--rider-speed:${speed};--rider-lens:${lens};--rider-coast-ms:${coastPeriodMs(lev)}ms;">
       ${renderScanlines()}
@@ -364,7 +364,11 @@ export function renderPlayArena(ride, play = {}) {
   const bandOn = Boolean(hedgeOn && ride.hedge.bandRails && ride.hedge.bandRails.length);
   const midPipOn = Boolean(hedgeOn && ride.hedge.midPip && ride.hedge.midPip.at != null);
   const fadeSidePips = fade && !fadeIn ? fade.sidePips || [] : [];
+  const fadeInSidePips = fade && fadeIn ? fade.sidePips || [] : [];
   const sideFadeOn = Boolean(fade && !fadeIn && fadeSidePips.length === 2);
+  const sideFadeInOn = Boolean(
+    fadeIn && hedgeOn && fadeInSidePips.length === 2 && ride.hedge.sidePips && ride.hedge.sidePips.length === 2,
+  );
   const sidePipsOn = Boolean(
     (hedgeOn && ride.hedge.sidePips && ride.hedge.sidePips.length === 2) || sideFadeOn,
   );
@@ -373,8 +377,8 @@ export function renderPlayArena(ride, play = {}) {
   const pulseOn = Boolean(pulse && midPipOn && Number.isFinite(pulseAt));
   const fadeMs = fade && fade.ms != null ? fade.ms : HEDGE_FADE_MS;
   const pulseMs = pulse && pulse.ms != null ? pulse.ms : HEDGE_MID_PULSE_MS;
-  return `<div class="rider-play rider-bit is-looking ${jumped ? 'has-hop' : 'has-hold'}${trailed ? ' has-trail' : ''}${rokadOn ? ' has-rokad' : ''}${hedgeOn ? ' has-hedge' : ''}${fadeOn ? ' has-hedge-fade' : ''}${fadeInOn ? ' has-hedge-fade-in' : ''}${pulseOn ? ' has-hedge-mid-pulse' : ''}${sidePipsOn ? ' has-hedge-side-pips' : ''}${sideFadeOn ? ' has-hedge-side-fade' : ''}" data-rider-play data-bit="32" data-look="1"
-      data-hop-tell="${tell ? '1' : '0'}" data-trail-tell="${trailed ? '1' : '0'}" data-rokad-tell="${rokadOn ? '1' : '0'}" data-hedge-tell="${hedgeOn ? '1' : '0'}" data-freq-pip="${ride.hedge && ride.hedge.freqPip ? '1' : '0'}" data-freq-saknas="${ride.hedge && ride.hedge.saknas ? '1' : '0'}" data-freq-progress="${ride.hedge && ride.hedge.freqProgress ? '1' : '0'}" data-hedge-ghost="${ghostOn ? '1' : '0'}" data-hedge-band="${bandOn ? '1' : '0'}" data-hedge-mid-pip="${midPipOn ? '1' : '0'}" data-hedge-fade="${fadeOn ? '1' : '0'}" data-hedge-fade-in="${fadeInOn ? '1' : '0'}" data-hedge-mid-pulse="${pulseOn ? '1' : '0'}" data-hedge-side-pips="${sidePipsOn ? '1' : '0'}" data-hedge-side-fade="${sideFadeOn ? '1' : '0'}"
+  return `<div class="rider-play rider-bit is-looking ${jumped ? 'has-hop' : 'has-hold'}${trailed ? ' has-trail' : ''}${rokadOn ? ' has-rokad' : ''}${hedgeOn ? ' has-hedge' : ''}${fadeOn ? ' has-hedge-fade' : ''}${fadeInOn ? ' has-hedge-fade-in' : ''}${pulseOn ? ' has-hedge-mid-pulse' : ''}${sidePipsOn ? ' has-hedge-side-pips' : ''}${sideFadeOn ? ' has-hedge-side-fade' : ''}${sideFadeInOn ? ' has-hedge-side-fade-in' : ''}" data-rider-play data-bit="32" data-look="1"
+      data-hop-tell="${tell ? '1' : '0'}" data-trail-tell="${trailed ? '1' : '0'}" data-rokad-tell="${rokadOn ? '1' : '0'}" data-hedge-tell="${hedgeOn ? '1' : '0'}" data-freq-pip="${ride.hedge && ride.hedge.freqPip ? '1' : '0'}" data-freq-saknas="${ride.hedge && ride.hedge.saknas ? '1' : '0'}" data-freq-progress="${ride.hedge && ride.hedge.freqProgress ? '1' : '0'}" data-hedge-ghost="${ghostOn ? '1' : '0'}" data-hedge-band="${bandOn ? '1' : '0'}" data-hedge-mid-pip="${midPipOn ? '1' : '0'}" data-hedge-fade="${fadeOn ? '1' : '0'}" data-hedge-fade-in="${fadeInOn ? '1' : '0'}" data-hedge-mid-pulse="${pulseOn ? '1' : '0'}" data-hedge-side-pips="${sidePipsOn ? '1' : '0'}" data-hedge-side-fade="${sideFadeOn ? '1' : '0'}" data-hedge-side-fade-in="${sideFadeInOn ? '1' : '0'}"
       data-side="${escapeHtml(ride.input?.side || 'köp')}" data-rokad-from="${escapeHtml(ride.rokad?.from || ride.input?.side || 'köp')}" data-rokad-to="${escapeHtml(ride.rokad?.to || ride.input?.side || 'köp')}"
       data-leverage="${lev}" data-speed="${speed}" data-lens="${lens}" data-rail="${rail}" data-sit="${sit}"
       style="--rider-speed:${speed};--rider-lens:${lens};--rider-coast-ms:${coastMs}ms;--hop-window:${HOP_WINDOW_MS}ms;--hedge-fade-ms:${fadeMs}ms;--hedge-pulse-ms:${pulseMs}ms;"

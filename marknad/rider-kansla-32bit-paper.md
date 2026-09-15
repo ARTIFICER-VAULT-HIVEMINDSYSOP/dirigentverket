@@ -16,6 +16,7 @@
 - `cc2946f` — status: rebase klar + prova-känsla-checklista.
 - White-label + IPO-paper stubbar (`91d4d4d`).
 - **PR #4 mergad** `a8ea411` (15:31 Sthlm 9 sep) — 32-bit playfeel, första-ride-grind, dry-run, impuls, hopp-tell + soft unlock, struktur-trail-tell, rokad-tell. `LIVE_LOCKED` true.
+- **PR #8 mergad** `c56dbd3` (2026-09-15) — mitt-hedge paper UX på `#/rider`: frekvens-pip, saknas-band, band-räls, mitt-pip, fade giltig→saknas, fade-in saknas→giltig, engångs-puls mitt-pip, twin side-pips (köp/sälj), twin fade giltig→saknas. `LIVE_LOCKED` true. Inte draft längre.
 
 ## PR #4 — landat (inte draft)
 Gate `hasCompletedFirstRide` / `RIDER_FIRST_RIDE_KEY`, «små belopp»-hint, impuls (process före fart), 32-bit playfeel (W/S/F/[ ]/Space), silhuett-HUD, tom-arena dry-run (`fde2807`), mjuk impuls + kolla-grafen på fylld arena (`3dbc025` / `6dbb626`), hopp-tell + soft unlock (`b90b3c0`), struktur-trail-tell (`c8b83e4`), rokad-tell (`ba97064` / `b99e062`). Tester gröna. Merge-commit `a8ea411`.
@@ -52,7 +53,13 @@ Gate `hasCompletedFirstRide` / `RIDER_FIRST_RIDE_KEY`, «små belopp»-hint, imp
 
 **09:51 Sthlm 15 sep (ständig-process):** Magasin 8765 HTTP 200. PR #8 CLEAN/MERGEABLE, 0 behind (24 ahead); twin side-pips landat (`eceb9ff`). PR #11 0 behind. Cloud: mjuk twin-pip fade giltig→saknas (samma draft, ingen merge). PII-fri backup `/workspace/backups/dirigentverket-verktyg-kod-20260915-0654.tar.gz`. PR #9 lamp = kväll. Merge väntar namngivet ja. No live/send/merge.
 
-**15 sep morgon Europe/Sofia (draft PR #8, inte mergad):** twin-fade giltig→saknas landat. Twin side-pips (`eceb9ff`) tonar ut mjukt med räls/mitt-pip när planen blir saknas (samma fade-tid). Tom serie / saknas-band / under grind = inga twin-pips. Inga nya play-knappar. Paper. Väntar namngivet ÖB merge-ja.
+**15 sep morgon Europe/Sofia (då draft PR #8):** twin-fade giltig→saknas landat. Twin side-pips (`eceb9ff`) tonar ut mjukt med räls/mitt-pip när planen blir saknas (samma fade-tid). Tom serie / saknas-band / under grind = inga twin-pips. Inga nya play-knappar. Paper.
+
+## PR #8 — landat (inte draft)
+**2026-09-15:** PR #8 mergad till main `c56dbd3`. Mitt-hedge paper UX ovan är i main. `LIVE_LOCKED` true. Ingen live-order. Ingen kurs-hämtning.
+
+## Ny draft — twin fade-in saknas→giltig
+**15 sep (ny draft från main, inte reopen #8):** mjuk twin side-pip fade-in när mitt-hedge går saknas→giltig / blir proposed. Samma fade-tid som räls fade-in och twin fade-out (`HEDGE_FADE_MS` 1100). Bara befintliga planfält (`kop.tp` / `salj.tp`) — inga påhittade nivåer. Tom serie / saknas-band / under grind / !proposed = inga twin-pips. Inga nya play-knappar. Paper. Väntar namngivet ÖB merge-ja. No live/send/merge.
 
 https://github.com/ARTIFICER-VAULT-HIVEMINDSYSOP/dirigentverket/pull/8
 https://github.com/ARTIFICER-VAULT-HIVEMINDSYSOP/dirigentverket/pull/4
@@ -62,7 +69,7 @@ När ÖB öppnar `#/rider` ska det kännas så här, i den ordningen:
 1. Arena först — grafen syns innan någon formvägg.
 2. Process-hint syns mjukt (inte skrikig varning).
 3. W/S flyttar räls direkt; F fäster; hävstång 1–4× syns som fart/pip, inte textmur.
-4. Space = lins; hopp har tell; trail-tell syns bara på struktur; rokad-tell (vänd sida, volym −25 %, ÖB-gate) när paper-rokad finns; mitt-hedge-tell + frekvens-pip när serien räcker, saknas-pip när serie/band tomt; frekvens-progress-pip mot grind när svängar räknas men under minFrequency; band-räls + mitt-pip bara när planen finns; giltig→saknas tonar ut räls/pip (fade); saknas→giltig tonar in räls/pip; engångs-puls på mitt-pip efter fade-in; twin side-pips (köp mot taket, sälj mot golvet) när planen är proposed; twin side-pips tonar ut mjukt giltig→saknas (samma fade-tid som räls); inga nya play-knappar på ytan.
+4. Space = lins; hopp har tell; trail-tell syns bara på struktur; rokad-tell (vänd sida, volym −25 %, ÖB-gate) när paper-rokad finns; mitt-hedge-tell + frekvens-pip när serien räcker, saknas-pip när serie/band tomt; frekvens-progress-pip mot grind när svängar räknas men under minFrequency; band-räls + mitt-pip bara när planen finns; giltig→saknas tonar ut räls/pip (fade); saknas→giltig tonar in räls/pip; engångs-puls på mitt-pip efter fade-in; twin side-pips (köp mot taket, sälj mot golvet) när planen är proposed; twin side-pips tonar ut mjukt giltig→saknas (samma fade-tid som räls); twin fade-in saknas→giltig på ny draft (inte #8); inga nya play-knappar på ytan.
 5. En lyckad paper-ride krävs innan «små belopp» syns/öppnas.
 6. PAPER-badge sticky; live-knapp död.
 7. Tom arena = dry-run: silhuett rör sig före Räkna; tomma rutor stannar tomma.
