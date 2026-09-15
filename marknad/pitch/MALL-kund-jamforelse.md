@@ -26,7 +26,7 @@
 2. North Brons 5 000 € / Silver 25 000 € / Guld 50 000 € + samma % under  
 3. Bank vs vår process  
 4. Guld vs inflationsvalutor — lång PDF bara referens, limmas inte in  
-5. Spridning: råvaror · index · AI-handel · **försvar egen kategori**  
+5. Spridning: råvaror · index · AI-handel · **försvar** (eget ben)  
 6. Skatt: redovisningsansvarig på **alla** kontotyper  
 7. Högre kontotyp: löpande hjälp flera robotar · serverutrymme · förtur  
 8. Mer förtroende → mer utrymme  
