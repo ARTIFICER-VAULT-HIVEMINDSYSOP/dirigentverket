@@ -242,7 +242,7 @@
         <button type="button" class="primary" id="btnNext">Nästa</button>
         <button type="button" class="ghost" id="btnPdf">Exportera utfall (PDF)</button>
       </div>
-      <p class="hint">Sälj inte fastigheten — sälj lösningen på behovet. Tom = saknas. Ingen utlovad avkastning.</p>
+      <p class="hint">Sälj inte fastigheten — sälj lösningen på behovet. Lämna tomt när det är tomt. Ingen utlovad avkastning.</p>
     </section>
 
     <aside class="card">
@@ -277,22 +277,22 @@
   const $ = (id) => document.getElementById(id);
   const v = (id) => (($(id).value || '').trim());
   const checked = (g) => Array.from(document.querySelectorAll('input[data-g="'+g+'"]:checked')).map(x => x.value);
-  const line = (s) => s ? s : '<span class="empty">saknas</span>';
+  const line = (s) => s ? s : '<span class="empty">—</span>';
   const tags = (arr, extra) => {
     const a = (arr||[]).slice(); if (extra) a.push(extra);
-    if (!a.length) return '<span class="empty">saknas</span>';
+    if (!a.length) return '<span class="empty">—</span>';
     return '<div class="tags">'+a.map(t=>'<span class="tag">'+t+'</span>').join('')+'</div>';
   };
   const euro = (n) => {
-    if (n===''||n==null||!isFinite(Number(n))) return 'saknas';
+    if (n===''||n==null||!isFinite(Number(n))) return '—';
     return Number(n).toLocaleString('sv-SE')+' €';
   };
 
   
   function countryLabel() {
     const c = v('countryFocus');
-    if (c === 'Annat' || c === 'Other') return v('countryOther') || c || 'saknas';
-    return c || 'saknas';
+    if (c === 'Annat' || c === 'Other') return v('countryOther') || c || '—';
+    return c || '—';
   }
   function updateProto() {
     const land = countryLabel();
