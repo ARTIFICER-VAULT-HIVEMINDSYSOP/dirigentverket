@@ -605,6 +605,53 @@ export function hedgeProgressFadeIn(prev, next) {
   };
 }
 
+export function emptyHedgeProgressPulse() {
+  return {
+    pulsing: false,
+    freqHave: null,
+    freqNeed: null,
+    count: null,
+    ms: HEDGE_MID_PULSE_MS,
+    paper: true,
+  };
+}
+
+function progressFadeInStarted(fade) {
+  if (!fade || !fade.fading) return false;
+  const have = knownProgressSlot(fade.freqHave);
+  const need = knownProgressSlot(fade.freqNeed);
+  if (have == null || need == null || have >= need) return false;
+  if (fade.progressFadeIn) return true;
+  return Boolean(fade.fadingIn) && !fade.progressFade;
+}
+
+/**
+ * Soft one-shot progress-pip pulse only when fade-in proposed→grind starts.
+ * Same 32-bit ease-out family as mitt-pip / twin-pip (~900ms).
+ * Copies next have/need — never invents.
+ * Tom serie / saknas-band / !freqProgress / already proposed = no pulse.
+ */
+export function hedgeProgressPulse(fade, next) {
+  const hold = emptyHedgeProgressPulse();
+  if (!progressFadeInStarted(fade)) return hold;
+  if (!next || next.proposed || !next.freqProgress) return hold;
+  const have = knownProgressSlot(next.freqHave);
+  const need = knownProgressSlot(next.freqNeed);
+  if (have == null || need == null || have >= need) return hold;
+  const fadeHave = knownProgressSlot(fade.freqHave);
+  const fadeNeed = knownProgressSlot(fade.freqNeed);
+  if (fadeHave == null || fadeNeed == null || fadeHave !== have || fadeNeed !== need) return hold;
+  const count = knownProgressSlot(next.count);
+  return {
+    pulsing: true,
+    freqHave: have,
+    freqNeed: need,
+    count: count != null ? count : have,
+    ms: HEDGE_MID_PULSE_MS,
+    paper: true,
+  };
+}
+
 function copyKnownHedgeGhosts(list) {
   if (!Array.isArray(list)) return [];
   const out = [];
@@ -947,6 +994,7 @@ export function emptyPlayState() {
     robbanOpen: false,
     hedgeFade: emptyHedgeFade(),
     hedgePulse: emptyHedgePulse(),
+    hedgeProgressPulse: emptyHedgeProgressPulse(),
   };
 }
 
