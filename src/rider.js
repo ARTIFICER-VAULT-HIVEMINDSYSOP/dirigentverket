@@ -524,6 +524,7 @@ export function emptyHedgeFade() {
     midPip: null,
     sidePips: [],
     progressFade: false,
+    progressFadeIn: false,
     freqHave: null,
     freqNeed: null,
     count: null,
@@ -535,6 +536,7 @@ export function emptyHedgeFade() {
 export function emptyHedgeProgressFade() {
   return {
     fading: false,
+    fadingIn: false,
     freqHave: null,
     freqNeed: null,
     count: null,
@@ -570,6 +572,31 @@ export function hedgeProgressFade(prev, next) {
   const count = knownProgressSlot(prev.count);
   return {
     fading: true,
+    fadingIn: false,
+    freqHave: have,
+    freqNeed: need,
+    count: count != null ? count : have,
+    ms: HEDGE_FADE_MS,
+    paper: true,
+  };
+}
+
+/**
+ * Soft HUD handoff omvänd: progress-pip fade-in only when a proposed mitt-hedge
+ * becomes saknas and grind-progress still applies (svängar räknas, under minFrequency).
+ * Copies next have/need — never invents. Tom serie / saknas-band / !freqProgress = no fade-in.
+ */
+export function hedgeProgressFadeIn(prev, next) {
+  const hold = emptyHedgeProgressFade();
+  if (!prev || !prev.proposed) return hold;
+  if (!next || next.proposed || !next.freqProgress) return hold;
+  const have = knownProgressSlot(next.freqHave);
+  const need = knownProgressSlot(next.freqNeed);
+  if (have == null || need == null || have >= need) return hold;
+  const count = knownProgressSlot(next.count);
+  return {
+    fading: true,
+    fadingIn: true,
     freqHave: have,
     freqNeed: need,
     count: count != null ? count : have,
@@ -618,6 +645,7 @@ export function hedgeBandFade(prev, next) {
   const midPip = ghosts.find((g) => g.kind === 'mid') || null;
   const sidePips = copyKnownSidePips(prev.sidePips);
   if (bandRails.length < 2 || !midPip) return hold;
+  const progressIn = hedgeProgressFadeIn(prev, next);
   return {
     fading: true,
     fadingIn: false,
@@ -626,9 +654,10 @@ export function hedgeBandFade(prev, next) {
     midPip,
     sidePips,
     progressFade: false,
-    freqHave: null,
-    freqNeed: null,
-    count: null,
+    progressFadeIn: progressIn.fading,
+    freqHave: progressIn.freqHave,
+    freqNeed: progressIn.freqNeed,
+    count: progressIn.count,
     ms: HEDGE_FADE_MS,
     paper: true,
   };
@@ -658,6 +687,7 @@ export function hedgeBandFadeIn(prev, next) {
     midPip,
     sidePips,
     progressFade: progress.fading,
+    progressFadeIn: false,
     freqHave: progress.freqHave,
     freqNeed: progress.freqNeed,
     count: progress.count,
