@@ -67,6 +67,8 @@ https://github.com/ARTIFICER-VAULT-HIVEMINDSYSOP/dirigentverket/pull/13
 https://github.com/ARTIFICER-VAULT-HIVEMINDSYSOP/dirigentverket/pull/8
 https://github.com/ARTIFICER-VAULT-HIVEMINDSYSOP/dirigentverket/pull/4
 
+**07:37 UTC / ~10:37 Europe/Sofia 16 sep (ständig-process):** Magasin 8765 HTTP 200. PR #13 CLEAN/MERGEABLE, 5 ahead / 0 behind; twin fade-in (`38141fa`) + twin-pip engångs-puls (`3777228`) redan landat. Status synkas till main. Cloud follow-up: mjuk frekvens-progress fade-out när mitt-hedge blir proposed (HUD-handoff, samma draft, ingen merge). PR #11 0 behind. PR #9 lamp = kväll. PII-fri backup morgon. Merge väntar namngivet ja. No live/send/merge.
+
 ## Prova-känsla (nu på main — paper)
 När ÖB öppnar `#/rider` ska det kännas så här, i den ordningen:
 1. Arena först — grafen syns innan någon formvägg.
