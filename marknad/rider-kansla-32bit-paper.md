@@ -71,7 +71,11 @@ https://github.com/ARTIFICER-VAULT-HIVEMINDSYSOP/dirigentverket/pull/4
 
 **16 sep morgon (draft PR #13):** frekvens-progress fade-out landat (`0883099`). När progress-pip syns och mitt-hedge blir proposed med giltiga band tonar progress ut mjukt (`HEDGE_FADE_MS` 1100) medan räls + mitt-pip + twin tar över. Tom serie / saknas-band / under grind / !proposed = ingen påhittad fade. Inga dubbla mitt-markörer. Inga nya play-knappar. Paper. `LIVE_LOCKED` true. Väntar namngivet ÖB merge-ja. No live/send/merge.
 
+**14:44 Europe/Sofia 16 sep (ständig-process):** Magasin 8765 HTTP 200. PR #13 CLEAN/MERGEABLE, 9 ahead / 0 behind; progress fade-out (`0883099`) landat. Status synkas till main. Cloud follow-up: mjuk frekvens-progress fade-in / återkomst när mitt-hedge går proposed→saknas (omvänd HUD-handoff, samma draft, ingen merge). PR #11 1 behind → update-branch. PR #9 lamp = kväll. PII-fri backup `/workspace/backups/dirigentverket-verktyg-kod-20260916-1040.tar.gz`. Merge väntar namngivet ja. No live/send/merge.
+
 **16 sep ~14:44 Europe/Sofia (draft PR #13):** frekvens-progress fade-in / återkomst landat (`9619709`). När mitt-hedge går proposed→grind (svängar räknas, under minFrequency) tonar progress in mjukt (`HEDGE_FADE_MS` 1100) medan räls/mitt/twin tonar ut. Spegel till fade-out `0883099`. Tom serie / saknas-band / ogiltigt band / !freqProgress = ingen påhittad fade-in. Inga dubbla mitt-markörer. Inga nya play-knappar. Paper. `LIVE_LOCKED` true. Väntar namngivet ÖB merge-ja. No live/send/merge.
+
+**16 sep (draft PR #13, merge main in):** `origin/main` (`35b3367` ständig-status) mergad in i branchen. Konflikt i `rider-kansla-32bit-paper.md` löst — båda statushistorikerna + fade-out `0883099` + fade-in `9619709` behållna. Ingen merge av PR:n. Paper. `LIVE_LOCKED` true. No live/send/merge.
 
 ## Prova-känsla (nu på main — paper)
 När ÖB öppnar `#/rider` ska det kännas så här, i den ordningen:
