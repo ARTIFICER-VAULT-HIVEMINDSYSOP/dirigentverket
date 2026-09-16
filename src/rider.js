@@ -523,6 +523,56 @@ export function emptyHedgeFade() {
     bandRails: [],
     midPip: null,
     sidePips: [],
+    progressFade: false,
+    freqHave: null,
+    freqNeed: null,
+    count: null,
+    ms: HEDGE_FADE_MS,
+    paper: true,
+  };
+}
+
+export function emptyHedgeProgressFade() {
+  return {
+    fading: false,
+    freqHave: null,
+    freqNeed: null,
+    count: null,
+    ms: HEDGE_FADE_MS,
+    paper: true,
+  };
+}
+
+function knownProgressSlot(v) {
+  if (v === '' || v === null || v === undefined) return null;
+  const n = Number(v);
+  if (!Number.isFinite(n) || n < 1) return null;
+  return Math.round(n);
+}
+
+/**
+ * Soft HUD handoff: progress-pip fade-out only when a visible grind-progress
+ * becomes a proposed mitt-hedge with giltiga band.
+ * Copies last known have/need — never invents. Tom serie / saknas-band /
+ * under grind / !proposed = no progress fade.
+ */
+export function hedgeProgressFade(prev, next) {
+  const hold = emptyHedgeProgressFade();
+  if (!prev || !prev.freqProgress) return hold;
+  if (!next || !next.proposed) return hold;
+  const ghosts = copyKnownHedgeGhosts(next.ghosts);
+  const bandRails = ghosts.filter((g) => g.kind === 'nedre' || g.kind === 'övre');
+  const midPip = ghosts.find((g) => g.kind === 'mid') || null;
+  if (bandRails.length < 2 || !midPip) return hold;
+  const have = knownProgressSlot(prev.freqHave);
+  const need = knownProgressSlot(prev.freqNeed);
+  if (have == null || need == null || have >= need) return hold;
+  const count = knownProgressSlot(prev.count);
+  return {
+    fading: true,
+    freqHave: have,
+    freqNeed: need,
+    count: count != null ? count : have,
     ms: HEDGE_FADE_MS,
     paper: true,
   };
@@ -575,6 +625,10 @@ export function hedgeBandFade(prev, next) {
     bandRails,
     midPip,
     sidePips,
+    progressFade: false,
+    freqHave: null,
+    freqNeed: null,
+    count: null,
     ms: HEDGE_FADE_MS,
     paper: true,
   };
@@ -595,6 +649,7 @@ export function hedgeBandFadeIn(prev, next) {
   const midPip = ghosts.find((g) => g.kind === 'mid') || null;
   const sidePips = copyKnownSidePips(next.sidePips);
   if (bandRails.length < 2 || !midPip) return hold;
+  const progress = hedgeProgressFade(prev, next);
   return {
     fading: true,
     fadingIn: true,
@@ -602,6 +657,10 @@ export function hedgeBandFadeIn(prev, next) {
     bandRails,
     midPip,
     sidePips,
+    progressFade: progress.fading,
+    freqHave: progress.freqHave,
+    freqNeed: progress.freqNeed,
+    count: progress.count,
     ms: HEDGE_FADE_MS,
     paper: true,
   };

@@ -1554,6 +1554,10 @@ body.view-rider .shell-artificer {
   opacity: 0.82;
 }
 
+.rider-play.has-freq-progress-fade .rider-sil-freq.is-progress-fade {
+  animation: rider-hedge-fade var(--hedge-fade-ms, 1100ms) ease-out forwards;
+}
+
 .rider-sil-freq-empty {
   font-family: var(--mono);
   font-size: 9px;
@@ -2099,8 +2103,12 @@ body.view-rider .shell-artificer {
   .rider-mark.is-hedge-mid-pulse .rider-hedge-mid-pip,
   .rider-mark.is-hedge-side-pulse .rider-hedge-side-pip,
   .rider-play[data-hedge-fade-in="1"] .rider-arena-field,
-  .rider-play[data-hedge-fade="1"] .rider-sil-freq-empty {
+  .rider-play[data-hedge-fade="1"] .rider-sil-freq-empty,
+  .rider-play.has-freq-progress-fade .rider-sil-freq.is-progress-fade {
     animation: none;
+  }
+  .rider-play.has-freq-progress-fade .rider-sil-freq.is-progress-fade {
+    opacity: 0;
   }
   .rider-mark.is-hedge-fade,
   .rider-play.has-hedge-side-fade .rider-mark.is-hedge-side-pip {
