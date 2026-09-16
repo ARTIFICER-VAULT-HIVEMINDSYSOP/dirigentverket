@@ -6,6 +6,8 @@
 
 **Synk 15 sep kväll:** merge `origin/main` (`82b8e8e`, PR #8 mergad). `LIVE_LOCKED` kvar. Draft. Ingen merge.
 
+**Synk 16 sep ~17:55 Sthlm:** merge `origin/main` (`35b3367`). Konflikt i rider-kansla-status: mitt-hedge/rokad från main behållen. `LIVE_LOCKED` kvar. Draft. Ingen merge.
+
 ## Vad som landat
 
 Paper-skinn på befintlig Artificer-yta (`#/robot`) i Dirigentverket-nexus. Inte en sidapp.
