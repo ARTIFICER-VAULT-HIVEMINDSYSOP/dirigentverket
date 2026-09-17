@@ -1708,7 +1708,8 @@ test('frekvens-progress engångs-puls när fade-out grind→proposed startar; ty
     hedgeFade: hedgeBandFadeIn(on.hedge, on.hedge),
     hedgeProgressPulse: hedgeProgressPulse(hedgeBandFadeIn(on.hedge, on.hedge), on.hedge),
   });
-  assert.match(alreadyOn, /data-hedge-fade-in="1"/);
+  assert.match(alreadyOn, /data-hedge-fade-in="0"/);
+  assert.match(alreadyOn, /data-freq-progress-fade="0"/);
   assert.match(alreadyOn, /data-freq-progress-pulse="0"/);
   assert.ok(!/is-progress-pulse/.test(alreadyOn));
 
