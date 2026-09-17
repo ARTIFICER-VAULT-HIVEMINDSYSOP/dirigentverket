@@ -573,6 +573,17 @@ class Handler(SimpleHTTPRequestHandler):
                     slots = []
             self._json(200, {"ok": True, "slots": slots})
             return
+        if parsed.path == "/api/onlinekunder":
+            self._json(
+                200,
+                {
+                    "ok": True,
+                    "customers": [],
+                    "kalla": "saknas",
+                    "note": "ingen onlinesignal i magasin_server",
+                },
+            )
+            return
         super().do_GET()
 
     def _save_row(self, magasin: str, row_id: str, text: str, park: str | None, dag: str, tid: str, require_comment: bool, outcome: bool = False):

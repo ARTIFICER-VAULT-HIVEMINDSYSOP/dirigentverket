@@ -14,6 +14,7 @@ import {
   rowId,
 } from '/src/contact-queue.js';
 import { renderMagazineHud } from '/src/magazine-hud.js';
+import { mountVerktygslada } from '/src/verktygslada-mount.js';
 
 const MAGASIN = window.MAGASIN || 'daniel';
 const JSON_URL = window.JSON_URL || './magasin.json';
@@ -297,3 +298,7 @@ if (filterRecoveryBtn) {
 }
 
 loadRows();
+mountVerktygslada();
+window.addEventListener('magasin:reload', () => {
+  loadRows();
+});

@@ -1,0 +1,39 @@
+{
+  "paper": true,
+  "live": false,
+  "send": false,
+  "updated": "2026-09-17",
+  "note": "Statusfält som kan uppdateras. Tom cell = saknas. Inga öppningsfrekvenser. Ingen send härifrån.",
+  "campaigns": [
+    {
+      "id": "fu-premium-zoho",
+      "namn": "FU premium Zoho",
+      "status": "SENT",
+      "sentBatches": "01–23",
+      "blockedBatch": "24",
+      "blocker": "partners@ lösenord ska verifieras på nytt",
+      "subject": "Premiuminbjudan från din mäklare · FastigheterUtomlands",
+      "drop": "test@ / test. junk",
+      "sent": null,
+      "clean": null,
+      "batches": null,
+      "openRate": null,
+      "note": "Batch 24 inte skickad. Paper tills namngivet ja."
+    },
+    {
+      "id": "semesterjag",
+      "namn": "Semesterjag",
+      "status": "READY",
+      "sentBatches": "",
+      "blockedBatch": "",
+      "blocker": "",
+      "subject": "",
+      "drop": "",
+      "sent": 0,
+      "clean": 471,
+      "batches": 24,
+      "openRate": null,
+      "note": "Paper tills namngivet ja. Skickar inte från HUD."
+    }
+  ]
+}

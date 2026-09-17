@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Kundjämförelse — verktyg</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #0b1628; --card: #122033; --line: #334155; --gold: #d4b06a; --gold2: #f0d59a;
+    --ink: #f8fafc; --mute: #94a3b8; --paper: #fffdf6; --paper-ink: #1a1206;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; font: 400 14px "Source Sans 3", system-ui, sans-serif;
+    background: linear-gradient(180deg, #0b1628, #071018); color: var(--ink); min-height: 100vh;
+  }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 1.25rem 1rem 3rem; }
+  header h1 { font-family: Fraunces, serif; margin: 0 0 .25rem; font-size: 1.75rem; }
+  header p { margin: 0 0 1.25rem; color: var(--mute); }
+  .layout { display: grid; grid-template-columns: 340px 1fr; gap: 1.25rem; }
+  @media (max-width: 900px) { .layout { grid-template-columns: 1fr; } }
+  .panel {
+    background: var(--card); border: 1px solid var(--line); border-radius: 14px;
+    padding: 1rem; height: fit-content; position: sticky; top: .75rem;
+  }
+  .panel h2 { margin: 0 0 .75rem; font-size: .8rem; letter-spacing: .12em; text-transform: uppercase; color: var(--gold); }
+  label { display: block; font-size: .78rem; color: var(--mute); margin: .55rem 0 .2rem; }
+  input, select {
+    width: 100%; padding: .55rem .65rem; border-radius: 8px; border: 1px solid var(--line);
+    background: #0a1522; color: var(--ink); font: inherit;
+  }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; }
+  .btns { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: 1rem; }
+  button {
+    border: 0; border-radius: 999px; padding: .55rem 1rem; font: 600 .9rem inherit; cursor: pointer;
+  }
+  button.primary { background: var(--gold); color: #1a1206; }
+  button.ghost { background: transparent; color: var(--gold2); border: 1px solid rgba(212,176,106,.45); }
+  .hint { font-size: .75rem; color: var(--mute); margin-top: .75rem; line-height: 1.35; }
+  .preview-wrap {
+    background: #1a1a1a; border-radius: 14px; padding: 1rem; border: 1px solid var(--line);
+  }
+  .sheet {
+    background: #fff; color: var(--paper-ink); border-radius: 4px;
+    max-width: 180mm; margin: 0 auto; padding: 12mm 12mm 10mm;
+    font: 400 11pt "Source Sans 3", sans-serif;
+  }
+  .brand { font: 600 8pt "Source Sans 3", sans-serif; letter-spacing: .14em; text-transform: uppercase; color: #8a7044; margin: 0 0 4px; }
+  .sheet h1 { font: 700 20pt Fraunces, serif; margin: 0 0 2px; color: #1a1206; }
+  .who { color: #5a4a30; margin: 0 0 12px; font-size: 10.5pt; }
+  .her { margin: 0 0 12px; padding: 12px 14px; background: #1a1206; color: #f7eccf; border-radius: 10px; font-size: 11pt; line-height: 1.4; }
+  .her strong { color: #f0d59a; }
+  .sheet h2 { font: 700 13pt Fraunces, serif; margin: 14px 0 8px; color: #2a1c08; border-left: 4px solid #d4b06a; padding-left: 8px; }
+  .tiers { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin: 0 0 6px; }
+  .tier { border: 2px solid #c9a24a; border-radius: 12px; padding: 12px 10px; background: #fffdf6; text-align: center; }
+  .tier.on { background: #f7eccf; border-color: #8a7044; }
+  .tier .n { font: 700 9pt "Source Sans 3", sans-serif; letter-spacing: .12em; text-transform: uppercase; color: #8a7044; }
+  .tier .p { font: 700 16pt Fraunces, serif; margin: 4px 0 6px; color: #1a1206; }
+  .tier .sub { font-size: 9pt; color: #6a5420; margin-bottom: 8px; }
+  .tier .sim { text-align: left; background: #1a1206; color: #f7eccf; border-radius: 8px; padding: 10px; font-size: 10.5pt; line-height: 1.35; }
+  .tier .sim .lbl { font: 600 8pt "Source Sans 3", sans-serif; letter-spacing: .08em; text-transform: uppercase; color: #d4b06a; margin-bottom: 4px; }
+  .tier .sim .big { font: 700 14pt Fraunces, serif; color: #f0d59a; margin: 4px 0; }
+  table.cmp { width: 100%; border-collapse: collapse; font-size: 10.5pt; margin-bottom: 4px; }
+  table.cmp th, table.cmp td { border: 1px solid #c9a24a; padding: 8px 10px; text-align: left; vertical-align: top; }
+  table.cmp th { background: #f7eccf; font-weight: 700; color: #2a1c08; }
+  .spread { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 8px; margin-top: 8px; }
+  .spread div { border: 1px solid #c9a24a; border-radius: 8px; padding: 10px; background: #fffdf6; font-size: 10pt; }
+  .spread strong { display: block; font-family: Fraunces, serif; font-size: 12pt; margin-bottom: 4px; }
+  .ro { margin: 12px 0 0; padding: 12px 14px; background: #f7eccf; border: 2px solid #d4b06a; border-radius: 10px; font-size: 11pt; line-height: 1.4; }
+  .ro strong { font-family: Fraunces, serif; font-size: 13pt; display: block; margin-bottom: 4px; }
+  .tagline { margin: 14px 0 0; font: 700 14pt Fraunces, serif; color: #2a1c08; }
+  .foot { margin-top: 10px; font-size: 8pt; color: #8a7044; line-height: 1.35; }
+  .err { color: #fca5a5; font-size: .8rem; margin-top: .5rem; min-height: 1.2em; }
+  @media print {
+    body { background: #fff; }
+    .wrap { max-width: none; padding: 0; }
+    .panel, header p, .btns, .hint, .err, .no-print { display: none !important; }
+    .layout { display: block; }
+    .preview-wrap { background: transparent; border: 0; padding: 0; }
+    .sheet { box-shadow: none; max-width: none; padding: 0; }
+  }
+
+  .avtal {
+    margin-top: 16px; padding: 14px; border: 2px solid #c9a24a; border-radius: 12px;
+    background: #fffdf6; page-break-inside: avoid;
+  }
+  .avtal h2 { margin-top: 0; }
+  .avtal .grid3 {
+    display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin: 10px 0 12px;
+  }
+  .avtal .cell {
+    background: #1a1206; color: #f7eccf; border-radius: 8px; padding: 10px; text-align: center;
+  }
+  .avtal .cell .lbl { font: 600 8pt "Source Sans 3", sans-serif; letter-spacing: .08em; text-transform: uppercase; color: #d4b06a; }
+  .avtal .cell .val { font: 700 13pt Fraunces, serif; color: #f0d59a; margin-top: 4px; }
+  .avtal ol { margin: 8px 0 0; padding-left: 1.2em; font-size: 10.5pt; line-height: 1.4; }
+  .avtal ol li { margin-bottom: 8px; }
+  .avtal .sign {
+    margin-top: 14px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+    border-top: 1px solid #c9a24a; padding-top: 12px; font-size: 10pt;
+  }
+  .avtal .sign .line { border-bottom: 1px solid #8a7044; min-height: 28px; margin-top: 18px; }
+  .chkrow { display: flex; align-items: center; gap: .5rem; margin: .75rem 0 .25rem; }
+  .chkrow input { width: auto; }
+  .chkrow label { margin: 0; color: var(--ink); font-size: .85rem; }
+
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="no-print">
+    <h1>Kundjämförelse</h1>
+    <p>Fyll i siffrorna · förhandsgranska · exportera PDF. Utkast — ingen utlovad framtida vinst.</p>
+  </header>
+  <div class="layout">
+    <aside class="panel no-print">
+      <h2>Inmatning</h2>
+      <label for="namn">Kundnamn</label>
+      <input id="namn" value="" placeholder="fyll i" />
+      <label for="kid">Kund-id</label>
+      <input id="kid" value="" placeholder="saknas" />
+      <label for="brand">Varumärke / rad</label>
+      <input id="brand" value="North Investment" />
+      <div class="row2">
+        <div>
+          <label for="insatt">Insatt (tal)</label>
+          <input id="insatt" type="number" step="0.01" min="0" value="" placeholder="saknas" />
+        </div>
+        <div>
+          <label for="saldo">Saldo (tal)</label>
+          <input id="saldo" type="number" step="0.01" min="0" value="" placeholder="saknas" />
+        </div>
+      </div>
+      <label for="valuta">Valuta (etikett)</label>
+      <input id="valuta" value="" placeholder="saknas" />
+      <label for="startant">Start-antagande (valfritt)</label>
+      <input id="startant" placeholder="saknas" value="" />
+      <label for="highlight">Markera nivå</label>
+      <select id="highlight">
+        <option value="brons" selected>Brons</option>
+        <option value="silver">Silver</option>
+        <option value="guld">Guld</option>
+      </select>
+      
+      <div class="chkrow">
+        <input type="checkbox" id="visaAvtal" />
+        <label for="visaAvtal">Visa handelskredit-överenskommelse</label>
+      </div>
+      <label for="avtalMal">Mål-saldo (tröskel, tal — tom = markerad nivå)</label>
+      <input id="avtalMal" type="number" step="0.01" min="0" placeholder="t.ex. 5000" />
+      <label for="ipoNotis">Notering / förtur (valfritt, en rad)</label>
+      <input id="ipoNotis" placeholder="t.ex. namngiven notering — ingen avkastningsgaranti" />
+      <label for="datum">Datum</label>
+      <input id="datum" type="date" />
+      <div class="btns">
+        <button type="button" class="primary" id="btnRender">Uppdatera</button>
+        <button type="button" class="ghost" id="btnPdf">Exportera PDF</button>
+      </div>
+      <div class="err" id="err"></div>
+      <p class="hint">
+        North-trösklar är låsta: Brons 5 000 € · Silver 25 000 € · Guld 50 000 €.
+        %-ökning räknas automatiskt från insatt→saldo och speglas på trösklarna.
+        PDF = Skriv ut → Spara som PDF i dialogen. Kryssa «Visa handelskredit-överenskommelse» för papperet (saldo → kredit → mål, fem punkter).
+      </p>
+    </aside>
+    <main class="preview-wrap">
+      <div class="sheet" id="sheet"></div>
+    </main>
+  </div>
+</div>
+<script>
+(function () {
+  const BRONS = 5000, SILVER = 25000, GULD = 50000;
+  const $ = (id) => document.getElementById(id);
+  function money(n, cur) {
+    if (!isFinite(n)) return '—';
+    const s = n.toLocaleString('sv-SE', { maximumFractionDigits: 2, minimumFractionDigits: 0 });
+    return cur ? (cur === 'USD' ? '$' + s.replace(/\s/g, '\u202f') : s + ' ' + cur) : s;
+  }
+  function eur(n) {
+    return Math.round(n).toLocaleString('sv-SE').replace(/\s/g, '\u202f') + ' €';
+  }
+  function todayISO() {
+    const d = new Date();
+    const z = (x) => String(x).padStart(2, '0');
+    return d.getFullYear() + '-' + z(d.getMonth() + 1) + '-' + z(d.getDate());
+  }
+  if (!$('datum').value) $('datum').value = todayISO();
+
+  function render() {
+    const err = $('err');
+    err.textContent = '';
+    const namn = $('namn').value.trim() || 'Kund';
+    const kid = $('kid').value.trim() || '—';
+    const brand = $('brand').value.trim() || 'North Investment';
+    const insatt = parseFloat($('insatt').value);
+    const saldo = parseFloat($('saldo').value);
+    const valuta = $('valuta').value.trim() || 'USD';
+    const startant = $('startant').value.trim();
+    const hi = $('highlight').value;
+    const datum = $('datum').value || todayISO();
+
+    if (!(insatt > 0) || !(saldo >= 0)) {
+      err.textContent = 'Insatt måste vara > 0 och saldo ett tal.';
+      return;
+    }
+    const pct = (saldo - insatt) / insatt;
+    const pctLabel = (pct >= 0 ? '+' : '') + (pct * 100).toFixed(0).replace('.', ',') + ' %';
+    const bronsEnd = BRONS * (1 + pct);
+    const silverEnd = SILVER * (1 + pct);
+    const guldEnd = GULD * (1 + pct);
+    const ant = startant ? ' (Antagande start ' + startant + '.)' : '';
+
+    const tier = (key, title, thr, end, sub) => {
+      const on = hi === key ? ' on' : '';
+      return '<div class="tier' + on + '">' +
+        '<div class="n">' + title + '</div>' +
+        '<div class="p">' + eur(thr) + '</div>' +
+        '<div class="sub">' + sub + '</div>' +
+        '<div class="sim"><div class="lbl">Samma ' + pctLabel + '</div>' +
+        '<div>' + eur(thr) + '</div>' +
+        '<div class="big">→ ca ' + eur(end) + '</div></div></div>';
+    };
+
+
+    // Handelskredit-överenskommelse (mall: kontotyp-papper)
+    let avtalHtml = '';
+    if ($('visaAvtal').checked) {
+      const thrMap = { brons: BRONS, silver: SILVER, guld: GULD };
+      const malRaw = parseFloat($('avtalMal').value);
+      const mal = (isFinite(malRaw) && malRaw > 0) ? malRaw : thrMap[hi];
+      const kredit = Math.max(0, mal - saldo);
+      const tierName = hi === 'brons' ? 'Brons' : (hi === 'silver' ? 'Silver' : 'Guld');
+      const fn = (namn.split(/\s+/)[0] || namn);
+      const ipo = $('ipoNotis').value.trim();
+      const ipoLine = ipo
+        ? ('Vid noteringar får du förtur. ' + ipo + ' En notering är inte ett löfte om avkastning.')
+        : 'Vid noteringar får du förtur. Kapital och skydd är på plats så du kan gå in när fönstret är öppet. En notering är inte ett löfte om avkastning.';
+      avtalHtml =
+        '<div class="avtal">' +
+        '<p class="brand">Kapital &amp; Strategi AB · Intern överenskommelse</p>' +
+        '<h2>' + namn + ' — ' + tierName + 'konto</h2>' +
+        '<p style="font-size:10.5pt;line-height:1.4;margin:0 0 10px">' + fn +
+        ', du har redan <strong>' + money(saldo, valuta) + '</strong> på kontot. Det är ditt. Till ' +
+        tierName.toLowerCase() + 'nivån på <strong>' + money(mal, valuta) +
+        '</strong> fattas <strong>' + money(kredit, valuta) +
+        '</strong>. Det beloppet är inte ett krav på mer egna pengar. Det är en <strong>handelskredit</strong> — så att du kan gå in med mer kapacitet, och med lägre egen risk.</p>' +
+        '<div class="grid3">' +
+        '<div class="cell"><div class="lbl">Saldo</div><div class="val">' + money(saldo, valuta) + '</div></div>' +
+        '<div class="cell"><div class="lbl">Handelskredit</div><div class="val">' + money(kredit, valuta) + '</div></div>' +
+        '<div class="cell"><div class="lbl">Mål · ' + tierName + '</div><div class="val">' + money(mal, valuta) + '</div></div>' +
+        '</div>' +
+        '<p style="font-size:10pt;margin:0 0 8px"><strong>Vad pappret är till för</strong><br>' +
+        'Det här är inte till för att låsa dig. Det är till för att du ska veta vad som skyddar dig: krediten, rätten att backa, hur risken styrs, förturen i noteringar och tillgången till poolen.</p>' +
+        '<ol>' +
+        '<li><strong>Handelskredit.</strong> ' + money(kredit, valuta) + ' läggs in så att kontot når ' + money(mal, valuta) +
+        ' och ' + tierName.toLowerCase() + 'nivån. Du lägger inte in hela beloppet själv. Uttag är spärrade tills krediten är återställd. Spärren släpps när krediten är noll.</li>' +
+        '<li><strong>Backa om minus.</strong> Går det minus kan du häva krediten. Då återställs den. Du är inte låst. Förmåner som bara hänger på krediten upphör om du backar.</li>' +
+        '<li><strong>Dynamisk riskhantering.</strong> Stop loss och take profit flyttas med marknaden. Vi tittar löpande om affären går åt rätt håll. Det är inte en fast spärr som sitter still — risken styrs så länge positionen är öppen.</li>' +
+        '<li><strong>Särskild prio i börsnoteringar.</strong> ' + ipoLine + '</li>' +
+        '<li><strong>Likviditetspoolen.</strong> Du får tillgång till likviditetspoolen. Uttag sker i turordning efter insättningsdatum, högre nivå först. Poolen kan stängas tillfälligt vid extrema rörelser.</li>' +
+        '</ol>' +
+        '<p style="font-size:10pt;margin:12px 0 0">Det här är en intern överenskommelse (utkast). Du kan backa när som helst. Målet är ett resultat som gör att du vill stanna. Ingen framtida avkastning garanteras.</p>' +
+        '<div class="sign"><div><div>NAMN</div><div class="line">' + namn + '</div></div>' +
+        '<div><div>DATUM</div><div class="line">' + datum + '</div></div></div>' +
+        '<div class="sign" style="border:0;padding-top:4px"><div><div>UNDERSKRIFT</div><div class="line"></div></div><div></div></div>' +
+        '</div>';
+    }
+
+
+    $('sheet').innerHTML =
+      '<p class="brand">Kapital och Strategi · ' + brand + '</p>' +
+      '<h1>' + namn + ' — jämförelser</h1>' +
+      '<p class="who">Kund ' + kid + ' · ' + brand + '</p>' +
+      '<div class="her"><strong>Handel:</strong> Insatt <strong>' + money(insatt, valuta) +
+      '</strong> · Saldo <strong>' + money(saldo, valuta) +
+      '</strong> → ökning ca <strong>' + pctLabel + '</strong> mot insatt.' + ant + '</div>' +
+      '<div class="ro"><strong>Högre kontotyp · mer hjälp · mer kapacitet</strong>' +
+      'Med högre kontotyp får du löpande hjälp att styra flera handelsrobotar — inte bara en. ' +
+      'Du får mer utrymme på våra servrar och förtur när många ordrar kommer in samtidigt. ' +
+      'Mer förtroende i kontot = mer utrymme. Samma process: andel, stopp, mål — med mer kraft bakom.</div>' +
+      '<h2>1. Samma %-ökning på Brons · Silver · Guld</h2>' +
+      '<div class="tiers">' +
+        tier('brons', 'Brons', BRONS, bronsEnd, '2 robotar · hjälp · serverutrymme') +
+        tier('silver', 'Silver', SILVER, silverEnd, '4 robotar · mer hjälp · mer kapacitet') +
+        tier('guld', 'Guld', GULD, guldEnd, '6 robotar · mest hjälp · förtur vid tryck') +
+      '</div>' +
+      '<p class="foot">Illustrerat med kundens procentsats — inte löfte om framtida resultat.</p>' +
+      '<h2>2. Bank vs vår process</h2>' +
+      '<table class="cmp"><tr><th></th><th>Bankspar</th><th>Vår trading-process</th></tr>' +
+      '<tr><td><strong>Köpkraft</strong></td><td>Inflation gör att samma kronor ofta köper mindre med tiden.</td><td>Kapitalet får jobba med andel, stopp och mål.</td></tr>' +
+      '<tr><td><strong>Ro</strong></td><td>Känns tryggt — andrummet kan ätas upp tyst.</td><td>Mer saldo = mer marginal = mer ro.</td></tr>' +
+      '<tr><td><strong>Spridning</strong></td><td>Ett sparkonto = en korg.</td><td>Råvaror · index · AI-handel · försvar.</td></tr></table>' +
+      '<h2>3. Guld vs inflationsvalutor</h2>' +
+      '<table class="cmp"><tr><th></th><th>Euro / dollar</th><th>Guld</th></tr>' +
+      '<tr><td><strong>Lång sikt</strong></td><td>Inflationsvalutor kan tappa köpkraft när utbudet ökar.</td>' +
+      '<td>Begränsat utbud — historiskt bättre på att bära köpkraft över lång tid.</td></tr>' +
+      '<tr><td><strong>Kort sikt</strong></td><td>Valutan känns stabil dag till dag.</td>' +
+      '<td>Kan dippa enskilda år — därför spridning, inte allt i guld.</td></tr></table>' +
+      '<p class="foot">Referensunderlag om guld finns internt — limmas inte in som löfte. Ingen framtida garanti.</p>' +
+      '<h2>4. Sprid innehaven</h2>' +
+      '<div class="spread">' +
+      '<div><strong>Råvaror</strong>Guld — köpkraftsben mot inflationstryck.</div>' +
+      '<div><strong>Index</strong>Bred korg — inte en enda punkt.</div>' +
+      '<div><strong>AI-handel</strong>Systematisk process med din andel.</div>' +
+      '<div><strong>Försvar</strong>Försvarsrelaterat som eget ben.</div></div>' +
+      '<h2>5. Skatt &amp; redovisning</h2>' +
+      '<div class="ro"><strong>Hjälp på samtliga kontotyper</strong>' +
+      'När du valt kontotyp får du hjälp och handledning med planering av skatt. ' +
+      'Redovisningsansvarig hjälper med skatteärenden på Brons, Silver och Guld.</div>' +
+      '<div class="ro"><strong>Mer förtroende · mer utrymme</strong>' +
+      'När du placerar mer förtroende i kontot — mer kapital som får jobba där — får du mer utrymme: större marginal och mer andrum att följa planen.</div>' +
+      '<p class="tagline">Mer hjälp. Fler robotar. Mer serverutrymme. Förtur. Mer utrymme.</p>' +
+      '<p class="foot">Utkast · ' + datum + ' · North 5 000 / 25 000 / 50 000 € · inte intro-aktivering · ingen ForceX-jargong</p>' +
+      avtalHtml;
+  }
+
+  $('btnRender').addEventListener('click', render);
+  $('visaAvtal').addEventListener('change', render);
+  ['namn','kid','brand','insatt','saldo','valuta','startant','highlight','datum','avtalMal','ipoNotis'].forEach((id) => {
+    $(id).addEventListener('input', render);
+    $(id).addEventListener('change', render);
+  });
+  $('btnPdf').addEventListener('click', () => {
+    render();
+    const n = ($('namn').value.trim() || 'kund').replace(/\s+/g, '-');
+    const prev = document.title;
+    document.title = n + '-jamforelse';
+    window.print();
+    document.title = prev;
+  });
+  render();
+})();
+</script>
+</body>
+</html>

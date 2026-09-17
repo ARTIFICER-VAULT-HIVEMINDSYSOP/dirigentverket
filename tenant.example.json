@@ -35,6 +35,14 @@
     "disclaimer": "",
     "paper": true
   },
+  "toolbox": {
+    "desk": "daniel",
+    "calendarUrl": "https://calendar.google.com/calendar/u/0/r",
+    "williamCalendarUrl": "",
+    "jamforelsePath": "/utskick/kundjamforelse-verktyg.html",
+    "depositionPath": "/utskick/deposition-mall.html",
+    "kampanjStatusPath": "/utskick/kampanj-status.json"
+  },
   "rules": {
     "one_card_per_customer": true,
     "na_equals_vm": true,

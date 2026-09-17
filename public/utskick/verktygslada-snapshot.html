@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Verktygslåda · kristall-HUD</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=IBM+Plex+Mono:wght@400;500&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet" />
+<style>
+body{margin:0;min-height:100vh;background:#12110e;color:#ece7dc;font-family:"Source Sans 3",sans-serif;}
+.fake{max-width:40rem;margin:0 auto;padding:2.5rem 1.2rem 8rem;}
+.fake h1{font-family:Fraunces,serif;color:#e0c48a;}
+.fake p{color:#9c9688;}
+.row{border:1px solid #2f2c22;background:#1c1b14;border-radius:14px;padding:1rem;margin:1rem 0;}
+/* Magasinet HUD — cylinder + cocked hammer. Name + status, never symbol/PNL. */
+
+.magazine-hud {
+  margin: 0 0 1.2rem;
+  border: 1px solid var(--line, #3a3426);
+  background:
+    radial-gradient(ellipse at 50% 38%, rgba(212, 176, 106, 0.16), transparent 52%),
+    linear-gradient(180deg, #16140f, #0b0a08);
+  border-radius: 14px;
+  padding: 0.7rem 0.8rem 0.85rem;
+}
+
+.magazine-hud.is-extra {
+  margin: 0 0 1rem;
+  opacity: 0.92;
+}
+
+.magazine-hud-kicker,
+.magazine-hud-cap,
+.magazine-hud-extra-note,
+.magazine-hud-empty {
+  margin: 0;
+  text-align: center;
+  color: var(--gold-2, #f0d59a);
+  font: 600 0.78rem "IBM Plex Mono", ui-monospace, monospace;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.magazine-hud-cap {
+  margin-top: 0.45rem;
+  letter-spacing: 0.08em;
+  text-transform: none;
+  color: var(--gold, #d4b06a);
+}
+
+.magazine-hud-extra-note,
+.magazine-hud-empty {
+  margin-top: 0.4rem;
+  color: var(--mute, #9a927f);
+  letter-spacing: 0.04em;
+  text-transform: none;
+  font-weight: 400;
+}
+
+.magazine-drum {
+  position: relative;
+  width: min(22rem, 100%);
+  aspect-ratio: 1;
+  margin: 0.4rem auto 0;
+}
+
+.magazine-rounds {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  position: absolute;
+  inset: 12%;
+  border-radius: 50%;
+  border: 2px solid #3a3426;
+  background:
+    radial-gradient(circle at 50% 50%, #1c1912 36%, #12100b 37% 100%);
+  box-shadow: inset 0 0 0 18px #16140f;
+}
+
+.magazine-round {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 5.4rem;
+  margin: 0;
+  transform:
+    rotate(calc((var(--i) / var(--n)) * 360deg))
+    translateY(-6.1rem)
+    rotate(calc((var(--i) / var(--n)) * -360deg))
+    translate(-50%, -50%);
+  transform-origin: 0 0;
+}
+
+.magazine-round button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 5.4rem;
+  height: 5.4rem;
+  border-radius: 50%;
+  border: 1px solid #3a3426;
+  background: #1c1912;
+  color: #ece6d6;
+  cursor: pointer;
+  box-shadow: 0 0 0 0 rgba(212, 176, 106, 0);
+  padding: 0.35rem;
+}
+
+.round-name {
+  font: 700 0.95rem Fraunces, serif;
+  color: #f0d59a;
+  line-height: 1.1;
+}
+
+.round-status {
+  font: 500 0.62rem "IBM Plex Mono", ui-monospace, monospace;
+  color: #9a927f;
+  margin-top: 0.2rem;
+}
+
+.magazine-round.is-cocked button {
+  border-color: #d4b06a;
+}
+
+.magazine-round.is-lit button {
+  border-color: #f0d59a;
+  box-shadow: 0 0 22px rgba(240, 213, 154, 0.45);
+  background: #2a2418;
+}
+
+.magazine-round.is-parked button {
+  opacity: 0.62;
+}
+
+.magazine-round.is-spent button {
+  opacity: 0.38;
+}
+
+.magazine-round.is-firing button {
+  box-shadow: 0 0 28px rgba(255, 196, 90, 0.85);
+  border-color: #ffe08a;
+}
+
+.magazine-hammer {
+  position: absolute;
+  left: 50%;
+  top: 4%;
+  width: 1.15rem;
+  height: 2.4rem;
+  margin-left: -0.15rem;
+  background: linear-gradient(180deg, #d4b06a, #8a7044);
+  clip-path: polygon(20% 0, 80% 0, 100% 28%, 70% 28%, 70% 100%, 30% 100%, 30% 28%, 0 28%);
+  transform: rotate(-38deg);
+  transform-origin: 50% 90%;
+  z-index: 3;
+}
+
+.magazine-hammer.is-cocked {
+  transform: rotate(-62deg);
+}
+
+.magazine-hammer.is-firing {
+  transform: rotate(8deg);
+  transition: transform 120ms ease-out;
+}
+
+.magazine-muzzle {
+  position: absolute;
+  left: 50%;
+  top: 1%;
+  width: 2.4rem;
+  height: 2.4rem;
+  margin-left: -1.2rem;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 220, 120, 0.95), transparent 70%);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 4;
+}
+
+.magazine-muzzle.is-firing {
+  animation: magazine-flash 0.7s ease-out 1;
+}
+
+@keyframes magazine-flash {
+  0% { opacity: 0; transform: scale(0.4); }
+  18% { opacity: 1; transform: scale(1.15); }
+  100% { opacity: 0; transform: scale(1.6); }
+}
+
+.magazine-hud.is-extra .magazine-drum {
+  width: min(16rem, 100%);
+}
+
+.magazine-hud.is-extra .magazine-round {
+  width: 4.2rem;
+  transform:
+    rotate(calc((var(--i) / var(--n)) * 360deg))
+    translateY(-4.6rem)
+    rotate(calc((var(--i) / var(--n)) * -360deg))
+    translate(-50%, -50%);
+}
+
+.magazine-hud.is-extra .magazine-round button {
+  width: 4.2rem;
+  height: 4.2rem;
+}
+
+/* Floating crystal HUD — glass over Magasin / Rider. Not a page takeover. */
+
+.crystal-hud {
+  position: fixed;
+  z-index: 9400;
+  right: 18px;
+  bottom: 18px;
+  width: min(28rem, calc(100vw - 24px));
+  max-height: calc(100vh - 24px);
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: stretch;
+  font-family: "Source Sans 3", "Segoe UI", sans-serif;
+  color: #f4efe4;
+  pointer-events: none;
+}
+
+.crystal-hud > * {
+  pointer-events: auto;
+}
+
+.crystal-dock {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+  justify-content: flex-end;
+}
+
+.crystal-orb {
+  position: relative;
+  width: 3.4rem;
+  height: 3.4rem;
+  border: 0;
+  cursor: pointer;
+  border-radius: 1.15rem 1.45rem 1.05rem 1.55rem;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.42), rgba(186, 230, 253, 0.12) 38%, rgba(201, 166, 107, 0.22) 72%, rgba(40, 70, 110, 0.35)),
+    radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.55), transparent 42%);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.28),
+    0 0 22px rgba(160, 210, 255, 0.35),
+    0 10px 28px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.55);
+  overflow: hidden;
+}
+
+.crystal-facet,
+.crystal-facet-2 {
+  position: absolute;
+  inset: 8% 18% auto 8%;
+  height: 42%;
+  background: linear-gradient(120deg, rgba(255, 255, 255, 0.55), transparent 60%);
+  clip-path: polygon(0 0, 100% 12%, 70% 100%, 0 78%);
+  pointer-events: none;
+}
+
+.crystal-facet-2 {
+  inset: auto 6% 10% 30%;
+  height: 38%;
+  background: linear-gradient(200deg, rgba(201, 166, 107, 0.35), transparent 70%);
+  clip-path: polygon(20% 0, 100% 30%, 80% 100%, 0 70%);
+}
+
+.crystal-orb-label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+
+.crystal-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.16), rgba(18, 28, 44, 0.45));
+  color: #f0d59a;
+  text-decoration: none;
+  font: 600 0.78rem "Source Sans 3", sans-serif;
+  letter-spacing: 0.04em;
+  padding: 0.38rem 0.7rem;
+  border-radius: 999px;
+  backdrop-filter: blur(14px) saturate(1.35);
+  box-shadow:
+    0 0 0 1px rgba(180, 220, 255, 0.12),
+    0 6px 18px rgba(0, 0, 0, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.28);
+  cursor: pointer;
+}
+
+.crystal-chip:hover,
+button.crystal-chip:hover {
+  color: #fff8e8;
+  box-shadow: 0 0 18px rgba(186, 230, 253, 0.35);
+}
+
+.crystal-chip.is-draft {
+  border-color: rgba(240, 213, 154, 0.45);
+}
+
+.crystal-chip.is-secondary {
+  opacity: 0.82;
+  font-size: 0.72rem;
+}
+
+.crystal-panel {
+  margin: 0 0 0.55rem;
+  max-height: min(72vh, 40rem);
+  overflow: auto;
+  padding: 0.9rem 0.95rem 1.1rem;
+  border-radius: 1.15rem;
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.14), rgba(16, 24, 36, 0.62) 42%, rgba(12, 16, 22, 0.78)),
+    radial-gradient(ellipse at 12% 0%, rgba(186, 230, 253, 0.18), transparent 50%);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  box-shadow:
+    0 0 0 1px rgba(201, 166, 107, 0.18),
+    0 24px 60px rgba(0, 0, 0, 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.28);
+  backdrop-filter: blur(18px) saturate(1.4);
+}
+
+.crystal-hud.is-open .crystal-orb {
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.4),
+    0 0 28px rgba(201, 166, 107, 0.45),
+    0 10px 28px rgba(0, 0, 0, 0.45);
+}
+
+.crystal-head {
+  position: relative;
+  cursor: grab;
+  padding-right: 2.2rem;
+  margin-bottom: 0.75rem;
+}
+
+.crystal-kicker {
+  margin: 0;
+  font: 600 0.68rem "IBM Plex Mono", ui-monospace, monospace;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #b8e0f8;
+}
+
+.crystal-head h2 {
+  margin: 0.15rem 0 0.2rem;
+  font: 600 1.45rem Fraunces, serif;
+  color: #f0d59a;
+}
+
+.crystal-lede,
+.crystal-cap,
+.crystal-faint,
+.crystal-stub,
+.crystal-empty,
+.crystal-flash,
+.crystal-ks-note,
+.crystal-plan,
+.crystal-identity,
+.crystal-check-kicker {
+  margin: 0.2rem 0 0;
+  color: #c9c2b3;
+  font-size: 0.86rem;
+}
+
+.crystal-min {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 1.8rem;
+  height: 1.8rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(0, 0, 0, 0.25);
+  color: #f0d59a;
+  cursor: pointer;
+}
+
+.crystal-tiles {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.45rem;
+  margin-bottom: 0.8rem;
+}
+
+.crystal-tile {
+  padding: 0.55rem 0.6rem 0.6rem;
+  border-radius: 0.75rem;
+  background: rgba(8, 12, 18, 0.38);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.crystal-tile-kicker {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0;
+  font: 600 0.62rem "IBM Plex Mono", ui-monospace, monospace;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #9aa8b8;
+}
+
+.crystal-tile-value {
+  margin: 0.2rem 0 0;
+  font: 600 0.95rem Fraunces, serif;
+  color: #f7eccf;
+}
+
+.crystal-tile-note {
+  margin: 0.15rem 0 0;
+  font-size: 0.75rem;
+  color: #8e97a6;
+}
+
+.crystal-lamp {
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  display: inline-block;
+  box-shadow: 0 0 8px currentColor;
+}
+
+.crystal-lamp-gron { background: #7a9e7e; color: #7a9e7e; }
+.crystal-lamp-gul { background: #c4a04a; color: #c4a04a; }
+.crystal-lamp-rod { background: #c45c4a; color: #c45c4a; }
+
+.crystal-block {
+  margin: 0.85rem 0 0;
+  padding-top: 0.7rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.crystal-block h3 {
+  margin: 0 0 0.35rem;
+  font: 600 0.95rem Fraunces, serif;
+  color: #e0c48a;
+}
+
+.crystal-signals {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin: 0.45rem 0 0.55rem;
+}
+
+.crystal-signal {
+  min-width: 5.2rem;
+  padding: 0.35rem 0.5rem;
+  border-radius: 0.65rem;
+  border: 1px solid rgba(186, 230, 253, 0.2);
+  background: rgba(8, 16, 28, 0.45);
+}
+
+.crystal-signal-kicker {
+  display: block;
+  font: 600 0.58rem "IBM Plex Mono", ui-monospace, monospace;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #8eb4d0;
+}
+
+.crystal-signal-text {
+  display: block;
+  color: #f7eccf;
+  font-size: 0.82rem;
+}
+
+.crystal-signal.is-pulse {
+  animation: crystal-pulse 1.4s ease-in-out infinite;
+  border-color: rgba(240, 213, 154, 0.7);
+}
+
+@keyframes crystal-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(240, 213, 154, 0.15); }
+  50% { box-shadow: 0 0 16px 0 rgba(240, 213, 154, 0.45); }
+}
+
+.crystal-hud .magazine-hud {
+  margin: 0.4rem 0 0.55rem;
+  background: rgba(8, 10, 12, 0.35);
+}
+
+.crystal-park-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  align-items: flex-end;
+}
+
+.crystal-park-row label {
+  font-size: 0.72rem;
+  color: #9aa8b8;
+}
+
+.crystal-park-row input {
+  display: block;
+  margin-top: 0.15rem;
+  background: rgba(8, 12, 18, 0.7);
+  color: #f4efe4;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 999px;
+  padding: 0.28rem 0.55rem;
+  font: 400 0.78rem "IBM Plex Mono", ui-monospace, monospace;
+  color-scheme: dark;
+}
+
+.crystal-parks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+
+.crystal-park {
+  border: 1px solid rgba(201, 166, 107, 0.4);
+  background: rgba(201, 166, 107, 0.12);
+  color: #f0d59a;
+  border-radius: 999px;
+  padding: 0.35rem 0.7rem;
+  font: 600 0.8rem inherit;
+  cursor: pointer;
+}
+
+.crystal-park.is-pulse {
+  animation: crystal-pulse 0.9s ease-out 2;
+}
+
+.crystal-online-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.crystal-online-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.6rem;
+  padding: 0.3rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.crystal-empty {
+  color: #c4a04a;
+}
+
+.crystal-stub {
+  font: 400 0.75rem "IBM Plex Mono", ui-monospace, monospace;
+  color: #8eb4d0;
+}
+
+.crystal-stub code {
+  color: #f0d59a;
+}
+
+.crystal-identity {
+  font: 600 1.05rem Fraunces, serif;
+  color: #f7eccf;
+}
+
+.crystal-block blockquote {
+  margin: 0.4rem 0;
+  padding: 0.45rem 0.6rem;
+  border-left: 3px solid #c9a66b;
+  background: rgba(201, 166, 107, 0.08);
+  color: #f0d59a;
+  font-style: italic;
+}
+
+.crystal-check {
+  margin: 0.3rem 0 0.6rem;
+  padding-left: 1.1rem;
+  color: #e6dcc8;
+}
+
+.crystal-shortcuts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin: 0.4rem 0;
+}
+
+.crystal-shortcut {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 0.05rem;
+  padding: 0.4rem 0.65rem;
+  border-radius: 0.7rem;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(8, 12, 18, 0.4);
+  color: #f0d59a;
+  text-decoration: none;
+  font-size: 0.82rem;
+}
+
+.crystal-shortcut span {
+  font: 600 0.58rem "IBM Plex Mono", ui-monospace, monospace;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #8eb4d0;
+}
+
+.crystal-drawer {
+  margin-top: 0.8rem;
+  padding: 0.7rem 0.65rem;
+  border-radius: 0.85rem;
+  border: 1px solid rgba(186, 230, 253, 0.25);
+  background: rgba(6, 14, 24, 0.5);
+}
+
+.crystal-drawer-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.crystal-kampanj {
+  margin-top: 0.55rem;
+  padding: 0.55rem 0.6rem;
+  border-radius: 0.7rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.crystal-kampanj h4 {
+  margin: 0.15rem 0;
+  font: 600 0.95rem Fraunces, serif;
+}
+
+.crystal-kampanj-status {
+  margin: 0;
+  font: 700 0.68rem "IBM Plex Mono", ui-monospace, monospace;
+  letter-spacing: 0.14em;
+}
+
+.crystal-kampanj-sent .crystal-kampanj-status { color: #9fbfa2; }
+.crystal-kampanj-ready .crystal-kampanj-status { color: #f0d59a; }
+.crystal-kampanj-block .crystal-kampanj-status { color: #e08a7a; }
+.crystal-kampanj p { margin: 0.2rem 0 0; font-size: 0.82rem; }
+.crystal-blocker { color: #e08a7a; }
+
+@media (max-width: 640px) {
+  .crystal-hud {
+    right: 10px;
+    bottom: 10px;
+    width: calc(100vw - 20px);
+  }
+  .crystal-tiles { grid-template-columns: 1fr; }
+}
+
+</style>
+</head>
+<body>
+<main class="fake">
+<p style="font:600 .72rem IBM Plex Mono,monospace;letter-spacing:.16em;text-transform:uppercase;color:#c9a66b">Daniel Magasin · bakgrund</p>
+<h1>Magasinet (förhandsvisning)</h1>
+<p>Kristall-HUD ligger ovanpå, ersätter inte Magasin. Tom kö = saknas.</p>
+<article class="row"><strong>väntar kö</strong><p>saknas</p></article>
+</main>
+<aside id="crystal-hud" class="crystal-hud is-open" data-crystal-hud role="complementary" aria-label="Verktygslåda" style="">
+    <div class="crystal-dock">
+    <button type="button" class="crystal-orb" data-action="crystal-toggle" aria-expanded="true" title="Verktygslåda">
+      <span class="crystal-facet" aria-hidden="true"></span>
+      <span class="crystal-facet crystal-facet-2" aria-hidden="true"></span>
+      <span class="crystal-orb-label">Verktygslåda</span>
+    </button>
+    <a class="crystal-chip" data-chip="kalender" href="https://calendar.google.com/calendar/u/0/r" target="_blank" rel="noopener noreferrer" title="Daniel kalender (öppnar Google Calendar)">Kalender</a>
+    
+    <a class="crystal-chip" data-chip="jamforelse" href="/utskick/kundjamforelse-verktyg.html" target="_blank" rel="noopener noreferrer" title="Kontotyps-jämförelse · North Brons/Silver/Guld">Jämförelse</a>
+    <a class="crystal-chip is-draft" data-chip="deposition" href="/utskick/deposition-mall.html" target="_blank" rel="noopener noreferrer" title="Öppnar depositionsmall (utkast). Skickar inte.">Deposition</a>
+    <button type="button" class="crystal-chip" data-action="crystal-kampanj" data-chip="kampanj" title="Mailkampanj-status. Skickar inte.">Kampanj</button>
+  </div>
+    <div class="crystal-panel" >
+    <header class="crystal-head" data-drag-handle>
+      <p class="crystal-kicker">ÖB Daniel · Dirigentverket</p>
+      <h2>Verktygslåda</h2>
+      <p class="crystal-lede">Kristall-HUD över Magasin och Rider. Paper. Ingen live-order.</p>
+      <button type="button" class="crystal-min" data-action="crystal-toggle" title="Fäll ihop">−</button>
+    </header>
+
+    <div class="crystal-tiles">
+      <article class="crystal-tile" data-tile="live">
+    <p class="crystal-tile-kicker"><span class="crystal-lamp crystal-lamp-rod" title="live låst" aria-hidden="true"></span>Live / paper</p>
+    <p class="crystal-tile-value">LIVE AV</p>
+    <p class="crystal-tile-note">Paper default. Lampan går inte att tända här.</p>
+  </article>
+      <article class="crystal-tile" data-tile="magasin">
+    <p class="crystal-tile-kicker"><span class="crystal-lamp crystal-lamp-gul" title="saknas" aria-hidden="true"></span>Magasin</p>
+    <p class="crystal-tile-value">saknas</p>
+    <p class="crystal-tile-note">koppla till magasin_server</p>
+  </article>
+      <article class="crystal-tile" data-tile="forcex">
+    <p class="crystal-tile-kicker"><span class="crystal-lamp crystal-lamp-gul" title="saknas" aria-hidden="true"></span>ForceX-session</p>
+    <p class="crystal-tile-value">saknas</p>
+    <p class="crystal-tile-note">Inga nycklar, cookies eller PAT visas.</p>
+  </article>
+      <article class="crystal-tile" data-tile="pr">
+    <p class="crystal-tile-kicker"><span class="crystal-lamp crystal-lamp-gul" title="saknas tills räknat" aria-hidden="true"></span>PR / spärr</p>
+    <p class="crystal-tile-value">öppna saknas · spärr saknas</p>
+    <p class="crystal-tile-note">Tom cell = saknas. Inga påhittade tal.</p>
+  </article>
+    </div>
+
+    <section class="crystal-block crystal-magasin" data-block="magasin">
+      <h3>Daniel Magasin · signaler</h3>
+      <p class="crystal-cap">väntar kö</p>
+      <div class="crystal-signals"><span class="crystal-signal" data-signal="cocked">
+    <span class="crystal-signal-kicker">Nästa</span>
+    <span class="crystal-signal-text">saknas</span>
+  </span><span class="crystal-signal" data-signal="lit">
+    <span class="crystal-signal-kicker">Tänd</span>
+    <span class="crystal-signal-text">saknas</span>
+  </span><span class="crystal-signal" data-signal="firing">
+    <span class="crystal-signal-kicker">Avfyrad</span>
+    <span class="crystal-signal-text">saknas</span>
+  </span><span class="crystal-signal" data-signal="wait">
+    <span class="crystal-signal-kicker">Kö</span>
+    <span class="crystal-signal-text">saknas</span>
+  </span></div>
+        
+      <form class="crystal-park-row" data-crystal-park>
+        <label>Dag <input name="dag" type="date" /></label>
+        <label>Tid <input name="tid" type="time" /></label>
+        <div class="crystal-parks"><button type="button" class="crystal-park" data-action="crystal-park" data-park="NA" title="NA">NA</button><button type="button" class="crystal-park" data-action="crystal-park" data-park="VM" title="VM">VM</button><button type="button" class="crystal-park" data-action="crystal-park" data-park="RECOVERY" title="Recovery">Recovery</button><button type="button" class="crystal-park" data-action="crystal-park" data-park="BOOKED" title="Bokat">Bokat</button></div>
+      </form>
+      <p class="crystal-flash" data-crystal-flash></p>
+      <p class="crystal-stub">koppla till magasin_server</p>
+      <p class="crystal-faint">NA / VM / Recovery / Bokat · paper-UI. Kö från magasin.json när den finns.</p>
+    </section>
+
+    <section class="crystal-block" data-block="online">
+      <h3>Onlinekunder</h3>
+      <p class="crystal-empty">saknas</p>
+      <p class="crystal-stub">Ingen onlinesignal i boken. Poll: <code>/api/onlinekunder</code></p>
+    </section>
+
+    <section class="crystal-block" data-block="robban">
+    <h3>Robban Robotsson</h3>
+    <p class="crystal-identity">Robban Robotsson</p>
+    <blockquote>Först säkerhetsutrustning. Sedan fart. Aldrig tvärtom.</blockquote>
+    <p class="crystal-plan">Utan S/L och T/P är det inte en plan — det är ett rop.</p>
+    <p class="crystal-faint">S/L ≈ säkerhetsbälte · T/P ≈ flytväst · R:R ≈ hjälm</p>
+    <p class="crystal-check-kicker">Checklista innan storlek · paper, inga live-ordrar</p>
+    <ul class="crystal-check"><li><strong>SL</strong> · säkerhetsbälte</li><li><strong>TP</strong> · flytväst</li><li><strong>RR</strong> · hjälm · innan storlek</li></ul>
+    <div class="crystal-shortcuts"><a class="crystal-shortcut" href="#/robot" data-local="robot">Artificer · SL/TP</a><a class="crystal-shortcut" href="#/rider" data-local="rider">Trade Rider</a><a class="crystal-shortcut" href="#/panel" data-local="panel">Panel / Älvor</a><a class="crystal-shortcut" href="#/kalkyl" data-local="kalkyl">Kalkyl</a><a class="crystal-shortcut" href="#/synergier" data-local="synergier">Synergier</a><a class="crystal-shortcut" href="#/nyheter" data-local="nyheter">Nyheter</a></div>
+    <p class="crystal-ks-note">Kapitalstrategi.com är referens, inte en andra bok. Artificer kopierar inte sajten.</p>
+    <div class="crystal-shortcuts"><a class="crystal-shortcut is-ks" href="https://www.kapitalstrategi.com/tradingskolan" target="_blank" rel="noopener noreferrer">Tradingskolan<span>KS-referens</span></a><a class="crystal-shortcut is-ks" href="https://www.kapitalstrategi.com/trade-rider" target="_blank" rel="noopener noreferrer">Trade Rider<span>KS-referens</span></a><a class="crystal-shortcut is-ks" href="https://www.kapitalstrategi.com/player-value" target="_blank" rel="noopener noreferrer">Player Value<span>KS-referens</span></a><a class="crystal-shortcut is-ks" href="https://www.kapitalstrategi.com/skatt" target="_blank" rel="noopener noreferrer">Skatt<span>KS-referens</span></a><a class="crystal-shortcut is-ks" href="https://www.kapitalstrategi.com/signaler" target="_blank" rel="noopener noreferrer">Signaler<span>KS-referens</span></a></div>
+    <p class="crystal-faint">Läge: paper ja, live släckt.</p>
+  </section>
+    <section class="crystal-block" data-block="shortcuts">
+    <h3>Klustret</h3>
+    <div class="crystal-shortcuts">
+      <a class="crystal-shortcut" href="/magasin.html">Magasinet</a><a class="crystal-shortcut" href="/william.html">William magasin</a><a class="crystal-shortcut" href="/utskick/kundjamforelse-verktyg.html">Kontotyp / jämförelse</a>
+      <a class="crystal-shortcut is-ext" href="https://crm1.forcex.software" target="_blank" rel="noopener noreferrer">ForceX CRM<span>extern</span></a>
+    </div>
+  </section>
+
+    <section class="crystal-drawer is-open" data-block="kampanj" >
+      <div class="crystal-drawer-head">
+        <h3>Mailkampanj · status</h3>
+        <button type="button" class="crystal-chip" data-action="crystal-kampanj-refresh">Uppdatera</button>
+      </div>
+      <p class="crystal-faint">Visar status. Skickar inte. Inga påhittade öppningsfrekvenser.</p>
+      <article class="crystal-kampanj crystal-kampanj-sent">
+        <p class="crystal-kampanj-status">SENT</p>
+        <h4>FU premium Zoho</h4>
+        <p>skickat 01–23 · block 24 · öppningsfrekvens saknas</p>
+        <p class="crystal-faint">ämne: Premiuminbjudan från din mäklare · FastigheterUtomlands</p>
+        <p class="crystal-blocker">spärr: partners@ lösenord ska verifieras på nytt</p>
+        <p class="crystal-faint">släng: test@ / test. junk</p>
+        <p class="crystal-faint">Batch 24 inte skickad. Paper tills namngivet ja.</p>
+      </article><article class="crystal-kampanj crystal-kampanj-ready">
+        <p class="crystal-kampanj-status">READY</p>
+        <h4>Semesterjag</h4>
+        <p>sent 0 · rena 471 · satser 24 · öppningsfrekvens saknas</p>
+        
+        
+        
+        <p class="crystal-faint">Paper tills namngivet ja. Skickar inte från HUD.</p>
+      </article>
+    </section>
+  </div>
+  </aside>
+</body>
+</html>

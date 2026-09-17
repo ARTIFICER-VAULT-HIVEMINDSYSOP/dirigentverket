@@ -97,6 +97,7 @@ export function renderShell(inner, ctx) {
         ${nav('#/kalkyl', 'Kalkyl', 'kalkyl')}
         ${nav('#/synergier', 'Synergier', 'synergier')}
         ${nav('#/nyheter', 'Nyheter', 'nyheter')}
+        <button type="button" class="linkish" data-action="crystal-open">Verktygslåda</button>
         ${nav('#/rider', 'Trade Rider', 'rider')}
         <a href="/magasin.html">Magasinet</a>
         ${nav('#/sele', 'Pilotsele', 'sele')}
