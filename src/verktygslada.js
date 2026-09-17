@@ -8,6 +8,12 @@ export const CALENDAR_URL = 'https://calendar.google.com/calendar/u/0/r';
 export const JAMFORELSE_PATH = '/utskick/kundjamforelse-verktyg.html';
 export const JAMFORELSE_MALL_PATH = '/utskick/mall-kund-jamforelse.html';
 export const DEPOSITION_PATH = '/utskick/deposition-mall.html';
+export const DEPOSITION_UTKAST_SV =
+  '/ekonomi/avtal/Capital-Strategy-deposition-escrow-mottagningsbekraftelse-utkast.md';
+export const DEPOSITION_RECEIPT_EN =
+  '/ekonomi/avtal/Capital-Strategy-deposit-escrow-receipt-DRAFT.md';
+export const DEPOSITION_TERMS_UI = '/utskick/ks-escrow-terms.html';
+export const DEPOSITION_TERMS_UI_ALT = '/ekonomi/avtal/KS-escrow-terms-UI.html';
 export const KAMPANJ_STATUS_PATH = '/utskick/kampanj-status.json';
 export const MAGASIN_JSON_PATH = '/magasin.json';
 export const ONLINEKUNDER_PATH = '/api/onlinekunder';
@@ -98,7 +104,9 @@ export function chipLinks(tenant) {
       id: 'deposition',
       label: 'Deposition',
       href: publicPath((toolbox && toolbox.depositionPath) || DEPOSITION_PATH),
-      title: 'Öppnar depositionsmall (utkast). Skickar inte.',
+      title: 'Öppnar mottagningsbekräftelse (SV) och villkor. Skickar inte.',
+      utkast: publicPath((toolbox && toolbox.depositionUtkastSv) || DEPOSITION_UTKAST_SV),
+      terms: publicPath((toolbox && toolbox.depositionTermsUi) || DEPOSITION_TERMS_UI),
     },
     kampanj: {
       id: 'kampanj',
@@ -308,6 +316,9 @@ export const CLUSTER_SHORTCUTS = Object.freeze([
   { id: 'william', href: '/william.html', namn: 'William magasin', kind: 'cluster' },
   { id: 'jamforelse', href: JAMFORELSE_PATH, namn: 'Kontotyp / jämförelse', kind: 'cluster' },
   { id: 'jamforelse-mall', href: JAMFORELSE_MALL_PATH, namn: 'Mall jämförelse', kind: 'cluster' },
+  { id: 'deposition', href: DEPOSITION_PATH, namn: 'Deposition utkast', kind: 'cluster' },
+  { id: 'deposition-sv', href: DEPOSITION_UTKAST_SV, namn: 'Mottagningsbekräftelse SV', kind: 'cluster' },
+  { id: 'deposition-terms', href: DEPOSITION_TERMS_UI, namn: 'Escrow-villkor', kind: 'cluster' },
 ]);
 
 export const ROBBAN_CHECKLIST = Object.freeze([

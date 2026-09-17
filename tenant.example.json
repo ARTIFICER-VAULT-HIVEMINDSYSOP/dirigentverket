@@ -42,6 +42,10 @@
     "jamforelsePath": "/utskick/kundjamforelse-verktyg.html",
     "jamforelseMallPath": "/utskick/mall-kund-jamforelse.html",
     "depositionPath": "/utskick/deposition-mall.html",
+    "depositionUtkastSv": "/ekonomi/avtal/Capital-Strategy-deposition-escrow-mottagningsbekraftelse-utkast.md",
+    "depositionReceiptEn": "/ekonomi/avtal/Capital-Strategy-deposit-escrow-receipt-DRAFT.md",
+    "depositionTermsUi": "/utskick/ks-escrow-terms.html",
+    "depositionTermsUiAlt": "/ekonomi/avtal/KS-escrow-terms-UI.html",
     "kampanjStatusPath": "/utskick/kampanj-status.json"
   },
   "rules": {

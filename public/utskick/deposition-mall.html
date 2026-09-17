@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Depositionsmall · utkast</title>
+  <title>Deposition · mottagningsbekräftelse + villkor</title>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=IBM+Plex+Mono:wght@400;500&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet" />
   <style>
     :root {
@@ -11,107 +11,64 @@
       --gold2: #e0c48a; --ink: #ece7dc; --mute: #9c9688; --warn: #c4a04a;
     }
     * { box-sizing: border-box; }
-    body {
-      margin: 0; min-height: 100vh; background: #12110e; color: var(--ink);
-      font: 400 16px/1.5 "Source Sans 3", sans-serif;
-    }
-    .wrap { max-width: 42rem; margin: 0 auto; padding: 2rem 1.2rem 4rem; }
-    .kicker { font: 600 0.72rem "IBM Plex Mono", ui-monospace, monospace; letter-spacing: .16em; text-transform: uppercase; color: var(--gold); margin: 0 0 .4rem; }
-    h1 { font: 600 1.8rem Fraunces, serif; margin: 0 0 .5rem; color: var(--gold2); }
-    .lede { color: var(--mute); margin: 0 0 1.2rem; }
+    body { margin: 0; min-height: 100vh; background: #12110e; color: var(--ink); font: 400 15px/1.5 "Source Sans 3", sans-serif; }
+    .wrap { max-width: 72rem; margin: 0 auto; padding: 1.4rem 1rem 3rem; }
+    .kicker { font: 600 0.72rem "IBM Plex Mono", ui-monospace, monospace; letter-spacing: .16em; text-transform: uppercase; color: var(--gold); margin: 0 0 .35rem; }
+    h1 { font: 600 1.55rem Fraunces, serif; margin: 0 0 .35rem; color: var(--gold2); }
     .banner {
       border: 1px solid rgba(196,160,74,.5); background: rgba(40,28,10,.55);
-      color: #e6d3a2; padding: .8rem 1rem; border-radius: 10px; margin: 0 0 1.2rem;
+      color: #e6d3a2; padding: .7rem .9rem; border-radius: 10px; margin: 0 0 1rem;
     }
-    label { display: block; font-size: .82rem; color: var(--mute); margin: .7rem 0 .25rem; }
-    input, textarea {
-      width: 100%; background: #0e0d0b; color: var(--ink); border: 1px solid var(--line);
-      border-radius: 8px; padding: .55rem .7rem; font: inherit;
+    .panes { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; min-height: 70vh; }
+    @media (max-width: 900px) { .panes { grid-template-columns: 1fr; } }
+    .pane {
+      background: var(--card); border: 1px solid var(--line); border-radius: 12px;
+      display: flex; flex-direction: column; min-height: 28rem; overflow: hidden;
     }
-    textarea { min-height: 14rem; resize: vertical; }
-    .btns { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: 1rem; }
-    button, .btn {
-      border: 1px solid rgba(201,166,107,.45); background: rgba(201,166,107,.12);
-      color: var(--gold2); border-radius: 999px; padding: .5rem 1rem; font: 600 .9rem inherit;
-      cursor: pointer; text-decoration: none; display: inline-block;
-    }
-    button.ghost { background: transparent; }
-    .hint { font-size: .8rem; color: var(--mute); margin-top: .8rem; }
-    .flash { min-height: 1.2rem; color: var(--gold2); font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: .85rem; }
-    .saknas { color: var(--warn); }
+    .pane h2 { margin: 0; padding: .7rem .9rem; font: 600 .8rem "IBM Plex Mono", ui-monospace, monospace; letter-spacing: .1em; text-transform: uppercase; color: var(--gold); border-bottom: 1px solid var(--line); }
+    pre, iframe { flex: 1; margin: 0; border: 0; width: 100%; background: #0e0d0b; color: var(--ink); }
+    pre { padding: 1rem; white-space: pre-wrap; font: 400 .82rem "IBM Plex Mono", ui-monospace, monospace; overflow: auto; }
+    .saknas { color: var(--warn); padding: 1rem; }
+    .more { margin-top: 1rem; display: flex; flex-wrap: wrap; gap: .45rem; }
+    .more a { color: var(--gold); text-decoration: none; border: 1px solid rgba(201,166,107,.4); border-radius: 999px; padding: .35rem .75rem; font-size: .85rem; }
   </style>
 </head>
 <body>
   <main class="wrap">
-    <p class="kicker">Paper · utkast · skickar inte</p>
-    <h1>Depositionsmall</h1>
-    <p class="lede">Öppnar utkast. Live-utsändning bara efter namngivet ÖB-ja. Inga påhittade kronor.</p>
+    <p class="kicker">Paper · öppnar utkast · skickar inte</p>
+    <h1>Deposition</h1>
     <div class="banner" role="status">
-      Den här ytan skickar inte mejl. Den förbereder ämne, brödtext och en plats för bilaga.
-      Konto- och beloppsfält lämnas tomma (= saknas) tills mäklare eller Finance Manager fyller i.
+      Öppnar mottagningsbekräftelse (SV) och villkors-UI. Ingen utgående e-post. Inga påhittade kronor.
     </div>
-    <form id="draft" autocomplete="off">
-      <label for="to">Till</label>
-      <input id="to" name="to" type="email" placeholder="saknas" />
-      <label for="subject">Ämne</label>
-      <input id="subject" name="subject" value="Deposition / escrow — utkast" />
-      <label for="body">Brödtext</label>
-      <textarea id="body" name="body">Hej,
-
-Utkast till depositionsmall. Inget belopp, IBAN eller konto anges här.
-
-Köpeskilling hanteras i oberoende escrow enligt SPA. Handpenning och resterande andelar = saknas i denna mall tills mäklare/Finance Manager fyller i.
-
-Escrow släpper inte till säljaren före villkor och lagfart enligt avtal.
-
-Detta är inte ett utskick. Live-send kräver namngivet ja från ÖB.
-
-Vänliga hälsningar
-</textarea>
-      <label for="file">Bilaga (lokal fil — appen laddar inte upp och skickar inte)</label>
-      <input id="file" name="file" type="file" />
-      <p class="hint" id="fileHint">Bilaga: saknas</p>
-      <div class="btns">
-        <button type="button" id="copy">Kopiera utkast</button>
-        <a class="btn ghost" id="mailto" href="#">Öppna e-postprogram (mailto)</a>
-      </div>
-      <p class="flash" id="flash"></p>
-      <p class="hint">Inget Zoho, inget ForceX-mejl, ingen AgentMail-send från den här knappen.</p>
-    </form>
+    <div class="panes">
+      <section class="pane">
+        <h2>Mottagningsbekräftelse · SV utkast</h2>
+        <pre id="utkast">läser utkast…</pre>
+      </section>
+      <section class="pane">
+        <h2>Villkor · UI</h2>
+        <iframe title="KS escrow-villkor" src="/utskick/ks-escrow-terms.html"></iframe>
+      </section>
+    </div>
+    <p class="more">
+      <a href="/ekonomi/avtal/Capital-Strategy-deposition-escrow-mottagningsbekraftelse-utkast.md">Öppna SV-md</a>
+      <a href="/ekonomi/avtal/Capital-Strategy-deposit-escrow-receipt-DRAFT.md">EN receipt DRAFT</a>
+      <a href="/utskick/ks-escrow-terms.html">Villkor (public)</a>
+      <a href="/ekonomi/avtal/KS-escrow-terms-UI.html">Villkor (ekonomi)</a>
+    </p>
   </main>
   <script>
     (function () {
-      var fileHint = document.getElementById('fileHint');
-      var flash = document.getElementById('flash');
-      document.getElementById('file').addEventListener('change', function (ev) {
-        var f = ev.target.files && ev.target.files[0];
-        fileHint.textContent = f ? ('Bilaga vald lokalt: ' + f.name + ' — bifoga själv i mailet') : 'Bilaga: saknas';
-      });
-      function draftText() {
-        var to = document.getElementById('to').value.trim();
-        var subject = document.getElementById('subject').value.trim();
-        var body = document.getElementById('body').value;
-        return { to: to, subject: subject, body: body };
-      }
-      document.getElementById('copy').addEventListener('click', function () {
-        var d = draftText();
-        var blob = 'Till: ' + (d.to || 'saknas') + '\nÄmne: ' + d.subject + '\n\n' + d.body;
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-          navigator.clipboard.writeText(blob).then(function () {
-            flash.textContent = 'utkast kopierat · inte skickat';
-          }).catch(function () { flash.textContent = 'kunde inte kopiera'; });
-        } else {
-          flash.textContent = 'saknar urklipp';
-        }
-      });
-      document.getElementById('mailto').addEventListener('click', function (ev) {
-        ev.preventDefault();
-        var d = draftText();
-        var href = 'mailto:' + encodeURIComponent(d.to || '') +
-          '?subject=' + encodeURIComponent(d.subject || '') +
-          '&body=' + encodeURIComponent(d.body || '');
-        window.location.href = href;
-        flash.textContent = 'e-postprogram öppnat som utkast · appen skickade inte';
+      var el = document.getElementById('utkast');
+      var path = '/ekonomi/avtal/Capital-Strategy-deposition-escrow-mottagningsbekraftelse-utkast.md';
+      fetch(path, { cache: 'no-store' }).then(function (r) {
+        if (!r.ok) throw new Error('saknas');
+        return r.text();
+      }).then(function (t) {
+        el.textContent = t;
+      }).catch(function () {
+        el.className = 'saknas';
+        el.textContent = 'saknas — koppla filen ' + path;
       });
     })();
   </script>

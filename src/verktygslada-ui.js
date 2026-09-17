@@ -27,7 +27,11 @@ function lamp(kind, label) {
 function chipAnchor(chip, extraClass = '') {
   if (!chip) return '';
   const extra = extraClass ? ` ${extraClass}` : '';
-  return `<a class="crystal-chip${extra}" data-chip="${escapeHtml(chip.id)}" href="${escapeHtml(chip.href)}" target="_blank" rel="noopener noreferrer" title="${escapeHtml(chip.title || chip.label)}">${escapeHtml(chip.label)}</a>`;
+  const extraData =
+    chip.utkast && chip.terms
+      ? ` data-utkast="${escapeHtml(chip.utkast)}" data-terms="${escapeHtml(chip.terms)}"`
+      : '';
+  return `<a class="crystal-chip${extra}" data-chip="${escapeHtml(chip.id)}" href="${escapeHtml(chip.href)}" target="_blank" rel="noopener noreferrer" title="${escapeHtml(chip.title || chip.label)}"${extraData}>${escapeHtml(chip.label)}</a>`;
 }
 
 function statusTile(opts) {

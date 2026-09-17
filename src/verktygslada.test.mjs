@@ -1,3 +1,6 @@
+import { existsSync } from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { magazineView, emptyHudState, PAPER_FIXTURES } from './contact-queue.js';
@@ -6,6 +9,10 @@ import {
   JAMFORELSE_PATH,
   JAMFORELSE_MALL_PATH,
   DEPOSITION_PATH,
+  DEPOSITION_UTKAST_SV,
+  DEPOSITION_RECEIPT_EN,
+  DEPOSITION_TERMS_UI,
+  DEPOSITION_TERMS_UI_ALT,
   CALENDAR_URL,
   bookedNeedsTime,
   campaignStatusView,
@@ -124,7 +131,16 @@ test('snabbknappar: Jämförelse pekar på befintligt kundjamforelse-verktyg, in
   assert.equal(chips.jamforelse.href, JAMFORELSE_PATH);
   assert.equal(chips.jamforelseMall.href, '/utskick/mall-kund-jamforelse.html');
   assert.equal(chips.jamforelseMall.href, JAMFORELSE_MALL_PATH);
+  assert.equal(chips.deposition.href, '/utskick/deposition-mall.html');
   assert.equal(chips.deposition.href, DEPOSITION_PATH);
+  assert.equal(chips.deposition.utkast, DEPOSITION_UTKAST_SV);
+  assert.equal(chips.deposition.terms, DEPOSITION_TERMS_UI);
+  assert.equal(DEPOSITION_UTKAST_SV, '/ekonomi/avtal/Capital-Strategy-deposition-escrow-mottagningsbekraftelse-utkast.md');
+  assert.equal(DEPOSITION_RECEIPT_EN, '/ekonomi/avtal/Capital-Strategy-deposit-escrow-receipt-DRAFT.md');
+  assert.equal(DEPOSITION_TERMS_UI, '/utskick/ks-escrow-terms.html');
+  assert.equal(DEPOSITION_TERMS_UI_ALT, '/ekonomi/avtal/KS-escrow-terms-UI.html');
+  assert.match(chips.deposition.title, /Skickar inte/);
+  assert.match(chips.deposition.title, /mottagningsbekräftelse/);
   assert.equal(chips.williamCalendar, null);
   const html = renderCrystalDock({ expanded: false, tenant: {} });
   assert.match(html, /Kalender/);
@@ -135,6 +151,24 @@ test('snabbknappar: Jämförelse pekar på befintligt kundjamforelse-verktyg, in
   assert.match(html, /\/utskick\/kundjamforelse-verktyg\.html/);
   assert.doesNotMatch(html, /kontotyp-jamforelse-ny|inventerad-jamforelse/);
   assert.match(html, /deposition-mall\.html/);
+  assert.match(html, /mottagningsbekraftelse-utkast\.md/);
+  assert.match(html, /ks-escrow-terms\.html/);
+  assert.doesNotMatch(html, /mailto:/);
+});
+
+test('deposition-mallar ligger på exakta sökvägar i boken', () => {
+  const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+  assert.equal(
+    existsSync(path.join(root, 'ekonomi/avtal/Capital-Strategy-deposition-escrow-mottagningsbekraftelse-utkast.md')),
+    true,
+  );
+  assert.equal(
+    existsSync(path.join(root, 'ekonomi/avtal/Capital-Strategy-deposit-escrow-receipt-DRAFT.md')),
+    true,
+  );
+  assert.equal(existsSync(path.join(root, 'public/utskick/ks-escrow-terms.html')), true);
+  assert.equal(existsSync(path.join(root, 'ekonomi/avtal/KS-escrow-terms-UI.html')), true);
+  assert.equal(existsSync(path.join(root, 'public/utskick/deposition-mall.html')), true);
 });
 
 test('HUD-html: paper, saknas, ingen send-knapp för mejl', () => {
@@ -166,6 +200,8 @@ test('HUD-html: paper, saknas, ingen send-knapp för mejl', () => {
   assert.match(html, /KS-referens/);
   assert.match(html, /\/utskick\/kundjamforelse-verktyg\.html/);
   assert.match(html, /\/utskick\/mall-kund-jamforelse\.html/);
+  assert.match(html, /mottagningsbekraftelse-utkast\.md/);
+  assert.match(html, /ks-escrow-terms\.html/);
 });
 
 test('tom kö i HUD hittar inte på kundnamn', () => {
