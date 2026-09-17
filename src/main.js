@@ -42,6 +42,7 @@ import {
   emptyHedgePulse,
   hedgeProgressPulse,
   emptyHedgeProgressPulse,
+  hedgeMidHandoffPulse,
   LIVE_LOCKED,
   hasCompletedFirstRide,
   markFirstRideComplete,
@@ -409,10 +410,11 @@ root.addEventListener('submit', (ev) => {
     if (hedgeFade.fading) {
       const until = now + hedgeFade.ms;
       const progressPulse = hedgeProgressPulse(hedgeFade, riderResult.hedge);
+      const handoffMid = hedgeMidHandoffPulse(hedgeFade, riderResult.hedge);
       riderPlay = {
         ...riderPlay,
         hedgeFade: { ...hedgeFade, until },
-        hedgePulse: emptyHedgePulse(),
+        hedgePulse: handoffMid,
         hedgeProgressPulse: progressPulse,
       };
       if (progressPulse.pulsing) {
@@ -423,6 +425,15 @@ root.addEventListener('submit', (ev) => {
           riderPlay = { ...riderPlay, hedgeProgressPulse: emptyHedgeProgressPulse() };
           render();
         }, progressPulse.ms);
+      }
+      if (handoffMid.pulsing) {
+        const midPulseUntil = now + handoffMid.ms;
+        riderPlay = { ...riderPlay, hedgePulse: { ...handoffMid, until: midPulseUntil } };
+        window.setTimeout(() => {
+          if (!riderPlay.hedgePulse || riderPlay.hedgePulse.until !== midPulseUntil) return;
+          riderPlay = { ...riderPlay, hedgePulse: emptyHedgePulse() };
+          render();
+        }, handoffMid.ms);
       }
       window.setTimeout(() => {
         if (!riderPlay.hedgeFade || riderPlay.hedgeFade.until !== until) return;

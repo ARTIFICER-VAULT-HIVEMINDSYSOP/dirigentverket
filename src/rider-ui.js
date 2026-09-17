@@ -214,9 +214,14 @@ export function renderPlayArena(ride, play = {}) {
   const fade = play.hedgeFade && play.hedgeFade.fading ? play.hedgeFade : null;
   const fadeIn = Boolean(fade && fade.fadingIn);
   const fadeGhosts = fade && !fadeIn ? fade.ghosts || [] : [];
-  const pulse = play.hedgePulse && play.hedgePulse.pulsing && !fadeIn ? play.hedgePulse : null;
+  const progressHandoff = Boolean(fadeIn && fade.progressFade);
+  const pulse =
+    play.hedgePulse && play.hedgePulse.pulsing && (!fadeIn || progressHandoff)
+      ? play.hedgePulse
+      : null;
   const pulseAt = pulse && pulse.midPip != null ? Number(pulse.midPip.at) : null;
-  const pulseSides = pulse && Array.isArray(pulse.sidePips) ? pulse.sidePips : [];
+  const pulseSides =
+    fadeIn || !pulse || !Array.isArray(pulse.sidePips) ? [] : pulse.sidePips;
   const prices = [
     ride.tp,
     ride.sl,
