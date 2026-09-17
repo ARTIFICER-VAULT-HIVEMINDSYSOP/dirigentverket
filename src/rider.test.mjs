@@ -1512,8 +1512,6 @@ test('frekvens-progress engångs-puls när fade-in proposed→grind startar; tys
   assert.equal(hedgeProgressPulse(null, few.hedge).pulsing, false);
   assert.equal(hedgeProgressPulse(emptyHedgeFade(), few.hedge).pulsing, false);
   assert.equal(hedgeProgressPulse(emptyHedgeProgressFade(), few.hedge).pulsing, false);
-  assert.equal(hedgeProgressPulse(hedgeBandFadeIn(few.hedge, on.hedge), on.hedge).pulsing, false);
-  assert.equal(hedgeProgressPulse(hedgeProgressFade(few.hedge, on.hedge), on.hedge).pulsing, false);
   assert.equal(hedgeProgressPulse(fadeIn, on.hedge).pulsing, false);
   assert.equal(hedgeProgressPulse(fadeIn, empty.hedge).pulsing, false);
   assert.equal(hedgeProgressPulse(hedgeProgressFadeIn(on.hedge, empty.hedge), empty.hedge).pulsing, false);
@@ -1574,11 +1572,156 @@ test('frekvens-progress engångs-puls när fade-in proposed→grind startar; tys
   assert.match(toBadHtml, /data-freq-progress-pulse="0"/);
   assert.ok(!/is-progress-pulse/.test(toBadHtml));
 
-  const quietOn = renderPlayArena(on, {
-    hedgeFade: hedgeBandFadeIn(few.hedge, on.hedge),
-    hedgeProgressPulse: hedgeProgressPulse(hedgeBandFadeIn(few.hedge, on.hedge), on.hedge),
+  const quietFew = renderPlayArena(few);
+  assert.match(quietFew, /data-freq-progress="1"/);
+  assert.match(quietFew, /data-freq-progress-pulse="0"/);
+  assert.ok(!/is-progress-pulse/.test(quietFew));
+});
+
+test('frekvens-progress engångs-puls när fade-out grind→proposed startar; tyst utan giltig overlay', () => {
+  const few = computeRide({
+    entry: 105,
+    maxFel: 2,
+    rr: 2,
+    grav: 105,
+    bbLower: 100,
+    bbUpper: 110,
+    priceSeries: '100\n110\n100',
   });
-  assert.match(quietOn, /data-hedge-fade-in="1"/);
+  const on = computeRide({
+    entry: 105,
+    maxFel: 2,
+    rr: 2,
+    grav: 105,
+    bbLower: 100,
+    bbUpper: 110,
+    priceSeries: '100\n110\n100\n110',
+  });
+  const empty = computeRide({ entry: 100, maxFel: 2, rr: 2, grav: 100 });
+  const badBand = computeRide({
+    entry: 105,
+    maxFel: 2,
+    rr: 2,
+    grav: 105,
+    bbLower: 110,
+    bbUpper: 100,
+    priceSeries: '100\n110\n100\n110',
+  });
+  const noBand = computeRide({
+    entry: 105,
+    maxFel: 2,
+    rr: 2,
+    grav: 105,
+    priceSeries: '100\n110\n100\n110',
+  });
+
+  assert.equal(few.hedge.freqProgress, true);
+  assert.equal(few.hedge.freqHave, 2);
+  assert.equal(few.hedge.freqNeed, 3);
+  assert.equal(on.hedge.proposed, true);
+  assert.equal(on.hedge.freqProgress, false);
+
+  const fadeOut = hedgeProgressFade(few.hedge, on.hedge);
+  const bandFadeIn = hedgeBandFadeIn(few.hedge, on.hedge);
+  const bandFade = hedgeBandFade(on.hedge, few.hedge);
+  const pulse = hedgeProgressPulse(fadeOut, on.hedge);
+  const bandPulse = hedgeProgressPulse(bandFadeIn, on.hedge);
+  const fadeInPulse = hedgeProgressPulse(bandFade, few.hedge);
+
+  assert.equal(pulse.pulsing, true);
+  assert.equal(pulse.paper, true);
+  assert.equal(pulse.ms, HEDGE_MID_PULSE_MS);
+  assert.equal(pulse.freqHave, 2);
+  assert.equal(pulse.freqNeed, 3);
+  assert.equal(pulse.count, 2);
+  assert.equal(bandPulse.pulsing, true);
+  assert.equal(bandPulse.freqHave, 2);
+  assert.equal(bandPulse.freqNeed, 3);
+  assert.equal(fadeInPulse.pulsing, true);
+  assert.equal(hedgeProgressPulse(bandFadeIn, few.hedge).pulsing, false);
+  assert.equal(hedgeProgressPulse(bandFade, on.hedge).pulsing, false);
+
+  assert.equal(hedgeProgressPulse(null, on.hedge).pulsing, false);
+  assert.equal(hedgeProgressPulse(emptyHedgeFade(), on.hedge).pulsing, false);
+  assert.equal(hedgeProgressPulse(emptyHedgeProgressFade(), on.hedge).pulsing, false);
+  assert.equal(hedgeProgressPulse(fadeOut, few.hedge).pulsing, false);
+  assert.equal(hedgeProgressPulse(fadeOut, empty.hedge).pulsing, false);
+  assert.equal(hedgeProgressPulse(hedgeProgressFade(few.hedge, empty.hedge), empty.hedge).pulsing, false);
+  assert.equal(hedgeProgressPulse(hedgeProgressFade(few.hedge, badBand.hedge), badBand.hedge).pulsing, false);
+  assert.equal(hedgeProgressPulse(hedgeProgressFade(few.hedge, noBand.hedge), noBand.hedge).pulsing, false);
+  assert.equal(hedgeProgressPulse(hedgeBandFadeIn(empty.hedge, on.hedge), on.hedge).pulsing, false);
+  assert.equal(hedgeProgressPulse(hedgeBandFadeIn(on.hedge, on.hedge), on.hedge).pulsing, false);
+  assert.equal(hedgeProgressPulse(fadeOut, { proposed: true }).pulsing, true);
+  assert.equal(hedgeProgressPulse(fadeOut, { proposed: false, freqProgress: true, freqHave: 2, freqNeed: 3 }).pulsing, false);
+  assert.equal(emptyHedgeProgressPulse().pulsing, false);
+  assert.equal(emptyPlayState().hedgeProgressPulse.pulsing, false);
+  assert.equal(LIVE_LOCKED, true);
+
+  const pulseHtml = renderPlayArena(on, { hedgeFade: bandFadeIn, hedgeProgressPulse: bandPulse });
+  assert.match(pulseHtml, /data-freq-progress-pulse="1"/);
+  assert.match(pulseHtml, /data-freq-progress-fade="1"/);
+  assert.match(pulseHtml, /data-freq-progress="1"/);
+  assert.match(pulseHtml, /has-freq-progress-pulse/);
+  assert.match(pulseHtml, /is-progress-pulse/);
+  assert.match(pulseHtml, /has-freq-progress-fade/);
+  assert.match(pulseHtml, /is-progress-fade/);
+  assert.match(pulseHtml, /data-freq-progress-fade-in="0"/);
+  assert.ok(!/is-progress-fade-in/.test(pulseHtml));
+  assert.match(pulseHtml, /data-freq-have="2"/);
+  assert.match(pulseHtml, /data-freq-need="3"/);
+  assert.match(pulseHtml, /--hedge-pulse-ms:900ms/);
+  assert.match(pulseHtml, /data-hedge-fade-in="1"/);
+  assert.match(pulseHtml, /data-hedge-mid-pip="1"/);
+  assert.equal((pulseHtml.match(/rider-mark-hedge-mid/g) || []).length, 1);
+  assert.equal((pulseHtml.match(/rider-hedge-mid-pip/g) || []).length, 1);
+  assert.ok(!/<button/i.test(pulseHtml));
+  assert.ok(!/<dialog/i.test(pulseHtml));
+  assert.doesNotMatch(pulseHtml, /P&L|pnl/);
+  assert.equal(LIVE_LOCKED, true);
+
+  const fadeOnlyHtml = renderPlayArena(on, { hedgeFade: bandFadeIn });
+  assert.match(fadeOnlyHtml, /data-freq-progress-fade="1"/);
+  assert.match(fadeOnlyHtml, /data-freq-progress-pulse="0"/);
+  assert.ok(!/is-progress-pulse/.test(fadeOnlyHtml));
+  assert.ok(!/has-freq-progress-pulse/.test(fadeOnlyHtml));
+
+  const pulseWithoutFade = renderPlayArena(on, { hedgeProgressPulse: bandPulse });
+  assert.match(pulseWithoutFade, /data-freq-progress-pulse="0"/);
+  assert.ok(!/is-progress-pulse/.test(pulseWithoutFade));
+
+  const oppositeHtml = renderPlayArena(few, { hedgeFade: bandFade, hedgeProgressPulse: fadeInPulse });
+  assert.match(oppositeHtml, /data-freq-progress-fade-in="1"/);
+  assert.match(oppositeHtml, /data-freq-progress-pulse="1"/);
+  assert.match(oppositeHtml, /is-progress-fade-in/);
+  assert.ok(!/has-freq-progress-fade[^-]/.test(oppositeHtml) && !/has-freq-progress-fade"/.test(oppositeHtml));
+
+  const fromEmptyHtml = renderPlayArena(on, {
+    hedgeFade: hedgeBandFadeIn(empty.hedge, on.hedge),
+    hedgeProgressPulse: hedgeProgressPulse(hedgeBandFadeIn(empty.hedge, on.hedge), on.hedge),
+  });
+  assert.match(fromEmptyHtml, /data-hedge-fade-in="1"/);
+  assert.match(fromEmptyHtml, /data-freq-progress-fade="0"/);
+  assert.match(fromEmptyHtml, /data-freq-progress-pulse="0"/);
+  assert.ok(!/is-progress-pulse/.test(fromEmptyHtml));
+
+  const alreadyOn = renderPlayArena(on, {
+    hedgeFade: hedgeBandFadeIn(on.hedge, on.hedge),
+    hedgeProgressPulse: hedgeProgressPulse(hedgeBandFadeIn(on.hedge, on.hedge), on.hedge),
+  });
+  assert.match(alreadyOn, /data-hedge-fade-in="1"/);
+  assert.match(alreadyOn, /data-freq-progress-pulse="0"/);
+  assert.ok(!/is-progress-pulse/.test(alreadyOn));
+
+  const emptyHtml = renderPlayArena(empty, {
+    hedgeFade: hedgeProgressFade(few.hedge, empty.hedge),
+    hedgeProgressPulse: hedgeProgressPulse(hedgeProgressFade(few.hedge, empty.hedge), empty.hedge),
+  });
+  assert.match(emptyHtml, /data-freq-saknas="1"/);
+  assert.match(emptyHtml, /data-freq-progress-pulse="0"/);
+  assert.ok(!/is-progress-pulse/.test(emptyHtml));
+
+  const quietOn = renderPlayArena(on);
+  assert.match(quietOn, /data-freq-progress="0"/);
   assert.match(quietOn, /data-freq-progress-pulse="0"/);
   assert.ok(!/is-progress-pulse/.test(quietOn));
 

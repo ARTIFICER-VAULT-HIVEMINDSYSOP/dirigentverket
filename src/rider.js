@@ -634,23 +634,7 @@ function progressFadeOutStarted(fade) {
   return !fade.fadingIn && !fade.progressFadeIn;
 }
 
-/**
- * Soft one-shot progress-pip pulse only when fade-in proposed→grind starts.
- * Same 32-bit ease-out family as mitt-pip / twin-pip (~900ms).
- * Copies next have/need — never invents.
- * Tom serie / saknas-band / !freqProgress / already proposed = no pulse.
- */
-export function hedgeProgressPulse(fade, next) {
-  const hold = emptyHedgeProgressPulse();
-  if (!progressFadeInStarted(fade)) return hold;
-  if (!next || next.proposed || !next.freqProgress) return hold;
-  const have = knownProgressSlot(next.freqHave);
-  const need = knownProgressSlot(next.freqNeed);
-  if (have == null || need == null || have >= need) return hold;
-  const fadeHave = knownProgressSlot(fade.freqHave);
-  const fadeNeed = knownProgressSlot(fade.freqNeed);
-  if (fadeHave == null || fadeNeed == null || fadeHave !== have || fadeNeed !== need) return hold;
-  const count = knownProgressSlot(next.count);
+function progressPulseFromSlots(have, need, count) {
   return {
     pulsing: true,
     freqHave: have,
@@ -659,6 +643,37 @@ export function hedgeProgressPulse(fade, next) {
     ms: HEDGE_MID_PULSE_MS,
     paper: true,
   };
+}
+
+/**
+ * Soft one-shot progress-pip pulse on HUD handoff start:
+ * - fade-in proposed→grind (arrival on grind progress)
+ * - fade-out grind→proposed (exit/handoff as progress yields to mid+twin)
+ * Opposite directions never pulse together.
+ * Same 32-bit ease-out family as mitt-pip / twin-pip (~900ms).
+ * Copies overlay/real have/need — never invents.
+ * Tom serie / saknas-band / under grind / !freqProgress / already proposed without fade-out = no pulse.
+ */
+export function hedgeProgressPulse(fade, next) {
+  const hold = emptyHedgeProgressPulse();
+  const fadeIn = progressFadeInStarted(fade);
+  const fadeOut = progressFadeOutStarted(fade);
+  if (fadeIn === fadeOut) return hold;
+  const fadeHave = knownProgressSlot(fade.freqHave);
+  const fadeNeed = knownProgressSlot(fade.freqNeed);
+  if (fadeHave == null || fadeNeed == null || fadeHave >= fadeNeed) return hold;
+  if (fadeIn) {
+    if (!next || next.proposed || !next.freqProgress) return hold;
+    const have = knownProgressSlot(next.freqHave);
+    const need = knownProgressSlot(next.freqNeed);
+    if (have == null || need == null || have >= need) return hold;
+    if (fadeHave !== have || fadeNeed !== need) return hold;
+    const count = knownProgressSlot(next.count);
+    return progressPulseFromSlots(have, need, count);
+  }
+  if (!next || !next.proposed) return hold;
+  const count = knownProgressSlot(fade.count);
+  return progressPulseFromSlots(fadeHave, fadeNeed, count);
 }
 
 /**

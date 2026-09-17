@@ -61,7 +61,7 @@ function progressFadeOverlay(play) {
 function freqProgressPulseOn(play, overlay) {
   const pulse = play && play.hedgeProgressPulse;
   if (!pulse || !pulse.pulsing) return false;
-  if (!overlay || overlay.kind !== 'in') return false;
+  if (!overlay || (overlay.kind !== 'in' && overlay.kind !== 'out')) return false;
   const have = Number(pulse.freqHave);
   const need = Number(pulse.freqNeed);
   const overlayHave = Number(overlay.freqHave);
@@ -76,7 +76,7 @@ function renderFreqPips(hedge, overlay = null, pulseOn = false) {
   if (!hedge && !overlay) return '';
   const fadingOut = Boolean(overlay && overlay.kind === 'out');
   const fadingIn = Boolean(overlay && overlay.kind === 'in');
-  const pulsing = Boolean(pulseOn && fadingIn);
+  const pulsing = Boolean(pulseOn && (fadingIn || fadingOut));
   const useOverlay = fadingOut || fadingIn;
   const src = hedge || {};
   const saknas = Boolean(src.saknas) && !useOverlay;
