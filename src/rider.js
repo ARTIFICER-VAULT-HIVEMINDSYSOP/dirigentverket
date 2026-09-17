@@ -686,6 +686,46 @@ export function hedgeMidHandoffPulse(fade, next) {
   };
 }
 
+function knownTwinSides(next, fade) {
+  if (!next || !next.proposed) return [];
+  const fromPlan = hedgeSidePips(next.kop, next.salj);
+  const sidePips = copyKnownSidePips(next.sidePips);
+  if (fromPlan.length !== 2 || sidePips.length !== 2) return [];
+  if (!sidePips.some((p) => p.kind === 'köp') || !sidePips.some((p) => p.kind === 'sälj')) return [];
+  const planMatch = fromPlan.every((fp) =>
+    sidePips.some((sp) => sp.kind === fp.kind && Number(sp.at) === Number(fp.at)),
+  );
+  if (!planMatch) return [];
+  const fadeSides = copyKnownSidePips(fade && fade.sidePips);
+  if (fadeSides.length === 2) {
+    const fadeMatch = fadeSides.every((fp) =>
+      sidePips.some((sp) => sp.kind === fp.kind && Number(sp.at) === Number(fp.at)),
+    );
+    if (!fadeMatch) return [];
+  }
+  return sidePips;
+}
+
+/**
+ * Soft one-shot twin side-pip pulse only when fade-out grind→proposed starts.
+ * Landing tell — mirror of mitt-pip landing. Same 32-bit ease-out family (~900ms).
+ * Copies next kop.tp / salj.tp — never invents.
+ * Tom serie / saknas-band / under grind / !proposed / saknar tp / already proposed = no pulse.
+ */
+export function hedgeTwinHandoffPulse(fade, next) {
+  const hold = emptyHedgePulse();
+  if (!progressFadeOutStarted(fade)) return hold;
+  const sidePips = knownTwinSides(next, fade);
+  if (sidePips.length !== 2) return hold;
+  return {
+    pulsing: true,
+    midPip: null,
+    sidePips,
+    ms: HEDGE_MID_PULSE_MS,
+    paper: true,
+  };
+}
+
 function copyKnownHedgeGhosts(list) {
   if (!Array.isArray(list)) return [];
   const out = [];
@@ -826,6 +866,15 @@ export function hedgeTwinPulse(fade, next) {
     ms: HEDGE_MID_PULSE_MS,
     paper: true,
   };
+}
+
+/**
+ * After fade-in saknas→giltig, skip twin if grind→proposed landing already pulsed.
+ * One clear one-shot — never two stacked in the same overlay.
+ */
+export function hedgeTwinAfterFade(fade, next, handoffTwin) {
+  if (handoffTwin && handoffTwin.pulsing) return emptyHedgePulse();
+  return hedgeTwinPulse(fade, next);
 }
 
 export function emptyRideRokad(side = 'köp') {

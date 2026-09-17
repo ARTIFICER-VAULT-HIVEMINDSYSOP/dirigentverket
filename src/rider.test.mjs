@@ -50,6 +50,8 @@ import {
   hedgeProgressPulse,
   emptyHedgeProgressPulse,
   hedgeMidHandoffPulse,
+  hedgeTwinHandoffPulse,
+  hedgeTwinAfterFade,
   hedgeSidePips,
   HEDGE_FADE_MS,
   HEDGE_MID_PULSE_MS,
@@ -1741,6 +1743,193 @@ test('mitt-pip engångs-puls när progress fade-out grind→proposed startar; ty
   assert.match(quietOn, /data-hedge-mid-pulse="0"/);
   assert.ok(!/is-hedge-mid-pulse/.test(quietOn));
   assert.match(quietOn, /data-hedge-mid-pip="1"/);
+  assert.equal((quietOn.match(/rider-mark-hedge-mid/g) || []).length, 1);
+});
+
+test('twin side-pip engångs-puls när progress fade-out grind→proposed startar; tyst annars', () => {
+  const few = computeRide({
+    entry: 105,
+    maxFel: 2,
+    rr: 2,
+    grav: 105,
+    bbLower: 100,
+    bbUpper: 110,
+    priceSeries: '100\n110\n100',
+  });
+  const on = computeRide({
+    entry: 105,
+    maxFel: 2,
+    rr: 2,
+    grav: 105,
+    bbLower: 100,
+    bbUpper: 110,
+    priceSeries: '100\n110\n100\n110',
+  });
+  const empty = computeRide({ entry: 100, maxFel: 2, rr: 2, grav: 100 });
+  const badBand = computeRide({
+    entry: 105,
+    maxFel: 2,
+    rr: 2,
+    grav: 105,
+    bbLower: 110,
+    bbUpper: 100,
+    priceSeries: '100\n110\n100\n110',
+  });
+  const noBand = computeRide({
+    entry: 105,
+    maxFel: 2,
+    rr: 2,
+    grav: 105,
+    priceSeries: '100\n110\n100\n110',
+  });
+
+  assert.equal(few.hedge.freqProgress, true);
+  assert.equal(on.hedge.proposed, true);
+  assert.equal(on.hedge.kop.tp, 110);
+  assert.equal(on.hedge.salj.tp, 100);
+
+  const fadeOut = hedgeProgressFade(few.hedge, on.hedge);
+  const bandFadeIn = hedgeBandFadeIn(few.hedge, on.hedge);
+  const emptyFadeIn = hedgeBandFadeIn(empty.hedge, on.hedge);
+  const pulse = hedgeTwinHandoffPulse(fadeOut, on.hedge);
+  const bandPulse = hedgeTwinHandoffPulse(bandFadeIn, on.hedge);
+
+  assert.equal(pulse.pulsing, true);
+  assert.equal(pulse.paper, true);
+  assert.equal(pulse.ms, HEDGE_MID_PULSE_MS);
+  assert.equal(pulse.midPip, null);
+  assert.equal(pulse.sidePips.length, 2);
+  assert.equal(pulse.sidePips[0].kind, 'köp');
+  assert.equal(pulse.sidePips[0].at, on.hedge.kop.tp);
+  assert.equal(pulse.sidePips[1].kind, 'sälj');
+  assert.equal(pulse.sidePips[1].at, on.hedge.salj.tp);
+  assert.equal(bandPulse.pulsing, true);
+  assert.equal(bandPulse.sidePips[0].at, 110);
+  assert.equal(bandPulse.sidePips[1].at, 100);
+
+  assert.equal(hedgeTwinHandoffPulse(null, on.hedge).pulsing, false);
+  assert.equal(hedgeTwinHandoffPulse(emptyHedgeFade(), on.hedge).pulsing, false);
+  assert.equal(hedgeTwinHandoffPulse(emptyHedgeProgressFade(), on.hedge).pulsing, false);
+  assert.equal(hedgeTwinHandoffPulse(hedgeBandFade(on.hedge, few.hedge), few.hedge).pulsing, false);
+  assert.equal(hedgeTwinHandoffPulse(hedgeProgressFadeIn(on.hedge, few.hedge), few.hedge).pulsing, false);
+  assert.equal(hedgeTwinHandoffPulse(fadeOut, few.hedge).pulsing, false);
+  assert.equal(hedgeTwinHandoffPulse(fadeOut, empty.hedge).pulsing, false);
+  assert.equal(hedgeTwinHandoffPulse(hedgeProgressFade(few.hedge, empty.hedge), empty.hedge).pulsing, false);
+  assert.equal(hedgeTwinHandoffPulse(hedgeProgressFade(few.hedge, badBand.hedge), badBand.hedge).pulsing, false);
+  assert.equal(hedgeTwinHandoffPulse(hedgeProgressFade(few.hedge, noBand.hedge), noBand.hedge).pulsing, false);
+  assert.equal(hedgeTwinHandoffPulse(emptyFadeIn, on.hedge).pulsing, false);
+  assert.equal(hedgeTwinHandoffPulse(fadeOut, { proposed: true, sidePips: [] }).pulsing, false);
+  assert.equal(
+    hedgeTwinHandoffPulse(fadeOut, { proposed: true, sidePips: [{ kind: 'köp', at: 110 }] }).pulsing,
+    false,
+  );
+  assert.equal(
+    hedgeTwinHandoffPulse(fadeOut, {
+      proposed: true,
+      kop: { tp: 110 },
+      salj: { tp: 100 },
+      sidePips: [{ kind: 'köp', at: 999 }, { kind: 'sälj', at: 100 }],
+    }).pulsing,
+    false,
+  );
+  assert.equal(
+    hedgeTwinHandoffPulse(bandFadeIn, {
+      proposed: true,
+      kop: { tp: 110 },
+      salj: { tp: 100 },
+      sidePips: [
+        { kind: 'köp', at: 111 },
+        { kind: 'sälj', at: 100 },
+      ],
+    }).pulsing,
+    false,
+  );
+  assert.equal(LIVE_LOCKED, true);
+
+  assert.equal(hedgeTwinPulse(bandFadeIn, on.hedge).pulsing, true);
+  assert.equal(hedgeTwinAfterFade(bandFadeIn, on.hedge, bandPulse).pulsing, false);
+  assert.equal(hedgeTwinAfterFade(emptyFadeIn, on.hedge, hedgeTwinHandoffPulse(emptyFadeIn, on.hedge)).pulsing, true);
+  assert.equal(hedgeTwinAfterFade(emptyFadeIn, on.hedge, emptyHedgePulse()).pulsing, true);
+
+  const both = {
+    pulsing: true,
+    midPip: hedgeMidHandoffPulse(bandFadeIn, on.hedge).midPip,
+    sidePips: bandPulse.sidePips,
+    ms: HEDGE_MID_PULSE_MS,
+    paper: true,
+  };
+  const pulseHtml = renderPlayArena(on, { hedgeFade: bandFadeIn, hedgePulse: both });
+  assert.match(pulseHtml, /data-hedge-side-pulse="1"/);
+  assert.match(pulseHtml, /is-hedge-side-pulse/);
+  assert.match(pulseHtml, /has-hedge-side-pulse/);
+  assert.match(pulseHtml, /data-hedge-mid-pulse="1"/);
+  assert.match(pulseHtml, /has-hedge-mid-pulse/);
+  assert.match(pulseHtml, /data-hedge-fade-in="1"/);
+  assert.match(pulseHtml, /data-hedge-side-fade-in="1"/);
+  assert.match(pulseHtml, /data-freq-progress-fade="1"/);
+  assert.match(pulseHtml, /data-hedge-side-pip="köp"/);
+  assert.match(pulseHtml, /data-hedge-side-pip="sälj"/);
+  assert.equal((pulseHtml.match(/is-hedge-side-pulse/g) || []).length, 2);
+  assert.match(pulseHtml, /--hedge-pulse-ms:900ms/);
+  assert.equal((pulseHtml.match(/rider-mark-hedge-mid/g) || []).length, 1);
+  assert.equal((pulseHtml.match(/rider-hedge-mid-pip/g) || []).length, 1);
+  assert.ok(!/<button/i.test(pulseHtml));
+  assert.ok(!/<dialog/i.test(pulseHtml));
+  assert.doesNotMatch(pulseHtml, /P&L|pnl/);
+  assert.equal(LIVE_LOCKED, true);
+
+  const fadeOnlyHtml = renderPlayArena(on, { hedgeFade: bandFadeIn });
+  assert.match(fadeOnlyHtml, /data-freq-progress-fade="1"/);
+  assert.match(fadeOnlyHtml, /data-hedge-side-pulse="0"/);
+  assert.ok(!/is-hedge-side-pulse/.test(fadeOnlyHtml));
+  assert.ok(!/has-hedge-side-pulse/.test(fadeOnlyHtml));
+
+  const fromEmptyHtml = renderPlayArena(on, {
+    hedgeFade: emptyFadeIn,
+    hedgePulse: hedgeTwinHandoffPulse(emptyFadeIn, on.hedge),
+  });
+  assert.match(fromEmptyHtml, /data-hedge-fade-in="1"/);
+  assert.match(fromEmptyHtml, /data-freq-progress-fade="0"/);
+  assert.match(fromEmptyHtml, /data-hedge-side-pulse="0"/);
+  assert.ok(!/is-hedge-side-pulse/.test(fromEmptyHtml));
+
+  const duringEmptyFade = renderPlayArena(on, {
+    hedgeFade: emptyFadeIn,
+    hedgePulse: hedgeTwinPulse(emptyFadeIn, on.hedge),
+  });
+  assert.match(duringEmptyFade, /data-hedge-fade-in="1"/);
+  assert.match(duringEmptyFade, /data-hedge-side-pulse="0"/);
+  assert.ok(!/is-hedge-side-pulse/.test(duringEmptyFade));
+
+  const toGrindHtml = renderPlayArena(few, {
+    hedgeFade: hedgeBandFade(on.hedge, few.hedge),
+    hedgePulse: hedgeTwinHandoffPulse(hedgeBandFade(on.hedge, few.hedge), few.hedge),
+  });
+  assert.match(toGrindHtml, /data-freq-progress-fade-in="1"/);
+  assert.match(toGrindHtml, /data-hedge-side-pulse="0"/);
+  assert.ok(!/is-hedge-side-pulse/.test(toGrindHtml));
+
+  const emptyHtml = renderPlayArena(empty, {
+    hedgeFade: hedgeProgressFade(few.hedge, empty.hedge),
+    hedgePulse: hedgeTwinHandoffPulse(hedgeProgressFade(few.hedge, empty.hedge), empty.hedge),
+  });
+  assert.match(emptyHtml, /data-freq-saknas="1"/);
+  assert.match(emptyHtml, /data-hedge-side-pulse="0"/);
+  assert.ok(!/is-hedge-side-pulse/.test(emptyHtml));
+  assert.ok(!/rider-hedge-side-pip/.test(emptyHtml));
+
+  const fewHtml = renderPlayArena(few, {
+    hedgePulse: hedgeTwinHandoffPulse(bandFadeIn, few.hedge),
+  });
+  assert.match(fewHtml, /data-freq-progress="1"/);
+  assert.match(fewHtml, /data-hedge-side-pulse="0"/);
+  assert.ok(!/is-hedge-side-pulse/.test(fewHtml));
+  assert.ok(!/rider-hedge-side-pip/.test(fewHtml));
+
+  const quietOn = renderPlayArena(on);
+  assert.match(quietOn, /data-hedge-side-pulse="0"/);
+  assert.ok(!/is-hedge-side-pulse/.test(quietOn));
+  assert.match(quietOn, /data-hedge-side-pips="1"/);
   assert.equal((quietOn.match(/rider-mark-hedge-mid/g) || []).length, 1);
 });
 

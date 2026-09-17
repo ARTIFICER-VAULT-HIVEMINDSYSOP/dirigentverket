@@ -221,7 +221,9 @@ export function renderPlayArena(ride, play = {}) {
       : null;
   const pulseAt = pulse && pulse.midPip != null ? Number(pulse.midPip.at) : null;
   const pulseSides =
-    fadeIn || !pulse || !Array.isArray(pulse.sidePips) ? [] : pulse.sidePips;
+    !pulse || !Array.isArray(pulse.sidePips) || (fadeIn && !progressHandoff)
+      ? []
+      : pulse.sidePips;
   const prices = [
     ride.tp,
     ride.sl,

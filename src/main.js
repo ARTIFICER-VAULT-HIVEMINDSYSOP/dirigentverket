@@ -43,6 +43,8 @@ import {
   hedgeProgressPulse,
   emptyHedgeProgressPulse,
   hedgeMidHandoffPulse,
+  hedgeTwinHandoffPulse,
+  hedgeTwinAfterFade,
   LIVE_LOCKED,
   hasCompletedFirstRide,
   markFirstRideComplete,
@@ -411,10 +413,18 @@ root.addEventListener('submit', (ev) => {
       const until = now + hedgeFade.ms;
       const progressPulse = hedgeProgressPulse(hedgeFade, riderResult.hedge);
       const handoffMid = hedgeMidHandoffPulse(hedgeFade, riderResult.hedge);
+      const handoffTwin = hedgeTwinHandoffPulse(hedgeFade, riderResult.hedge);
+      const handoffPulse = {
+        pulsing: Boolean(handoffMid.pulsing || handoffTwin.pulsing),
+        midPip: handoffMid.midPip,
+        sidePips: handoffTwin.sidePips || [],
+        ms: handoffMid.pulsing ? handoffMid.ms : handoffTwin.ms,
+        paper: true,
+      };
       riderPlay = {
         ...riderPlay,
         hedgeFade: { ...hedgeFade, until },
-        hedgePulse: handoffMid,
+        hedgePulse: handoffPulse,
         hedgeProgressPulse: progressPulse,
       };
       if (progressPulse.pulsing) {
@@ -426,20 +436,22 @@ root.addEventListener('submit', (ev) => {
           render();
         }, progressPulse.ms);
       }
-      if (handoffMid.pulsing) {
-        const midPulseUntil = now + handoffMid.ms;
-        riderPlay = { ...riderPlay, hedgePulse: { ...handoffMid, until: midPulseUntil } };
+      if (handoffPulse.pulsing) {
+        const midPulseUntil = now + handoffPulse.ms;
+        riderPlay = { ...riderPlay, hedgePulse: { ...handoffPulse, until: midPulseUntil } };
         window.setTimeout(() => {
           if (!riderPlay.hedgePulse || riderPlay.hedgePulse.until !== midPulseUntil) return;
           riderPlay = { ...riderPlay, hedgePulse: emptyHedgePulse() };
           render();
-        }, handoffMid.ms);
+        }, handoffPulse.ms);
       }
       window.setTimeout(() => {
         if (!riderPlay.hedgeFade || riderPlay.hedgeFade.until !== until) return;
         const nextHedge = riderResult && riderResult.hedge;
         const midPulse = hedgeFade.fadingIn ? hedgeMidPulse(hedgeFade, nextHedge) : emptyHedgePulse();
-        const twinPulse = hedgeFade.fadingIn ? hedgeTwinPulse(hedgeFade, nextHedge) : emptyHedgePulse();
+        const twinPulse = hedgeFade.fadingIn
+          ? hedgeTwinAfterFade(hedgeFade, nextHedge, handoffTwin)
+          : emptyHedgePulse();
         const pulse = {
           pulsing: Boolean(midPulse.pulsing || twinPulse.pulsing),
           midPip: midPulse.midPip,
