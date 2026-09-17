@@ -79,7 +79,11 @@ https://github.com/ARTIFICER-VAULT-HIVEMINDSYSOP/dirigentverket/pull/4
 
 **16 sep ~17:55 Sthlm (ständig-process, draft PR #13):** frekvens-progress engångs-puls när fade-in proposed→grind startar landat (`88062e6`). Samma feel-family som mitt-pip/twin-pip (`HEDGE_MID_PULSE_MS` 900, ease-out). Puls bara när fade-in faktiskt startar med giltig freqProgress (kopierar have/need — aldrig påhittad). Tom serie / saknas-band / `!freqProgress` / already proposed = tyst. Inga dubbla mitt-markörer. Inga nya play-knappar. Paper. `LIVE_LOCKED` true. Väntar namngivet ÖB merge-ja. No live/send/merge.
 
+**10:45 Europe/Sofia 17 sep (ständig-process):** Magasin 8765 HTTP 200. PR #13 fortfarande draft CLEAN/MERGEABLE, 14 ahead / 0 behind; frekvens-progress fade-in proposed→grind (`9619709`) + frekvens-progress engångs-puls när fade-in startar (`88062e6`) redan landat. Status synkas till main. Ingen merge-claim. PR #11 0 behind. PR #9 lamp = kväll. Merge väntar namngivet ÖB-ja. No live/send/merge.
+
 **17 sep förmiddag Europe/Sofia (draft PR #13):** mitt-pip engångs-puls när frekvens-progress fade-out grind→proposed startar landat (`9ee7820`). Landing-tell, spegel till progress-puls `88062e6` (fade-in proposed→grind `9619709` redan landat). Samma feel-family (`HEDGE_MID_PULSE_MS` 900, ease-out). Puls bara när fade-out faktiskt startar med giltig proposed plan (räls/mitt syns). Tom serie / saknas-band / `!proposed` / already proposed without progress = tyst. Inga dubbla mitt-markörer. Inga nya play-knappar. Paper. `LIVE_LOCKED` true. Väntar namngivet ÖB merge-ja. No live/send/merge.
+
+**17 sep Europe/Sofia (ständig-process, draft PR #13):** `origin/main` (`9452879` ständig-status) mergad in i branchen. Konflikt i `rider-kansla-32bit-paper.md` löst — progress fade-in `9619709` + progress-puls `88062e6` + mitt-pip handoff-puls `9ee7820` behållna. PR #13 stannar draft. Merge väntar namngivet ÖB-ja. Paper. `LIVE_LOCKED` true. No live/send/merge.
 
 ## Prova-känsla (nu på main — paper)
 När ÖB öppnar `#/rider` ska det kännas så här, i den ordningen:
