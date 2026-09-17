@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8" />
+<title>[Kundnamn] — jämförelser</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet" />
+<style>
+  @page { size: A4; margin: 12mm; }
+  body { margin: 0; font: 400 11pt "Source Sans 3", sans-serif; color: #0b1628; background: #fff; }
+  .sheet { max-width: 180mm; margin: 0 auto; padding: 4mm; }
+  .brand { font: 600 8pt "Source Sans 3", sans-serif; letter-spacing: .14em; text-transform: uppercase; color: #8a7044; margin: 0 0 4px; }
+  h1 { font: 700 20pt Fraunces, serif; margin: 0 0 2px; color: #1a1206; }
+  .who { color: #5a4a30; margin: 0 0 12px; font-size: 10.5pt; }
+  .her {
+    margin: 0 0 14px; padding: 12px 14px; background: #1a1206; color: #f7eccf;
+    border-radius: 10px; font-size: 11pt; line-height: 1.4;
+  }
+  .her strong { color: #f0d59a; }
+  h2 {
+    font: 700 13pt Fraunces, serif; margin: 16px 0 8px; color: #2a1c08;
+    border-left: 4px solid #d4b06a; padding-left: 8px;
+  }
+  .tiers { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin: 0 0 8px; }
+  .tier {
+    border: 2px solid #c9a24a; border-radius: 12px; padding: 12px 10px;
+    background: #fffdf6; text-align: center;
+  }
+  .tier.on { background: #f7eccf; border-color: #8a7044; }
+  .tier .n { font: 700 9pt "Source Sans 3", sans-serif; letter-spacing: .12em; text-transform: uppercase; color: #8a7044; }
+  .tier .p { font: 700 16pt Fraunces, serif; margin: 4px 0 10px; color: #1a1206; }
+  .tier .sim {
+    text-align: left; background: #1a1206; color: #f7eccf;
+    border-radius: 8px; padding: 10px; font-size: 10.5pt; line-height: 1.35;
+  }
+  .tier .sim .lbl { font: 600 8pt "Source Sans 3", sans-serif; letter-spacing: .08em; text-transform: uppercase; color: #d4b06a; margin-bottom: 4px; }
+  .tier .sim .big { font: 700 14pt Fraunces, serif; color: #f0d59a; margin: 4px 0; }
+  table.cmp { width: 100%; border-collapse: collapse; font-size: 10.5pt; margin-bottom: 4px; }
+  table.cmp th, table.cmp td { border: 1px solid #c9a24a; padding: 8px 10px; text-align: left; vertical-align: top; }
+  table.cmp th { background: #f7eccf; font-weight: 700; color: #2a1c08; }
+  .spread { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 8px; margin-top: 8px; }
+  @media (max-width: 700px) { .spread { grid-template-columns: 1fr 1fr; } }
+  .spread div { border: 1px solid #c9a24a; border-radius: 8px; padding: 10px; background: #fffdf6; }
+  .spread strong { display: block; font-family: Fraunces, serif; font-size: 12pt; margin-bottom: 4px; }
+  .ro {
+    margin: 14px 0 0; padding: 12px 14px; background: #f7eccf;
+    border: 2px solid #d4b06a; border-radius: 10px; font-size: 11pt; line-height: 1.4;
+  }
+  .ro strong { font-family: Fraunces, serif; font-size: 13pt; display: block; margin-bottom: 4px; }
+  .tagline { margin: 14px 0 0; font: 700 14pt Fraunces, serif; color: #2a1c08; }
+  .foot { margin-top: 12px; font-size: 8pt; color: #8a7044; line-height: 1.35; }
+</style>
+</head>
+<body>
+<div class="sheet">
+  <p class="brand">Kapital och Strategi · North Investment</p>
+  <h1>[Kundnamn] — jämförelser</h1>
+  <p class="who">Kund [id] · North Investment</p>
+
+  <div class="her">
+    <strong>Hennes handel:</strong>
+    Insatt <strong>[insatt]</strong> · Saldo <strong>[saldo]</strong> → ökning ca <strong>[pct]</strong> mot insatt. (Antagande start [start] om ÖB gett.)
+  </div>
+
+  <div class="ro">
+    <strong>Högre kontotyp · mer hjälp · mer kapacitet</strong>
+    Med högre kontotyp får du löpande hjälp att styra flera handelsrobotar — inte bara en. Du får också mer utrymme på våra servrar och förtur när många ordrar kommer in samtidigt — så din handel prioriteras när det är tryck. Fler system, mer vägledning, mer förtroende i kontot = mer utrymme. Samma process: andel, stopp, mål — med mer kraft bakom.
+  </div>
+
+  <div class="ro">
+    <strong>Mer förtroende · mer utrymme</strong>
+    När du placerar mer förtroende i kontot — mer kapital som får jobba där — får du mer utrymme: större marginal, lugnare steg och mer andrum att följa planen. Det är samma process, med mer luft.
+  </div>
+
+  <h2>1. Samma %-ökning på Brons · Silver · Guld</h2>
+  <div class="tiers">
+    <div class="tier">
+      <div class="n">Brons</div>
+      <div class="p">5 000 €</div>
+      <div style="font-size:9pt;color:#6a5420;margin-bottom:8px">2 robotar · hjälp · serverutrymme</div>
+      <div class="sim">
+        <div class="lbl">Samma [pct]</div>
+        <div>5 000 €</div>
+        <div class="big">→ ca [brons_illust]</div>
+      </div>
+    </div>
+    <div class="tier">
+      <div class="n">Silver</div>
+      <div class="p">25 000 €</div>
+      <div style="font-size:9pt;color:#6a5420;margin-bottom:8px">4 robotar · mer hjälp · mer kapacitet</div>
+      <div class="sim">
+        <div class="lbl">Samma [pct]</div>
+        <div>25 000 €</div>
+        <div class="big">→ ca [silver_illust]</div>
+      </div>
+    </div>
+    <div class="tier on">
+      <div class="n">Guld</div>
+      <div class="p">50 000 €</div>
+      <div style="font-size:9pt;color:#6a5420;margin-bottom:8px">6 robotar · mest hjälp · förtur vid tryck</div>
+      <div class="sim">
+        <div class="lbl">Samma [pct]</div>
+        <div>50 000 €</div>
+        <div class="big">→ ca [guld_illust]</div>
+      </div>
+    </div>
+  </div>
+  <p class="foot">Illustrerat med ifylld procentsats — inte löfte om framtida resultat.</p>
+
+  <h2>2. Bank vs vår process</h2>
+  <table class="cmp">
+    <tr><th></th><th>Bankspar</th><th>Vår trading-process</th></tr>
+    <tr><td><strong>Köpkraft</strong></td><td>Inflation gör att samma kronor ofta köper mindre med tiden.</td><td>Kapitalet får jobba med andel, stopp och mål.</td></tr>
+    <tr><td><strong>Ro</strong></td><td>Känns tryggt — andrummet kan ätas upp tyst.</td><td>Mer saldo = mer marginal = mer ro.</td></tr>
+    <tr><td><strong>Spridning</strong></td><td>Ett sparkonto = en korg.</td><td>Råvaror · index · AI-handel.</td></tr>
+  </table>
+
+  <h2>3. Guld vs inflationsvalutor</h2>
+  <table class="cmp">
+    <tr><th></th><th>Euro / dollar</th><th>Guld</th></tr>
+    <tr>
+      <td><strong>Sedan ~2000</strong></td>
+      <td>Tappat ca <strong>93 %</strong> köpkraft mätt i guld (euro ~92,9 %, USD ~93,8 %).</td>
+      <td>Begränsat utbud — historiskt bättre på att bära köpkraft över lång tid.</td>
+    </tr>
+    <tr>
+      <td><strong>Kort sikt</strong></td>
+      <td>Valutan känns stabil dag till dag.</td>
+      <td>Kan dippa enskilda år — därför spridning.</td>
+    </tr>
+  </table>
+  <p class="foot">Källa: Xetra-Gold / Deutsche Börse Commodities (Monthly Gold Compass apr 2026). Ingen framtida garanti.</p>
+
+  <h2>4. Sprid innehaven</h2>
+  <div class="spread" style="grid-template-columns:1fr 1fr 1fr 1fr">
+    <div><strong>Råvaror</strong>Guld — köpkraftsben mot inflationstryck.</div>
+    <div><strong>Index</strong>Bred korg — inte en enda punkt.</div>
+    <div><strong>AI-handel</strong>Systematisk process med din andel.</div>
+    <div><strong>Försvar</strong>Försvarsrelaterat som eget ben.</div>
+  </div>
+
+  <h2>5. Skatt &amp; redovisning</h2>
+  <div class="ro">
+    <strong>Hjälp på samtliga kontotyper</strong>
+    När du valt kontotyp får du hjälp och handledning med planering av skatt. Redovisningsansvarig hjälper med skatteärenden på Brons, Silver och Guld — samma stöd oavsett nivå.
+  </div>
+
+  <div class="ro">
+    <strong>Rekommendation</strong>
+    Sprid mellan råvaror, index, AI-handel och försvar (egna ben). Högre kontotyp: löpande hjälp med flera robotar, mer serverutrymme och förtur. Skatteplanering och redovisningsansvarig på alla kontotyper. Mer förtroende = mer utrymme.
+  </div>
+
+  <p class="tagline">Mer hjälp. Fler robotar. Mer serverutrymme. Förtur. Mer utrymme.</p>
+  <p class="foot">Utkast · North 5 000 / 25 000 / 50 000 € · inte intro 250/500/1000 · [datum]</p>
+</div>
+</body>
+</html>

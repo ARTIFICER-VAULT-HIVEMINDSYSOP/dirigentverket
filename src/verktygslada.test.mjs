@@ -4,6 +4,7 @@ import { magazineView, emptyHudState, PAPER_FIXTURES } from './contact-queue.js'
 import {
   LIVE_LAMP_ON,
   JAMFORELSE_PATH,
+  JAMFORELSE_MALL_PATH,
   DEPOSITION_PATH,
   CALENDAR_URL,
   bookedNeedsTime,
@@ -116,10 +117,13 @@ test('kampanjstatus: öppningsfrekvens alltid saknas', () => {
   assert.equal(campaignStatusView(null).label, 'saknas');
 });
 
-test('snabbknappar: Kalender, Jämförelse, Deposition', () => {
+test('snabbknappar: Jämförelse pekar på befintligt kundjamforelse-verktyg, inte ett nytt verktyg', () => {
   const chips = chipLinks({});
   assert.equal(chips.calendar.href, CALENDAR_URL);
+  assert.equal(chips.jamforelse.href, '/utskick/kundjamforelse-verktyg.html');
   assert.equal(chips.jamforelse.href, JAMFORELSE_PATH);
+  assert.equal(chips.jamforelseMall.href, '/utskick/mall-kund-jamforelse.html');
+  assert.equal(chips.jamforelseMall.href, JAMFORELSE_MALL_PATH);
   assert.equal(chips.deposition.href, DEPOSITION_PATH);
   assert.equal(chips.williamCalendar, null);
   const html = renderCrystalDock({ expanded: false, tenant: {} });
@@ -128,7 +132,8 @@ test('snabbknappar: Kalender, Jämförelse, Deposition', () => {
   assert.match(html, /Deposition/);
   assert.match(html, /Kampanj/);
   assert.match(html, /calendar\.google\.com/);
-  assert.match(html, /kundjamforelse-verktyg\.html/);
+  assert.match(html, /\/utskick\/kundjamforelse-verktyg\.html/);
+  assert.doesNotMatch(html, /kontotyp-jamforelse-ny|inventerad-jamforelse/);
   assert.match(html, /deposition-mall\.html/);
 });
 
@@ -159,6 +164,8 @@ test('HUD-html: paper, saknas, ingen send-knapp för mejl', () => {
   assert.doesNotMatch(html, /data-send-mail|skicka mejl|Zoho send/i);
   assert.match(html, /Mailkampanj/);
   assert.match(html, /KS-referens/);
+  assert.match(html, /\/utskick\/kundjamforelse-verktyg\.html/);
+  assert.match(html, /\/utskick\/mall-kund-jamforelse\.html/);
 });
 
 test('tom kö i HUD hittar inte på kundnamn', () => {

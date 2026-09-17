@@ -6,6 +6,7 @@ export const DEFAULT_DESK = 'daniel';
 
 export const CALENDAR_URL = 'https://calendar.google.com/calendar/u/0/r';
 export const JAMFORELSE_PATH = '/utskick/kundjamforelse-verktyg.html';
+export const JAMFORELSE_MALL_PATH = '/utskick/mall-kund-jamforelse.html';
 export const DEPOSITION_PATH = '/utskick/deposition-mall.html';
 export const KAMPANJ_STATUS_PATH = '/utskick/kampanj-status.json';
 export const MAGASIN_JSON_PATH = '/magasin.json';
@@ -85,7 +86,13 @@ export function chipLinks(tenant) {
       id: 'jamforelse',
       label: 'Jämförelse',
       href: publicPath((toolbox && toolbox.jamforelsePath) || JAMFORELSE_PATH),
-      title: 'Kontotyps-jämförelse · North Brons/Silver/Guld',
+      title: 'Kontotyps-jämförelse · kundjamforelse-verktyg.html',
+    },
+    jamforelseMall: {
+      id: 'jamforelse-mall',
+      label: 'Mall',
+      href: publicPath((toolbox && toolbox.jamforelseMallPath) || JAMFORELSE_MALL_PATH),
+      title: 'Statisk mall · mall-kund-jamforelse.html',
     },
     deposition: {
       id: 'deposition',
@@ -300,6 +307,7 @@ export const CLUSTER_SHORTCUTS = Object.freeze([
   { id: 'magasin', href: '/magasin.html', namn: 'Magasinet', kind: 'cluster' },
   { id: 'william', href: '/william.html', namn: 'William magasin', kind: 'cluster' },
   { id: 'jamforelse', href: JAMFORELSE_PATH, namn: 'Kontotyp / jämförelse', kind: 'cluster' },
+  { id: 'jamforelse-mall', href: JAMFORELSE_MALL_PATH, namn: 'Mall jämförelse', kind: 'cluster' },
 ]);
 
 export const ROBBAN_CHECKLIST = Object.freeze([

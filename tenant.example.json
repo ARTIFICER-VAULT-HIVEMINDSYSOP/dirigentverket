@@ -40,6 +40,7 @@
     "calendarUrl": "https://calendar.google.com/calendar/u/0/r",
     "williamCalendarUrl": "",
     "jamforelsePath": "/utskick/kundjamforelse-verktyg.html",
+    "jamforelseMallPath": "/utskick/mall-kund-jamforelse.html",
     "depositionPath": "/utskick/deposition-mall.html",
     "kampanjStatusPath": "/utskick/kampanj-status.json"
   },
