@@ -701,6 +701,40 @@ export function hedgeMidHandoffPulse(fade, next) {
   };
 }
 
+/**
+ * Soft one-shot mitt-pip pulse only when fade-in proposed→grind starts.
+ * Exit/handoff tell — mirror of mitt landing-puls grind→proposed.
+ * Same 32-bit ease-out family (~900ms). Copies last known fade mid — never invents.
+ * Tom serie / saknas-band / under grind already / !freqProgress / missing mitt / already grind without fade = no pulse.
+ * Never stacks with mitt landing-puls in the same transition.
+ */
+export function hedgeMidExitPulse(fade, next) {
+  const hold = emptyHedgePulse();
+  if (hedgeMidHandoffPulse(fade, next).pulsing) return hold;
+  if (!progressFadeInStarted(fade)) return hold;
+  if (!next || next.proposed || !next.freqProgress) return hold;
+  const have = knownProgressSlot(next.freqHave);
+  const need = knownProgressSlot(next.freqNeed);
+  if (have == null || need == null || have >= need) return hold;
+  const fadeHave = knownProgressSlot(fade.freqHave);
+  const fadeNeed = knownProgressSlot(fade.freqNeed);
+  if (fadeHave == null || fadeNeed == null || fadeHave !== have || fadeNeed !== need) return hold;
+  const ghosts = copyKnownHedgeGhosts(fade.ghosts);
+  const bandRails = ghosts.filter((g) => g.kind === 'nedre' || g.kind === 'övre');
+  const midFromGhosts = ghosts.find((g) => g.kind === 'mid') || null;
+  const fadeMid = fade.midPip != null ? Number(fade.midPip.at) : NaN;
+  const midPip = Number.isFinite(fadeMid) ? { kind: 'mid', at: fadeMid } : midFromGhosts;
+  if (bandRails.length < 2 || !midPip) return hold;
+  if (midFromGhosts && Number(midFromGhosts.at) !== Number(midPip.at)) return hold;
+  return {
+    pulsing: true,
+    midPip,
+    sidePips: [],
+    ms: HEDGE_MID_PULSE_MS,
+    paper: true,
+  };
+}
+
 function knownTwinSides(next, fade) {
   if (!next || !next.proposed) return [];
   const fromPlan = hedgeSidePips(next.kop, next.salj);

@@ -215,8 +215,9 @@ export function renderPlayArena(ride, play = {}) {
   const fadeIn = Boolean(fade && fade.fadingIn);
   const fadeGhosts = fade && !fadeIn ? fade.ghosts || [] : [];
   const progressHandoff = Boolean(fadeIn && fade.progressFade);
+  const progressExit = Boolean(fade && !fadeIn && fade.progressFadeIn);
   const pulse =
-    play.hedgePulse && play.hedgePulse.pulsing && (!fadeIn || progressHandoff)
+    play.hedgePulse && play.hedgePulse.pulsing && (!fade || progressHandoff || progressExit)
       ? play.hedgePulse
       : null;
   const pulseAt = pulse && pulse.midPip != null ? Number(pulse.midPip.at) : null;
@@ -299,6 +300,9 @@ export function renderPlayArena(ride, play = {}) {
           hedgeRail: g.kind === 'nedre' || g.kind === 'övre' ? g.kind : null,
           hedgeMidPip: g.kind === 'mid',
           hedgeFade: true,
+          hedgeMidPulse: Boolean(
+            pulse && g.kind === 'mid' && Number.isFinite(pulseAt) && pulseAt === Number(g.at),
+          ),
         });
       }
     }
@@ -417,7 +421,14 @@ export function renderPlayArena(ride, play = {}) {
   const railText = rails[rail] != null ? escapeHtml(String(rails[rail])) : '';
   const ghostOn = Boolean(hedgeOn && ride.hedge.ghosts && ride.hedge.ghosts.length);
   const bandOn = Boolean(hedgeOn && ride.hedge.bandRails && ride.hedge.bandRails.length);
-  const midPipOn = Boolean(hedgeOn && ride.hedge.midPip && ride.hedge.midPip.at != null);
+  const fadeMidPip =
+    fade && !fadeIn
+      ? fade.midPip && fade.midPip.at != null
+        ? fade.midPip
+        : fadeGhosts.find((g) => g && g.kind === 'mid') || null
+      : null;
+  const fadeMidPipOn = Boolean(fade && !fadeIn && fadeGhosts.length && fadeMidPip && fadeMidPip.at != null);
+  const midPipOn = Boolean((hedgeOn && ride.hedge.midPip && ride.hedge.midPip.at != null) || fadeMidPipOn);
   const fadeSidePips = fade && !fadeIn ? fade.sidePips || [] : [];
   const fadeInSidePips = fade && fadeIn ? fade.sidePips || [] : [];
   const sideFadeOn = Boolean(fade && !fadeIn && fadeSidePips.length === 2);
@@ -429,7 +440,13 @@ export function renderPlayArena(ride, play = {}) {
   );
   const fadeOn = Boolean(fade && !fadeIn && fadeGhosts.length);
   const fadeInOn = Boolean(fadeIn && hedgeOn && ghostOn);
-  const pulseOn = Boolean(pulse && midPipOn && Number.isFinite(pulseAt));
+  const visibleMidAt =
+    hedgeOn && ride.hedge.midPip && ride.hedge.midPip.at != null
+      ? Number(ride.hedge.midPip.at)
+      : fadeMidPipOn
+        ? Number(fadeMidPip.at)
+        : NaN;
+  const pulseOn = Boolean(pulse && Number.isFinite(pulseAt) && Number.isFinite(visibleMidAt) && pulseAt === visibleMidAt);
   const rideSides = hedgeOn && ride.hedge.sidePips ? ride.hedge.sidePips : [];
   const sidePulseOn = Boolean(
     pulse &&

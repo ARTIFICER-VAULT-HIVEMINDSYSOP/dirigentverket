@@ -43,6 +43,7 @@ import {
   hedgeProgressPulse,
   emptyHedgeProgressPulse,
   hedgeMidHandoffPulse,
+  hedgeMidExitPulse,
   hedgeTwinHandoffPulse,
   hedgeTwinAfterFade,
   LIVE_LOCKED,
@@ -413,12 +414,14 @@ root.addEventListener('submit', (ev) => {
       const until = now + hedgeFade.ms;
       const progressPulse = hedgeProgressPulse(hedgeFade, riderResult.hedge);
       const handoffMid = hedgeMidHandoffPulse(hedgeFade, riderResult.hedge);
+      const exitMid = hedgeMidExitPulse(hedgeFade, riderResult.hedge);
+      const startMid = handoffMid.pulsing ? handoffMid : exitMid;
       const handoffTwin = hedgeTwinHandoffPulse(hedgeFade, riderResult.hedge);
       const handoffPulse = {
-        pulsing: Boolean(handoffMid.pulsing || handoffTwin.pulsing),
-        midPip: handoffMid.midPip,
+        pulsing: Boolean(startMid.pulsing || handoffTwin.pulsing),
+        midPip: startMid.midPip,
         sidePips: handoffTwin.sidePips || [],
-        ms: handoffMid.pulsing ? handoffMid.ms : handoffTwin.ms,
+        ms: startMid.pulsing ? startMid.ms : handoffTwin.ms,
         paper: true,
       };
       riderPlay = {
