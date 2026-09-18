@@ -46,7 +46,9 @@
     "depositionReceiptEn": "/ekonomi/avtal/Capital-Strategy-deposit-escrow-receipt-DRAFT.md",
     "depositionTermsUi": "/utskick/ks-escrow-terms.html",
     "depositionTermsUiAlt": "/ekonomi/avtal/KS-escrow-terms-UI.html",
-    "kampanjStatusPath": "/utskick/kampanj-status.json"
+    "kampanjStatusPath": "/utskick/kampanj-status.json",
+    "fumbHubPath": "/utskick/fumb-hub.html",
+    "fumbScoreboardPath": "/utskick/fumb-scoreboard.html"
   },
   "rules": {
     "one_card_per_customer": true,

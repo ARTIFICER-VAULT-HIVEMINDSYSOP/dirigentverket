@@ -15,6 +15,9 @@ export const DEPOSITION_RECEIPT_EN =
 export const DEPOSITION_TERMS_UI = '/utskick/ks-escrow-terms.html';
 export const DEPOSITION_TERMS_UI_ALT = '/ekonomi/avtal/KS-escrow-terms-UI.html';
 export const KAMPANJ_STATUS_PATH = '/utskick/kampanj-status.json';
+export const FUMB_HUB_PATH = '/utskick/fumb-hub.html';
+export const FUMB_SCOREBOARD_PATH = '/utskick/fumb-scoreboard.html';
+export const MAGASIN_HTML_PATH = '/magasin.html';
 export const MAGASIN_JSON_PATH = '/magasin.json';
 export const ONLINEKUNDER_PATH = '/api/onlinekunder';
 export const MAGASIN_KOMMENTAR_PATH = '/api/kommentar';
@@ -305,6 +308,7 @@ export function campaignStatusView(data) {
 export const LOCAL_SHORTCUTS = Object.freeze([
   { id: 'robot', href: '#/robot', namn: 'Artificer · SL/TP', kind: 'local' },
   { id: 'rider', href: '#/rider', namn: 'Trade Rider', kind: 'local' },
+  { id: 'skola', href: '#/verksamhet/tradingskolan', namn: 'Skola', kind: 'local' },
   { id: 'panel', href: '#/panel', namn: 'Panel / Älvor', kind: 'local' },
   { id: 'kalkyl', href: '#/kalkyl', namn: 'Kalkyl', kind: 'local' },
   { id: 'synergier', href: '#/synergier', namn: 'Synergier', kind: 'local' },
@@ -312,8 +316,10 @@ export const LOCAL_SHORTCUTS = Object.freeze([
 ]);
 
 export const CLUSTER_SHORTCUTS = Object.freeze([
-  { id: 'magasin', href: '/magasin.html', namn: 'Magasinet', kind: 'cluster' },
+  { id: 'magasin', href: MAGASIN_HTML_PATH, namn: 'Magasinet', kind: 'cluster' },
   { id: 'william', href: '/william.html', namn: 'William magasin', kind: 'cluster' },
+  { id: 'fumb', href: FUMB_HUB_PATH, namn: 'FUMB', kind: 'cluster' },
+  { id: 'fumb-scoreboard', href: FUMB_SCOREBOARD_PATH, namn: 'FUMB scoreboard', kind: 'cluster' },
   { id: 'jamforelse', href: JAMFORELSE_PATH, namn: 'Kontotyp / jämförelse', kind: 'cluster' },
   { id: 'jamforelse-mall', href: JAMFORELSE_MALL_PATH, namn: 'Mall jämförelse', kind: 'cluster' },
   { id: 'deposition', href: DEPOSITION_PATH, namn: 'Deposition utkast', kind: 'cluster' },

@@ -13,7 +13,12 @@ import {
   DEPOSITION_RECEIPT_EN,
   DEPOSITION_TERMS_UI,
   DEPOSITION_TERMS_UI_ALT,
+  FUMB_HUB_PATH,
+  FUMB_SCOREBOARD_PATH,
+  MAGASIN_HTML_PATH,
   CALENDAR_URL,
+  CLUSTER_SHORTCUTS,
+  LOCAL_SHORTCUTS,
   bookedNeedsTime,
   campaignStatusView,
   chipLinks,
@@ -29,6 +34,7 @@ import {
   sanitizeOnlineCustomers,
   toolboxBrand,
 } from './verktygslada.js';
+import { KS_REF_SHORTCUTS, ksUrl } from './ks-ref.js';
 import { renderCrystalHud, renderCrystalDock } from './verktygslada-ui.js';
 
 test('live-lampa är släckt', () => {
@@ -154,6 +160,46 @@ test('snabbknappar: Jämförelse pekar på befintligt kundjamforelse-verktyg, in
   assert.match(html, /mottagningsbekraftelse-utkast\.md/);
   assert.match(html, /ks-escrow-terms\.html/);
   assert.doesNotMatch(html, /mailto:/);
+});
+
+test('KS_REF_SHORTCUTS finns och skola är Tradingskolan-referens', () => {
+  assert.ok(Array.isArray(KS_REF_SHORTCUTS));
+  assert.ok(KS_REF_SHORTCUTS.some((s) => s.path === '/tradingskolan' && s.namn === 'Tradingskolan'));
+  assert.equal(ksUrl('/tradingskolan'), 'https://www.kapitalstrategi.com/tradingskolan');
+});
+
+test('CLUSTER_SHORTCUTS har FUMB-hub + scoreboard; Skola + Rider + Magasin i genvägar', () => {
+  const clusterIds = CLUSTER_SHORTCUTS.map((s) => s.id);
+  const localIds = LOCAL_SHORTCUTS.map((s) => s.id);
+  assert.equal(FUMB_HUB_PATH, '/utskick/fumb-hub.html');
+  assert.equal(FUMB_SCOREBOARD_PATH, '/utskick/fumb-scoreboard.html');
+  assert.ok(clusterIds.includes('fumb'));
+  assert.ok(clusterIds.includes('fumb-scoreboard'));
+  assert.ok(clusterIds.includes('magasin'));
+  assert.ok(clusterIds.includes('jamforelse'));
+  assert.ok(clusterIds.includes('deposition'));
+  assert.ok(localIds.includes('robot'));
+  assert.ok(localIds.includes('rider'));
+  assert.ok(localIds.includes('skola'));
+  assert.equal(CLUSTER_SHORTCUTS.find((s) => s.id === 'fumb').href, FUMB_HUB_PATH);
+  assert.equal(CLUSTER_SHORTCUTS.find((s) => s.id === 'fumb-scoreboard').href, FUMB_SCOREBOARD_PATH);
+  assert.equal(CLUSTER_SHORTCUTS.find((s) => s.id === 'magasin').href, MAGASIN_HTML_PATH);
+  assert.equal(LOCAL_SHORTCUTS.find((s) => s.id === 'skola').href, '#/verksamhet/tradingskolan');
+  const html = renderCrystalHud({ expanded: true, tenant: {} });
+  assert.match(html, /fumb-hub\.html/);
+  assert.match(html, /fumb-scoreboard\.html/);
+  assert.match(html, /#\/verksamhet\/tradingskolan/);
+  assert.match(html, /#\/robot/);
+  assert.match(html, /#\/rider/);
+  assert.match(html, /magasin\.html/);
+  assert.doesNotMatch(html, /FUMB\.exe|mailto:/);
+  const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+  assert.equal(existsSync(path.join(root, 'public/utskick/fumb-hub.html')), true);
+  assert.equal(existsSync(path.join(root, 'public/utskick/fumb-scoreboard.html')), true);
+  assert.equal(existsSync(path.join(root, 'public/utskick/verktygslada-preview.html')), true);
+  assert.equal(existsSync(path.join(root, 'public/magasin.html')), true);
+  assert.equal(existsSync(path.join(root, 'public/william.html')), true);
+  assert.equal(existsSync(path.join(root, 'public/leads.html')), true);
 });
 
 test('deposition-mallar ligger på exakta sökvägar i boken', () => {
