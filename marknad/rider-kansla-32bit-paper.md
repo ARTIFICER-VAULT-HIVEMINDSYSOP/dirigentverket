@@ -89,6 +89,10 @@ https://github.com/ARTIFICER-VAULT-HIVEMINDSYSOP/dirigentverket/pull/4
 
 **17 sep eftermiddag Europe/Sofia (draft PR #13):** frekvens-progress engångs-puls när fade-out grind→proposed startar landat (`291ff5f`). Exit/handoff-tell när progress lämnar HUD till mitt-pip + twin. Spegel till progress fade-in-puls `88062e6`; samma landning som mitt `9ee7820` + twin `3fcbdc0`. Samma feel-family (`HEDGE_MID_PULSE_MS` 900, ease-out). Puls bara när fade-out faktiskt startar med giltig freqProgress-overlay (kopierar have/need — aldrig påhittad). Tom serie / saknas-band / under grind / `!freqProgress` / already proposed = tyst. Inte samma puls som fade-in-progress (motsatt riktning). Inga dubbla mitt-markörer. Inga nya play-knappar. Paper. `LIVE_LOCKED` true. Väntar namngivet ÖB merge-ja. No live/send/merge.
 
+**17:53 Europe/Stockholm 17 sep (ständig-process):** Magasin 8765 HTTP 200. PR #13 CLEAN/MERGEABLE, 22 ahead / 0 behind (head `3b49aa6`). Twin side-pip engångs-puls grind→proposed (`3fcbdc0`) + frekvens-progress engångs-puls grind→proposed (`291ff5f`) + test already-proposed silent (`3b49aa6`) redan landat på draft. Mitt-pip handoff-puls `9ee7820` tidigare samma dag. PR #11 CLEAN 0 behind. PR #9 lamp CONFLICTING — CloudAgent ResourceExhausted blockerade kvälls-rebase + nästa Rider-steg (mitt exit-puls proposed→grind). PII-fri backup körs. Merge väntar namngivet ÖB-ja. No live/send/merge.
+
+**~10:38 Europe/Sofia 18 sep (ständig-process):** Conflict-fix mot `origin/main` (`33d02c1`). Enda konflikt `rider-kansla-32bit-paper.md` — fuller PR #13-narrativ (twin fade, progress handoff, mitt/twin landing, progress exit-puls `291ff5f`) behållen; 17:53-rad från main infälld. Head före fix `3b49aa6`. PR #13 stannar draft. Merge väntar namngivet ÖB-ja. Paper. `LIVE_LOCKED` true. No live/send/merge.
+
 ## Prova-känsla (nu på main — paper)
 När ÖB öppnar `#/rider` ska det kännas så här, i den ordningen:
 1. Arena först — grafen syns innan någon formvägg.
