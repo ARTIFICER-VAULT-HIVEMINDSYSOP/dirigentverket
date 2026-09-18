@@ -1,10 +1,18 @@
-# Kampanjstatus (paper)
+# Kampanjstatus (VD)
 
-Källa för kristall-HUD: `public/utskick/kampanj-status.json`.
+Uppdaterad 2026-09-18.
 
-HUD läser filen. **Skickar inte.** Tom cell = saknas. Öppningsfrekvens lämnas tom.
+## Semesterjag (`partners@`)
+- **STATUS:** STOPPAD — Zoho `500.3.4` Unusual sending activity
+- **SENT:** batch 01–15 (~300 BCC)
+- **PENDING:** 16–24 (~69+)
+- **Ämne:** Ditt semesterjag behöver ett hem
+- **Format:** HTML + inline header + svart transparent logga · ingen PDF
+- **Cue för fortsättning:** ÖB `fortsätt 16`
+- Bevis: `fu-premium-intro/utskick-semesterjag/LIVE-SEND-LOCK.txt` + `kampanj/zoho-proof/sj-batch-*-sent.png`
 
-Uppdatera JSON när satser ändras. Hitta inte på mått.
+## FU Premium
+- Batch 01–24 tidigare SENT (sep) — ingen omsänd utan nytt ja
 
-- FU premium Zoho: ämne låst `Premiuminbjudan från din mäklare · FastigheterUtomlands` — satser 01–23 SENT, 24 spärrad
-- Semesterjag: 01–04 skickade, 05 pausad (Zoho bounce / partners@). Paper. Skickar inte från HUD.
+## Svar
+- Bevakning igång; STOPP `jasmine.miller@gmail.com` blockad 18 sep
