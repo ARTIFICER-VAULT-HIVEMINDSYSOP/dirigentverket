@@ -17,6 +17,7 @@ export const DEPOSITION_TERMS_UI_ALT = '/ekonomi/avtal/KS-escrow-terms-UI.html';
 export const KAMPANJ_STATUS_PATH = '/utskick/kampanj-status.json';
 export const FUMB_HUB_PATH = '/utskick/fumb-hub.html';
 export const FUMB_SCOREBOARD_PATH = '/utskick/fumb-scoreboard.html';
+export const PIPE_TAVLA_PATH = '/utskick/pipe-tavla.html';
 export const MAGASIN_HTML_PATH = '/magasin.html';
 export const MAGASIN_JSON_PATH = '/magasin.json';
 export const ONLINEKUNDER_PATH = '/api/onlinekunder';
@@ -110,6 +111,12 @@ export function chipLinks(tenant) {
       title: 'Öppnar mottagningsbekräftelse (SV) och villkor. Skickar inte.',
       utkast: publicPath((toolbox && toolbox.depositionUtkastSv) || DEPOSITION_UTKAST_SV),
       terms: publicPath((toolbox && toolbox.depositionTermsUi) || DEPOSITION_TERMS_UI),
+    },
+    pipeTavla: {
+      id: 'pipe-tavla',
+      label: 'Pipe-tavla',
+      href: publicPath((toolbox && toolbox.pipeTavlaPath) || PIPE_TAVLA_PATH),
+      title: 'Pipe-tavla · Bokat poppar. Progress = pops. Skickar inte.',
     },
     kampanj: {
       id: 'kampanj',
@@ -230,6 +237,74 @@ export function bookedNeedsTime(payload) {
   return Boolean(payload && payload.kind === 'BOOKED' && !payload.tid);
 }
 
+const BOKAT_BITS = /\b(BOOKED|BOKAT|BOOK|CALL BACK)\b/i;
+
+/** Magasin Bokat / avtalad möte — not NA/VM/Recovery leftover lucka. */
+export function isBokatSignal(row) {
+  if (!row || typeof row !== 'object') return false;
+  if (row.avtalad === true || row.avtalad === 'true' || row.avtalad === 1) return true;
+  const bits = [row.park, row.status, row.kind, row.outcome && row.outcome.kind]
+    .map((x) => String(x || ''))
+    .join(' ');
+  return BOKAT_BITS.test(bits);
+}
+
+/** Desktop POP: Bokat → pop + popAt + firning. Non-bokat stays unpopped. */
+export function applyPipePop(row, nowMs = Date.now()) {
+  if (!row || typeof row !== 'object') return null;
+  const next = { ...row };
+  if (!isBokatSignal(next)) {
+    next.pop = false;
+    next.firning = false;
+    if (!String(next.popAt || '').trim()) next.popAt = '';
+    return next;
+  }
+  next.pop = true;
+  next.firning = true;
+  if (!String(next.popAt || '').trim()) {
+    const ms = Number.isFinite(Number(nowMs)) ? Number(nowMs) : Date.now();
+    next.popAt = new Date(ms).toISOString();
+  }
+  return next;
+}
+
+export function pipeProgress(entries) {
+  return (Array.isArray(entries) ? entries : []).filter((e) => e && e.pop === true).length;
+}
+
+function sanitizePipePop(row) {
+  return {
+    id: emptyLabel(row.id),
+    namn: emptyLabel(row.namn || row.name),
+    pop: true,
+    popAt: emptyLabel(row.popAt),
+    firning: row.firning === true,
+    lucka: emptyLabel(row.lucka),
+  };
+}
+
+/** Progress = pops. Empty / unwired = saknas. Never invent names. */
+export function pipeBoardView(rows, nowMs = Date.now(), wired = true) {
+  if (!wired) {
+    return { pops: [], progress: 'saknas', label: 'saknas', paper: true, send: false, wired: false };
+  }
+  const list = Array.isArray(rows) ? rows : [];
+  const pops = [];
+  for (const row of list) {
+    const next = applyPipePop(row, nowMs);
+    if (next && next.pop === true) pops.push(sanitizePipePop(next));
+  }
+  const progress = pipeProgress(pops);
+  return {
+    pops,
+    progress,
+    label: list.length || progress ? String(progress) : 'saknas',
+    paper: true,
+    send: false,
+    wired: true,
+  };
+}
+
 export function sanitizeOnlineCustomers(payload) {
   if (!payload || typeof payload !== 'object') {
     return { customers: [], label: 'saknas', wired: false };
@@ -318,6 +393,7 @@ export const LOCAL_SHORTCUTS = Object.freeze([
 export const CLUSTER_SHORTCUTS = Object.freeze([
   { id: 'magasin', href: MAGASIN_HTML_PATH, namn: 'Magasinet', kind: 'cluster' },
   { id: 'william', href: '/william.html', namn: 'William magasin', kind: 'cluster' },
+  { id: 'pipe-tavla', href: PIPE_TAVLA_PATH, namn: 'Pipe-tavla', kind: 'cluster' },
   { id: 'fumb', href: FUMB_HUB_PATH, namn: 'FUMB', kind: 'cluster' },
   { id: 'fumb-scoreboard', href: FUMB_SCOREBOARD_PATH, namn: 'FUMB scoreboard', kind: 'cluster' },
   { id: 'jamforelse', href: JAMFORELSE_PATH, namn: 'Kontotyp / jämförelse', kind: 'cluster' },

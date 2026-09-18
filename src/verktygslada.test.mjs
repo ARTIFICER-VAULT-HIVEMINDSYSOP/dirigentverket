@@ -15,20 +15,25 @@ import {
   DEPOSITION_TERMS_UI_ALT,
   FUMB_HUB_PATH,
   FUMB_SCOREBOARD_PATH,
+  PIPE_TAVLA_PATH,
   MAGASIN_HTML_PATH,
   CALENDAR_URL,
   CLUSTER_SHORTCUTS,
   LOCAL_SHORTCUTS,
+  applyPipePop,
   bookedNeedsTime,
   campaignStatusView,
   chipLinks,
   countOrSaknas,
   emptyLabel,
   forcexSessionHint,
+  isBokatSignal,
   magasinHealthFromPayload,
   magasinSignals,
   overlayRoute,
   parkPayload,
+  pipeBoardView,
+  pipeProgress,
   prBlockerPlaceholder,
   publicPath,
   sanitizeOnlineCustomers,
@@ -102,6 +107,37 @@ test('park-payload: NA/VM/Recovery; Bokat kräver tid', () => {
   assert.equal(bookedNeedsTime(parkPayload('BOOKED', { tid: '09:15' })), false);
 });
 
+test('Pipe-tavla POP: Bokat → pop+popAt+firning; progress = pops', () => {
+  const t = Date.parse('2026-09-18T12:00:00Z');
+  assert.equal(isBokatSignal({ park: 'NA' }), false);
+  assert.equal(isBokatSignal({ park: 'BOOKED' }), true);
+  assert.equal(isBokatSignal({ avtalad: true }), true);
+  assert.equal(isBokatSignal({ status: 'CALL BACK' }), true);
+  const na = applyPipePop({ id: 'x', park: 'NA' }, t);
+  assert.equal(na.pop, false);
+  assert.equal(na.firning, false);
+  const booked = applyPipePop({ id: 'x', park: 'BOOKED' }, t);
+  assert.equal(booked.pop, true);
+  assert.equal(booked.firning, true);
+  assert.equal(booked.popAt, '2026-09-18T12:00:00.000Z');
+  const keep = applyPipePop({ id: 'x', park: 'BOOKED', popAt: '2026-01-01T00:00:00.000Z' }, t);
+  assert.equal(keep.popAt, '2026-01-01T00:00:00.000Z');
+  const view = pipeBoardView(
+    [
+      { id: '1', park: 'BOOKED' },
+      { id: '2', park: 'VM' },
+    ],
+    t,
+    true,
+  );
+  assert.equal(view.progress, 1);
+  assert.equal(pipeProgress(view.pops), 1);
+  assert.equal(view.pops[0].namn, 'saknas');
+  assert.equal(view.send, false);
+  assert.equal(pipeBoardView([], t, false).label, 'saknas');
+  assert.equal(PIPE_TAVLA_PATH, '/utskick/pipe-tavla.html');
+});
+
 test('onlinekunder: tom lista = saknas, saldo visas inte', () => {
   const empty = sanitizeOnlineCustomers({ ok: true, customers: [] });
   assert.equal(empty.label, 'saknas');
@@ -151,12 +187,17 @@ test('snabbknappar: Jämförelse pekar på befintligt kundjamforelse-verktyg, in
   const html = renderCrystalDock({ expanded: false, tenant: {} });
   assert.match(html, /Kalender/);
   assert.match(html, /Jämförelse/);
+  assert.match(html, /Pipe-tavla/);
   assert.match(html, /Deposition/);
   assert.match(html, /Kampanj/);
   assert.match(html, /calendar\.google\.com/);
   assert.match(html, /\/utskick\/kundjamforelse-verktyg\.html/);
   assert.doesNotMatch(html, /kontotyp-jamforelse-ny|inventerad-jamforelse/);
   assert.match(html, /deposition-mall\.html/);
+  assert.match(html, /pipe-tavla\.html/);
+  assert.equal(chips.pipeTavla.href, PIPE_TAVLA_PATH);
+  assert.equal(chips.pipeTavla.label, 'Pipe-tavla');
+  assert.match(chips.pipeTavla.title, /Skickar inte/);
   assert.match(html, /mottagningsbekraftelse-utkast\.md/);
   assert.match(html, /ks-escrow-terms\.html/);
   assert.doesNotMatch(html, /mailto:/);
@@ -173,6 +214,7 @@ test('CLUSTER_SHORTCUTS har FUMB-hub + scoreboard; Skola + Rider + Magasin i gen
   const localIds = LOCAL_SHORTCUTS.map((s) => s.id);
   assert.equal(FUMB_HUB_PATH, '/utskick/fumb-hub.html');
   assert.equal(FUMB_SCOREBOARD_PATH, '/utskick/fumb-scoreboard.html');
+  assert.ok(clusterIds.includes('pipe-tavla'));
   assert.ok(clusterIds.includes('fumb'));
   assert.ok(clusterIds.includes('fumb-scoreboard'));
   assert.ok(clusterIds.includes('magasin'));
@@ -181,11 +223,13 @@ test('CLUSTER_SHORTCUTS har FUMB-hub + scoreboard; Skola + Rider + Magasin i gen
   assert.ok(localIds.includes('robot'));
   assert.ok(localIds.includes('rider'));
   assert.ok(localIds.includes('skola'));
+  assert.equal(CLUSTER_SHORTCUTS.find((s) => s.id === 'pipe-tavla').href, PIPE_TAVLA_PATH);
   assert.equal(CLUSTER_SHORTCUTS.find((s) => s.id === 'fumb').href, FUMB_HUB_PATH);
   assert.equal(CLUSTER_SHORTCUTS.find((s) => s.id === 'fumb-scoreboard').href, FUMB_SCOREBOARD_PATH);
   assert.equal(CLUSTER_SHORTCUTS.find((s) => s.id === 'magasin').href, MAGASIN_HTML_PATH);
   assert.equal(LOCAL_SHORTCUTS.find((s) => s.id === 'skola').href, '#/verksamhet/tradingskolan');
   const html = renderCrystalHud({ expanded: true, tenant: {} });
+  assert.match(html, /pipe-tavla\.html/);
   assert.match(html, /fumb-hub\.html/);
   assert.match(html, /fumb-scoreboard\.html/);
   assert.match(html, /#\/verksamhet\/tradingskolan/);
@@ -194,6 +238,8 @@ test('CLUSTER_SHORTCUTS har FUMB-hub + scoreboard; Skola + Rider + Magasin i gen
   assert.match(html, /magasin\.html/);
   assert.doesNotMatch(html, /FUMB\.exe|mailto:/);
   const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+  assert.equal(existsSync(path.join(root, 'public/utskick/pipe-tavla.html')), true);
+  assert.equal(existsSync(path.join(root, 'public/pipe-tavla.html')), true);
   assert.equal(existsSync(path.join(root, 'public/utskick/fumb-hub.html')), true);
   assert.equal(existsSync(path.join(root, 'public/utskick/fumb-scoreboard.html')), true);
   assert.equal(existsSync(path.join(root, 'public/utskick/verktygslada-preview.html')), true);
@@ -244,6 +290,8 @@ test('HUD-html: paper, saknas, ingen send-knapp för mejl', () => {
   assert.doesNotMatch(html, /data-send-mail|skicka mejl|Zoho send/i);
   assert.match(html, /Mailkampanj/);
   assert.match(html, /KS-referens/);
+  assert.match(html, /Pipe-tavla/);
+  assert.match(html, /\/utskick\/pipe-tavla\.html/);
   assert.match(html, /\/utskick\/kundjamforelse-verktyg\.html/);
   assert.match(html, /\/utskick\/mall-kund-jamforelse\.html/);
   assert.match(html, /mottagningsbekraftelse-utkast\.md/);

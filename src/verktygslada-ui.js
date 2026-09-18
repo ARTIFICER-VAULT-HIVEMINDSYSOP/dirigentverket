@@ -155,6 +155,7 @@ export function renderCrystalDock(model) {
     ${chipAnchor(chips.calendar)}
     ${william}
     ${chipAnchor(chips.jamforelse)}
+    ${chipAnchor(chips.pipeTavla)}
     ${chipAnchor(chips.deposition, 'is-draft')}
     <button type="button" class="crystal-chip" data-action="crystal-kampanj" data-chip="kampanj" title="${escapeHtml(chips.kampanj.title)}">${escapeHtml(chips.kampanj.label)}</button>
   </div>`;

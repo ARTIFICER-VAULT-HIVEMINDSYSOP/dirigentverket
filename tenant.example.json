@@ -48,7 +48,8 @@
     "depositionTermsUiAlt": "/ekonomi/avtal/KS-escrow-terms-UI.html",
     "kampanjStatusPath": "/utskick/kampanj-status.json",
     "fumbHubPath": "/utskick/fumb-hub.html",
-    "fumbScoreboardPath": "/utskick/fumb-scoreboard.html"
+    "fumbScoreboardPath": "/utskick/fumb-scoreboard.html",
+    "pipeTavlaPath": "/utskick/pipe-tavla.html"
   },
   "rules": {
     "one_card_per_customer": true,
