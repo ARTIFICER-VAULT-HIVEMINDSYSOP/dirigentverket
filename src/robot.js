@@ -6,6 +6,8 @@
 import { measureFrequency, parsePriceSeries, proposeMittHedge } from './hedge.js';
 import { guldRokadRule, losingRokad, recoveryMeasure } from './rokad.js';
 
+export const LIVE_LOCKED = true;
+
 function num(v) {
   if (v === '' || v === null || v === undefined) return null;
   const x = Number(String(v).replace(',', '.').replace(/\s/g, ''));
@@ -388,6 +390,16 @@ function resolveDynamic(input, initial, structure) {
   return heldInitialDynamic(input, initial, structure);
 }
 
+function paperLock(obj, saknar_sl_tp) {
+  return {
+    ...obj,
+    saknar_sl_tp: Boolean(saknar_sl_tp),
+    paper: true,
+    live: false,
+    liveLocked: LIVE_LOCKED,
+  };
+}
+
 function attachHedge(input) {
   const frequency = measureFrequency(input.priceSeries, input.bbLower, input.bbUpper);
   const stopDist = slDistance({
@@ -413,39 +425,45 @@ export function computeRobot(raw) {
   const dist = slDistance(input);
   if (dist === null) errors.push('Ange riskavstånd (pris eller %) eller ATR.');
   if (errors.length) {
-    return {
-      ok: false,
-      errors,
+    return paperLock(
+      {
+        ok: false,
+        errors,
+        input,
+        initial: null,
+        dynamic: null,
+        size: null,
+        structure,
+        season: seasonPlan(input),
+        frequency,
+        hedge,
+        rokad,
+        gold,
+      },
+      true,
+    );
+  }
+  const initial = initialLevels(input);
+  const dynamic = resolveDynamic(input, initial, structure);
+  const size = positionSize(input, dist);
+  return paperLock(
+    {
+      ok: true,
+      errors: [],
       input,
-      initial: null,
-      dynamic: null,
-      size: null,
+      initial,
+      dynamic,
+      size,
+      dist,
       structure,
       season: seasonPlan(input),
       frequency,
       hedge,
       rokad,
       gold,
-    };
-  }
-  const initial = initialLevels(input);
-  const dynamic = resolveDynamic(input, initial, structure);
-  const size = positionSize(input, dist);
-  return {
-    ok: true,
-    errors: [],
-    input,
-    initial,
-    dynamic,
-    size,
-    dist,
-    structure,
-    season: seasonPlan(input),
-    frequency,
-    hedge,
-    rokad,
-    gold,
-  };
+    },
+    !initial,
+  );
 }
 
 export function formatPx(n) {
