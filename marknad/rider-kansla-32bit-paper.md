@@ -79,12 +79,17 @@ https://github.com/ARTIFICER-VAULT-HIVEMINDSYSOP/dirigentverket/pull/4
 
 **10:45 Europe/Sofia 17 sep (ständig-process):** Magasin 8765 HTTP 200. PR #13 fortfarande draft CLEAN/MERGEABLE, 14 ahead / 0 behind; frekvens-progress fade-in proposed→grind (`9619709`) + frekvens-progress engångs-puls när fade-in startar (`88062e6`) redan landat. Status synkas till main. Ingen merge-claim. PR #11 0 behind. PR #9 lamp = kväll. Merge väntar namngivet ÖB-ja. No live/send/merge.
 
+
+**17:53 Europe/Stockholm 17 sep (ständig-process):** Magasin 8765 HTTP 200. PR #13 CLEAN/MERGEABLE, 22 ahead / 0 behind (head `3b49aa6`). Twin side-pip engångs-puls grind→proposed (`3fcbdc0`) + frekvens-progress engångs-puls grind→proposed (`291ff5f`) + test already-proposed silent (`3b49aa6`) redan landat på draft. Mitt-pip handoff-puls `9ee7820` tidigare samma dag. PR #11 CLEAN 0 behind. PR #9 lamp CONFLICTING — CloudAgent ResourceExhausted blockerade kvälls-rebase + nästa Rider-steg (mitt exit-puls proposed→grind). PII-fri backup körs. Merge väntar namngivet ÖB-ja. No live/send/merge.
+
+**17 sep eftermiddag Europe/Sofia (draft PR #13 — status synk till main):** twin side-pip engångs-puls när frekvens-progress fade-out grind→proposed landat (`3fcbdc0`). Frekvens-progress engångs-puls när fade-out grind→proposed landat (`291ff5f`). Paper. `LIVE_LOCKED` true. Väntar namngivet ÖB merge-ja.
+
 ## Prova-känsla (nu på main — paper)
 När ÖB öppnar `#/rider` ska det kännas så här, i den ordningen:
 1. Arena först — grafen syns innan någon formvägg.
 2. Process-hint syns mjukt (inte skrikig varning).
 3. W/S flyttar räls direkt; F fäster; hävstång 1–4× syns som fart/pip, inte textmur.
-4. Space = lins; hopp har tell; trail-tell syns bara på struktur; rokad-tell (vänd sida, volym −25 %, ÖB-gate) när paper-rokad finns; mitt-hedge-tell + frekvens-pip när serien räcker, saknas-pip när serie/band tomt; frekvens-progress-pip mot grind när svängar räknas men under minFrequency; band-räls + mitt-pip bara när planen finns; giltig→saknas tonar ut räls/pip (fade); saknas→giltig tonar in räls/pip; engångs-puls på mitt-pip efter fade-in; twin side-pips (köp mot taket, sälj mot golvet) när planen är proposed; twin side-pips tonar ut mjukt giltig→saknas (samma fade-tid som räls); twin fade-in saknas→giltig landat på draft PR #13; twin side-pip engångs-puls efter fade-in (samma glow-family som mitt-pip, sedan tyst) på samma draft; frekvens-progress fade-out när grind ger proposed (HUD-handoff, samma fade-tid); frekvens-progress fade-in proposed→grind landat på draft PR #13; frekvens-progress engångs-puls när fade-in proposed→grind startar (samma glow-family, sedan tyst) på samma draft; inga nya play-knappar på ytan.
+4. Space = lins; hopp har tell; trail-tell syns bara på struktur; rokad-tell (vänd sida, volym −25 %, ÖB-gate) när paper-rokad finns; mitt-hedge-tell + frekvens-pip när serien räcker, saknas-pip när serie/band tomt; frekvens-progress-pip mot grind när svängar räknas men under minFrequency; band-räls + mitt-pip bara när planen finns; giltig→saknas tonar ut räls/pip (fade); saknas→giltig tonar in räls/pip; engångs-puls på mitt-pip efter fade-in; twin side-pips (köp mot taket, sälj mot golvet) när planen är proposed; twin side-pips tonar ut mjukt giltig→saknas (samma fade-tid som räls); twin fade-in saknas→giltig landat på draft PR #13; twin side-pip engångs-puls efter fade-in (samma glow-family som mitt-pip, sedan tyst) på samma draft; frekvens-progress fade-out när grind ger proposed (HUD-handoff, samma fade-tid); frekvens-progress fade-in proposed→grind landat på draft PR #13; frekvens-progress engångs-puls när fade-in proposed→grind startar (samma glow-family, sedan tyst) på samma draft; mitt-pip engångs-puls när progress fade-out grind→proposed startar (landing-tell) på samma draft; twin side-pip engångs-puls när progress fade-out grind→proposed startar (`3fcbdc0`); frekvens-progress engångs-puls när fade-out grind→proposed startar (`291ff5f`); inga nya play-knappar på ytan.
 5. En lyckad paper-ride krävs innan «små belopp» syns/öppnas.
 6. PAPER-badge sticky; live-knapp död.
 7. Tom arena = dry-run: silhuett rör sig före Räkna; tomma rutor stannar tomma.
@@ -94,3 +99,4 @@ När ÖB öppnar `#/rider` ska det kännas så här, i den ordningen:
 - Sidapp utanför Dirigentverket-nexus
 - Merge utan ÖB-ja på namngiven PR-rad
 - Lamp-/WATCHERS-skin — bara kvällstid (ÖB 9 sep); inte startad här
+
