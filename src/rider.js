@@ -594,12 +594,16 @@ export function hedgeProgressFadeIn(prev, next) {
   const need = knownProgressSlot(next.freqNeed);
   if (have == null || need == null || have >= need) return hold;
   const count = knownProgressSlot(next.count);
+  const ghosts = copyKnownHedgeGhosts(prev.ghosts);
+  const midPip = ghosts.find((g) => g.kind === 'mid') || null;
   return {
     fading: true,
     fadingIn: true,
     freqHave: have,
     freqNeed: need,
     count: count != null ? count : have,
+    ghosts,
+    midPip,
     ms: HEDGE_FADE_MS,
     paper: true,
   };

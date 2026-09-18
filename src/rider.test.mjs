@@ -1941,7 +1941,13 @@ test('mitt-pip engångs-puls när progress fade-in proposed→grind startar; tys
   const bandPulse = hedgeMidExitPulse(bandFade, few.hedge);
   const landFade = hedgeBandFadeIn(few.hedge, on.hedge);
 
-  assert.equal(pulse.pulsing, false);
+  assert.equal(fadeIn.midPip && fadeIn.midPip.at, 105);
+  assert.equal(pulse.pulsing, true);
+  assert.equal(pulse.paper, true);
+  assert.equal(pulse.ms, HEDGE_MID_PULSE_MS);
+  assert.equal(pulse.midPip.at, 105);
+  assert.equal(pulse.midPip.kind, 'mid');
+  assert.deepEqual(pulse.sidePips, []);
   assert.equal(bandPulse.pulsing, true);
   assert.equal(bandPulse.paper, true);
   assert.equal(bandPulse.ms, HEDGE_MID_PULSE_MS);
@@ -1965,7 +1971,11 @@ test('mitt-pip engångs-puls när progress fade-in proposed→grind startar; tys
   assert.equal(hedgeMidExitPulse(hedgeBandFade(on.hedge, noBand.hedge), noBand.hedge).pulsing, false);
   assert.equal(hedgeMidExitPulse(hedgeBandFade(few.hedge, few.hedge), few.hedge).pulsing, false);
   assert.equal(hedgeMidExitPulse(hedgeProgressFadeIn(few.hedge, few.hedge), few.hedge).pulsing, false);
-  assert.equal(hedgeMidExitPulse(fadeIn, { proposed: false, freqProgress: true, freqHave: 2, freqNeed: 3 }).pulsing, false);
+  assert.equal(hedgeMidExitPulse(fadeIn, { proposed: false, freqProgress: true, freqHave: 9, freqNeed: 12 }).pulsing, false);
+  assert.equal(
+    hedgeMidExitPulse(hedgeProgressFadeIn({ proposed: true, ghosts: [] }, few.hedge), few.hedge).pulsing,
+    false,
+  );
   assert.equal(
     hedgeMidExitPulse({ ...bandFade, midPip: { kind: 'mid', at: 999 } }, few.hedge).pulsing,
     false,
