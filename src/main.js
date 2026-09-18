@@ -1,4 +1,5 @@
 import './style.css';
+import { mountVerktygslada } from './verktygslada-mount.js';
 import { loadState, saveState, resetToSeed } from './store.js';
 import { parseList } from './format.js';
 import {
@@ -116,12 +117,19 @@ function go(hash) {
   window.location.hash = hash;
 }
 
+let surfaceView = 'portfolj';
+
 function parseRoute() {
   const raw = (window.location.hash || '#/portfolj').replace(/^#/, '');
   const parts = raw.split('/').filter(Boolean);
   let view = parts[0] || 'portfolj';
   const id = parts[1] || null;
   if (view === 'projekt') view = 'verksamhet';
+  if (view === 'verktygslada' || view === 'panel') {
+    view = surfaceView || 'portfolj';
+    return { view, id };
+  }
+  surfaceView = view;
   return { view, id };
 }
 
@@ -207,6 +215,10 @@ root.addEventListener('click', (ev) => {
   const btn = ev.target.closest('[data-action]');
   if (!btn) return;
   const action = btn.getAttribute('data-action');
+  if (action === 'crystal-open') {
+    window.dispatchEvent(new CustomEvent('crystal-hud:open'));
+    return;
+  }
   if (action === 'mode-cards') {
     portfolioMode = 'cards';
     render();
@@ -502,3 +514,4 @@ window.addEventListener(
 window.addEventListener('hashchange', render);
 if (!window.location.hash) window.location.hash = '#/portfolj';
 render();
+mountVerktygslada();

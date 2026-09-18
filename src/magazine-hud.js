@@ -34,7 +34,7 @@ export function renderMagazineHud(view, opts = {}) {
   ]
     .filter(Boolean)
     .join(' ');
-  const kicker = opts.extra ? 'Extra · Trade Rider' : 'Magasinet · klient/lead-kö';
+  const kicker = opts.kicker || (opts.extra ? 'Extra · Trade Rider' : 'Magasinet · klient/lead-kö');
   const empty = !cartridges.length
     ? '<p class="magazine-hud-empty">väntar kö</p>'
     : '';

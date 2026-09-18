@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Deposition · mottagningsbekräftelse + villkor</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=IBM+Plex+Mono:wght@400;500&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #12110e; --card: #1c1b14; --line: #2f2c22; --gold: #c9a66b;
+      --gold2: #e0c48a; --ink: #ece7dc; --mute: #9c9688; --warn: #c4a04a;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; background: #12110e; color: var(--ink); font: 400 15px/1.5 "Source Sans 3", sans-serif; }
+    .wrap { max-width: 72rem; margin: 0 auto; padding: 1.4rem 1rem 3rem; }
+    .kicker { font: 600 0.72rem "IBM Plex Mono", ui-monospace, monospace; letter-spacing: .16em; text-transform: uppercase; color: var(--gold); margin: 0 0 .35rem; }
+    h1 { font: 600 1.55rem Fraunces, serif; margin: 0 0 .35rem; color: var(--gold2); }
+    .banner {
+      border: 1px solid rgba(196,160,74,.5); background: rgba(40,28,10,.55);
+      color: #e6d3a2; padding: .7rem .9rem; border-radius: 10px; margin: 0 0 1rem;
+    }
+    .panes { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; min-height: 70vh; }
+    @media (max-width: 900px) { .panes { grid-template-columns: 1fr; } }
+    .pane {
+      background: var(--card); border: 1px solid var(--line); border-radius: 12px;
+      display: flex; flex-direction: column; min-height: 28rem; overflow: hidden;
+    }
+    .pane h2 { margin: 0; padding: .7rem .9rem; font: 600 .8rem "IBM Plex Mono", ui-monospace, monospace; letter-spacing: .1em; text-transform: uppercase; color: var(--gold); border-bottom: 1px solid var(--line); }
+    pre, iframe { flex: 1; margin: 0; border: 0; width: 100%; background: #0e0d0b; color: var(--ink); }
+    pre { padding: 1rem; white-space: pre-wrap; font: 400 .82rem "IBM Plex Mono", ui-monospace, monospace; overflow: auto; }
+    .saknas { color: var(--warn); padding: 1rem; }
+    .more { margin-top: 1rem; display: flex; flex-wrap: wrap; gap: .45rem; }
+    .more a { color: var(--gold); text-decoration: none; border: 1px solid rgba(201,166,107,.4); border-radius: 999px; padding: .35rem .75rem; font-size: .85rem; }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <p class="kicker">Paper · öppnar utkast · skickar inte</p>
+    <h1>Deposition</h1>
+    <div class="banner" role="status">
+      Öppnar mottagningsbekräftelse (SV) och villkors-UI. Ingen utgående e-post. Inga påhittade kronor.
+    </div>
+    <div class="panes">
+      <section class="pane">
+        <h2>Mottagningsbekräftelse · SV utkast</h2>
+        <pre id="utkast">läser utkast…</pre>
+      </section>
+      <section class="pane">
+        <h2>Villkor · UI</h2>
+        <iframe title="KS escrow-villkor" src="/utskick/ks-escrow-terms.html"></iframe>
+      </section>
+    </div>
+    <p class="more">
+      <a href="/ekonomi/avtal/Capital-Strategy-deposition-escrow-mottagningsbekraftelse-utkast.md">Öppna SV-md</a>
+      <a href="/ekonomi/avtal/Capital-Strategy-deposit-escrow-receipt-DRAFT.md">EN receipt DRAFT</a>
+      <a href="/utskick/ks-escrow-terms.html">Villkor (public)</a>
+      <a href="/ekonomi/avtal/KS-escrow-terms-UI.html">Villkor (ekonomi)</a>
+    </p>
+  </main>
+  <script>
+    (function () {
+      var el = document.getElementById('utkast');
+      var path = '/ekonomi/avtal/Capital-Strategy-deposition-escrow-mottagningsbekraftelse-utkast.md';
+      fetch(path, { cache: 'no-store' }).then(function (r) {
+        if (!r.ok) throw new Error('saknas');
+        return r.text();
+      }).then(function (t) {
+        el.textContent = t;
+      }).catch(function () {
+        el.className = 'saknas';
+        el.textContent = 'saknas — koppla filen ' + path;
+      });
+    })();
+  </script>
+</body>
+</html>

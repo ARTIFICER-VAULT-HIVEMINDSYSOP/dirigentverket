@@ -35,6 +35,22 @@
     "disclaimer": "",
     "paper": true
   },
+  "toolbox": {
+    "desk": "daniel",
+    "calendarUrl": "https://calendar.google.com/calendar/u/0/r",
+    "williamCalendarUrl": "",
+    "jamforelsePath": "/utskick/kundjamforelse-verktyg.html",
+    "jamforelseMallPath": "/utskick/mall-kund-jamforelse.html",
+    "depositionPath": "/utskick/deposition-mall.html",
+    "depositionUtkastSv": "/ekonomi/avtal/Capital-Strategy-deposition-escrow-mottagningsbekraftelse-utkast.md",
+    "depositionReceiptEn": "/ekonomi/avtal/Capital-Strategy-deposit-escrow-receipt-DRAFT.md",
+    "depositionTermsUi": "/utskick/ks-escrow-terms.html",
+    "depositionTermsUiAlt": "/ekonomi/avtal/KS-escrow-terms-UI.html",
+    "kampanjStatusPath": "/utskick/kampanj-status.json",
+    "fumbHubPath": "/utskick/fumb-hub.html",
+    "fumbScoreboardPath": "/utskick/fumb-scoreboard.html",
+    "pipeTavlaPath": "/utskick/pipe-tavla.html"
+  },
   "rules": {
     "one_card_per_customer": true,
     "na_equals_vm": true,

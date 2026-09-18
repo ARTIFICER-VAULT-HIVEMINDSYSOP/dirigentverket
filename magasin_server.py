@@ -557,9 +557,39 @@ class Handler(SimpleHTTPRequestHandler):
         self.wfile.write(data)
         return True
 
+    def _serve_ekonomi(self, url_path: str) -> bool:
+        if not url_path.startswith("/ekonomi/"):
+            return False
+        rel = url_path[len("/ekonomi/") :]
+        if ".." in rel or rel.startswith("/"):
+            self.send_error(404)
+            return True
+        src_path = (ROOT / "ekonomi" / rel).resolve()
+        root_ek = (ROOT / "ekonomi").resolve()
+        if src_path != root_ek and root_ek not in src_path.parents:
+            self.send_error(404)
+            return True
+        if not src_path.is_file() or src_path.suffix not in {".md", ".html", ".txt"}:
+            self.send_error(404)
+            return True
+        data = src_path.read_bytes()
+        ctype = (
+            "text/html; charset=utf-8"
+            if src_path.suffix == ".html"
+            else "text/plain; charset=utf-8"
+        )
+        self.send_response(200)
+        self.send_header("Content-Type", ctype)
+        self.send_header("Content-Length", str(len(data)))
+        self.end_headers()
+        self.wfile.write(data)
+        return True
+
     def do_GET(self) -> None:
         parsed = urlparse(self.path)
         if self._serve_src(parsed.path):
+            return
+        if self._serve_ekonomi(parsed.path):
             return
         if parsed.path == "/api/luckor":
             qs = parse_qs(parsed.query)
@@ -572,6 +602,17 @@ class Handler(SimpleHTTPRequestHandler):
                 except json.JSONDecodeError:
                     slots = []
             self._json(200, {"ok": True, "slots": slots})
+            return
+        if parsed.path == "/api/onlinekunder":
+            self._json(
+                200,
+                {
+                    "ok": True,
+                    "customers": [],
+                    "kalla": "saknas",
+                    "note": "ingen onlinesignal i magasin_server",
+                },
+            )
             return
         super().do_GET()
 

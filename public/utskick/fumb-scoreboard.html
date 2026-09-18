@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FUMB · scoreboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=IBM+Plex+Mono:wght@400;500&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #12110e; --card: #1c1b14; --line: #2f2c22; --gold: #c9a66b;
+      --gold2: #e0c48a; --ink: #ece7dc; --mute: #9c9688; --warn: #c4a04a;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; background: var(--bg); color: var(--ink); font: 400 16px/1.55 "Source Sans 3", sans-serif; }
+    .wrap { max-width: 52rem; margin: 0 auto; padding: 2rem 1.2rem 4rem; }
+    .kicker { font: 600 0.72rem "IBM Plex Mono", ui-monospace, monospace; letter-spacing: .16em; text-transform: uppercase; color: var(--gold); margin: 0 0 .4rem; }
+    h1 { font: 600 1.7rem Fraunces, serif; margin: 0 0 .4rem; color: var(--gold2); }
+    .lede, p { color: var(--mute); }
+    .banner {
+      border: 1px solid rgba(196,160,74,.5); background: rgba(40,28,10,.55);
+      color: #e6d3a2; padding: .8rem 1rem; border-radius: 10px; margin: 0 0 1.2rem;
+    }
+    table {
+      width: 100%; border-collapse: collapse; background: var(--card);
+      border: 1px solid var(--line); border-radius: 12px; overflow: hidden;
+    }
+    th, td {
+      text-align: left; padding: .7rem .85rem; border-bottom: 1px solid var(--line);
+      font: 400 .92rem "IBM Plex Mono", ui-monospace, monospace;
+    }
+    th { color: var(--gold); letter-spacing: .08em; text-transform: uppercase; font-size: .72rem; }
+    td.saknas { color: var(--warn); }
+    tr:last-child td { border-bottom: 0; }
+    a { color: var(--gold); }
+    .links { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: 1rem; }
+    .links a {
+      border: 1px solid rgba(201,166,107,.45); border-radius: 999px; padding: .4rem .85rem;
+      text-decoration: none; font-size: .88rem;
+    }
+    code { font: 500 .85rem "IBM Plex Mono", ui-monospace, monospace; color: var(--gold2); }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <p class="kicker">Paper · scoreboard · ingen exe här</p>
+    <h1>FUMB scoreboard</h1>
+    <p class="lede">Tavla i boken. Desktop-appen <code>Desktop\FUMB\FUMB.exe</code> (Bob, separat) är källan när den körs. Utan signal = saknas.</p>
+    <div class="banner" role="status">Inga påhittade namn, poäng eller tider. Den här sidan startar inte FUMB.exe.</div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Rad</th>
+          <th>Namn</th>
+          <th>Poäng</th>
+          <th>Tid</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>1</td><td class="saknas">saknas</td><td class="saknas">saknas</td><td class="saknas">saknas</td><td class="saknas">saknas</td></tr>
+        <tr><td>2</td><td class="saknas">saknas</td><td class="saknas">saknas</td><td class="saknas">saknas</td><td class="saknas">saknas</td></tr>
+        <tr><td>3</td><td class="saknas">saknas</td><td class="saknas">saknas</td><td class="saknas">saknas</td><td class="saknas">saknas</td></tr>
+        <tr><td>4</td><td class="saknas">saknas</td><td class="saknas">saknas</td><td class="saknas">saknas</td><td class="saknas">saknas</td></tr>
+        <tr><td>5</td><td class="saknas">saknas</td><td class="saknas">saknas</td><td class="saknas">saknas</td><td class="saknas">saknas</td></tr>
+        <tr><td>6</td><td class="saknas">saknas</td><td class="saknas">saknas</td><td class="saknas">saknas</td><td class="saknas">saknas</td></tr>
+        <tr><td>7</td><td class="saknas">saknas</td><td class="saknas">saknas</td><td class="saknas">saknas</td><td class="saknas">saknas</td></tr>
+        <tr><td>8</td><td class="saknas">saknas</td><td class="saknas">saknas</td><td class="saknas">saknas</td><td class="saknas">saknas</td></tr>
+      </tbody>
+    </table>
+
+    <div class="links">
+      <a href="/utskick/fumb-hub.html">FUMB hub</a>
+      <a href="/magasin.html">Magasinet</a>
+    </div>
+  </main>
+</body>
+</html>

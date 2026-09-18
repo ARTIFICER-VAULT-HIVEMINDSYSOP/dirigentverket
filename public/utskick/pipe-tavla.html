@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Pipe-tavla · POP</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=IBM+Plex+Mono:wght@400;500&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #12110e; --card: #1c1b14; --line: #2f2c22; --gold: #c9a66b;
+      --gold2: #e0c48a; --ink: #ece7dc; --mute: #9c9688; --warn: #c4a04a;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; background: var(--bg); color: var(--ink); font: 400 16px/1.55 "Source Sans 3", sans-serif; }
+    .wrap { max-width: 52rem; margin: 0 auto; padding: 2rem 1.2rem 4rem; }
+    .kicker { font: 600 0.72rem "IBM Plex Mono", ui-monospace, monospace; letter-spacing: .16em; text-transform: uppercase; color: var(--gold); margin: 0 0 .4rem; }
+    h1 { font: 600 1.7rem Fraunces, serif; margin: 0 0 .4rem; color: var(--gold2); }
+    h2 { font: 600 1.05rem Fraunces, serif; color: var(--gold2); margin: 0 0 .45rem; }
+    .lede, p { color: var(--mute); }
+    .banner {
+      border: 1px solid rgba(196,160,74,.5); background: rgba(40,28,10,.55);
+      color: #e6d3a2; padding: .8rem 1rem; border-radius: 10px; margin: 0 0 1.2rem;
+    }
+    .progress {
+      background: var(--card); border: 1px solid var(--line); border-radius: 12px;
+      padding: 1rem 1.1rem; margin: 0 0 1rem;
+    }
+    .progress strong { color: var(--gold2); font: 600 1.6rem Fraunces, serif; }
+    .saknas { color: var(--warn); }
+    table {
+      width: 100%; border-collapse: collapse; background: var(--card);
+      border: 1px solid var(--line); border-radius: 12px; overflow: hidden;
+    }
+    th, td {
+      text-align: left; padding: .7rem .85rem; border-bottom: 1px solid var(--line);
+      font: 400 .9rem "IBM Plex Mono", ui-monospace, monospace;
+    }
+    th { color: var(--gold); letter-spacing: .08em; text-transform: uppercase; font-size: .72rem; }
+    tr:last-child td { border-bottom: 0; }
+    .pop-yes { color: var(--gold2); }
+    a { color: var(--gold); }
+    .links { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: 1rem; }
+    .links a {
+      border: 1px solid rgba(201,166,107,.45); border-radius: 999px; padding: .4rem .85rem;
+      text-decoration: none; font-size: .88rem;
+    }
+    code { font: 500 .85rem "IBM Plex Mono", ui-monospace, monospace; color: var(--gold2); }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <p class="kicker">Paper · pipe · skickar inte</p>
+    <h1>Pipe-tavla</h1>
+    <p class="lede">Samma POP som Desktop-lådan. <strong>Bokat → pop + popAt + firning.</strong> Progress = pops. Tom cell = saknas. Inga påhittade namn eller kronor.</p>
+    <div class="banner" role="status">Ingen live-send. Magasinkö när <code>/magasin.json</code> svarar; annars saknas.</div>
+
+    <section class="progress">
+      <h2>Progress</h2>
+      <p>pops: <strong id="progress">saknas</strong></p>
+      <p id="progress-note" class="saknas">väntar kö</p>
+    </section>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Id</th>
+          <th>Namn</th>
+          <th>Pop</th>
+          <th>popAt</th>
+          <th>Firning</th>
+          <th>Lucka</th>
+        </tr>
+      </thead>
+      <tbody id="rows">
+        <tr><td colspan="6" class="saknas">saknas</td></tr>
+      </tbody>
+    </table>
+
+    <div class="links">
+      <a href="/magasin.html">Magasinet</a>
+      <a href="/utskick/verktygslada-preview.html">Verktygslåda</a>
+    </div>
+  </main>
+  <script type="module">
+    import { pipeBoardView } from '/src/verktygslada.js';
+
+    function emptyCell(v) {
+      const s = String(v == null ? '' : v).trim();
+      return s || 'saknas';
+    }
+
+    function esc(s) {
+      return String(s)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    async function loadJson(url) {
+      try {
+        const res = await fetch(url, { cache: 'no-store' });
+        if (!res.ok) return null;
+        return await res.json();
+      } catch {
+        return null;
+      }
+    }
+
+    function rowsFromMagasin(data) {
+      if (!data || typeof data !== 'object') return [];
+      return Array.isArray(data.rows) ? data.rows.filter((r) => r && typeof r === 'object') : [];
+    }
+
+    function rowsFromBoka(data) {
+      const list = Array.isArray(data) ? data : Array.isArray(data && data.rows) ? data.rows : [];
+      return list
+        .filter((r) => r && typeof r === 'object')
+        .map((r) => ({
+          id: r.id,
+          namn: r.namn,
+          avtalad: true,
+          lucka: r.lucka,
+          popAt: r.at || r.popAt,
+        }));
+    }
+
+    const packs = await Promise.all([
+      loadJson('/magasin.json'),
+      loadJson('/william-magasin.json'),
+      loadJson('/leads-magasin.json'),
+      loadJson('/pending-boka.json'),
+    ]);
+    const wired = packs.some((p) => p != null);
+    const merged = [
+      ...rowsFromMagasin(packs[0]),
+      ...rowsFromMagasin(packs[1]),
+      ...rowsFromMagasin(packs[2]),
+      ...rowsFromBoka(packs[3]),
+    ];
+    const view = pipeBoardView(merged, Date.now(), wired);
+    const progressEl = document.getElementById('progress');
+    const noteEl = document.getElementById('progress-note');
+    const body = document.getElementById('rows');
+    progressEl.textContent = emptyCell(view.label);
+    if (!view.wired) {
+      noteEl.textContent = 'saknas — koppla till magasin_server';
+    } else if (!view.pops.length) {
+      noteEl.textContent = 'inga pops';
+      noteEl.className = '';
+    } else {
+      noteEl.textContent = 'Bokat poppar. Progress = pops.';
+      noteEl.className = '';
+    }
+    if (!view.pops.length) {
+      body.innerHTML = '<tr><td colspan="6" class="saknas">saknas</td></tr>';
+    } else {
+      body.innerHTML = view.pops
+        .map(
+          (p) =>
+            '<tr>' +
+            '<td>' + esc(emptyCell(p.id)) + '</td>' +
+            '<td>' + esc(emptyCell(p.namn)) + '</td>' +
+            '<td class="pop-yes">pop</td>' +
+            '<td>' + esc(emptyCell(p.popAt)) + '</td>' +
+            '<td>' + (p.firning ? 'firning' : 'saknas') + '</td>' +
+            '<td>' + esc(emptyCell(p.lucka)) + '</td>' +
+            '</tr>',
+        )
+        .join('');
+    }
+  </script>
+</body>
+</html>
