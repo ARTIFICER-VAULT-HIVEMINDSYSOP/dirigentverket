@@ -596,6 +596,7 @@ export function hedgeProgressFadeIn(prev, next) {
   const count = knownProgressSlot(next.count);
   const ghosts = copyKnownHedgeGhosts(prev.ghosts);
   const midPip = ghosts.find((g) => g.kind === 'mid') || null;
+  const sidePips = copyKnownSidePips(prev.sidePips);
   return {
     fading: true,
     fadingIn: true,
@@ -604,6 +605,9 @@ export function hedgeProgressFadeIn(prev, next) {
     count: count != null ? count : have,
     ghosts,
     midPip,
+    sidePips,
+    kop: prev.kop,
+    salj: prev.salj,
     ms: HEDGE_FADE_MS,
     paper: true,
   };
@@ -779,6 +783,53 @@ export function hedgeTwinHandoffPulse(fade, next) {
   };
 }
 
+function knownTwinExitSides(fade) {
+  const sidePips = copyKnownSidePips(fade && fade.sidePips);
+  if (sidePips.length !== 2) return [];
+  if (!sidePips.some((p) => p.kind === 'köp') || !sidePips.some((p) => p.kind === 'sälj')) return [];
+  const fromPlan = hedgeSidePips(fade && fade.kop, fade && fade.salj);
+  if (fromPlan.length === 2) {
+    const planMatch = fromPlan.every((fp) =>
+      sidePips.some((sp) => sp.kind === fp.kind && Number(sp.at) === Number(fp.at)),
+    );
+    if (!planMatch) return [];
+  }
+  return sidePips;
+}
+
+/**
+ * Soft one-shot twin side-pip pulse only when fade-in proposed→grind starts.
+ * Exit/handoff tell — mirror of twin landing-puls grind→proposed and mitt exit-puls.
+ * Same 32-bit ease-out family (~900ms). Copies last known fade kop.tp / salj.tp — never invents.
+ * Tom serie / saknas-band / under grind already / !freqProgress / saknar tp / already grind without fade = no pulse.
+ * Never stacks with twin landing-puls or mitt landing-puls in the same transition.
+ */
+export function hedgeTwinExitPulse(fade, next) {
+  const hold = emptyHedgePulse();
+  if (hedgeTwinHandoffPulse(fade, next).pulsing) return hold;
+  if (hedgeMidHandoffPulse(fade, next).pulsing) return hold;
+  if (!progressFadeInStarted(fade)) return hold;
+  if (!next || next.proposed || !next.freqProgress) return hold;
+  const have = knownProgressSlot(next.freqHave);
+  const need = knownProgressSlot(next.freqNeed);
+  if (have == null || need == null || have >= need) return hold;
+  const fadeHave = knownProgressSlot(fade.freqHave);
+  const fadeNeed = knownProgressSlot(fade.freqNeed);
+  if (fadeHave == null || fadeNeed == null || fadeHave !== have || fadeNeed !== need) return hold;
+  const ghosts = copyKnownHedgeGhosts(fade.ghosts);
+  const bandRails = ghosts.filter((g) => g.kind === 'nedre' || g.kind === 'övre');
+  if (bandRails.length < 2) return hold;
+  const sidePips = knownTwinExitSides(fade);
+  if (sidePips.length !== 2) return hold;
+  return {
+    pulsing: true,
+    midPip: null,
+    sidePips,
+    ms: HEDGE_MID_PULSE_MS,
+    paper: true,
+  };
+}
+
 function copyKnownHedgeGhosts(list) {
   if (!Array.isArray(list)) return [];
   const out = [];
@@ -827,6 +878,8 @@ export function hedgeBandFade(prev, next) {
     bandRails,
     midPip,
     sidePips,
+    kop: prev.kop,
+    salj: prev.salj,
     progressFade: false,
     progressFadeIn: progressIn.fading,
     freqHave: progressIn.freqHave,
@@ -922,11 +975,12 @@ export function hedgeTwinPulse(fade, next) {
 }
 
 /**
- * After fade-in saknas→giltig, skip twin if grind→proposed landing already pulsed.
- * One clear one-shot — never two stacked in the same overlay.
+ * After fade-in saknas→giltig, skip twin if grind→proposed landing or proposed→grind
+ * exit already pulsed. One clear one-shot — never two stacked in the same overlay.
  */
 export function hedgeTwinAfterFade(fade, next, handoffTwin) {
   if (handoffTwin && handoffTwin.pulsing) return emptyHedgePulse();
+  if (hedgeTwinExitPulse(fade, next).pulsing) return emptyHedgePulse();
   return hedgeTwinPulse(fade, next);
 }
 

@@ -314,6 +314,16 @@ export function renderPlayArena(ride, play = {}) {
           label: p.kind,
           hedgeSidePip: p.kind,
           hedgeFade: true,
+          hedgeSidePulse: Boolean(
+            pulse &&
+              pulseSides.some(
+                (sp) =>
+                  sp &&
+                  sp.kind === p.kind &&
+                  Number.isFinite(Number(sp.at)) &&
+                  Number(sp.at) === Number(p.at),
+              ),
+          ),
         });
       }
     }
@@ -447,13 +457,18 @@ export function renderPlayArena(ride, play = {}) {
         ? Number(fadeMidPip.at)
         : NaN;
   const pulseOn = Boolean(pulse && Number.isFinite(pulseAt) && Number.isFinite(visibleMidAt) && pulseAt === visibleMidAt);
-  const rideSides = hedgeOn && ride.hedge.sidePips ? ride.hedge.sidePips : [];
+  const visibleSides =
+    hedgeOn && ride.hedge.sidePips && ride.hedge.sidePips.length === 2
+      ? ride.hedge.sidePips
+      : sideFadeOn
+        ? fadeSidePips
+        : [];
   const sidePulseOn = Boolean(
     pulse &&
       sidePipsOn &&
-      rideSides.length === 2 &&
+      visibleSides.length === 2 &&
       pulseSides.length === 2 &&
-      rideSides.every(
+      visibleSides.every(
         (p) =>
           p &&
           (p.kind === 'köp' || p.kind === 'sälj') &&

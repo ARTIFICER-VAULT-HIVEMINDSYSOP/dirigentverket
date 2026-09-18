@@ -45,6 +45,7 @@ import {
   hedgeMidHandoffPulse,
   hedgeMidExitPulse,
   hedgeTwinHandoffPulse,
+  hedgeTwinExitPulse,
   hedgeTwinAfterFade,
   LIVE_LOCKED,
   hasCompletedFirstRide,
@@ -417,11 +418,13 @@ root.addEventListener('submit', (ev) => {
       const exitMid = hedgeMidExitPulse(hedgeFade, riderResult.hedge);
       const startMid = handoffMid.pulsing ? handoffMid : exitMid;
       const handoffTwin = hedgeTwinHandoffPulse(hedgeFade, riderResult.hedge);
+      const exitTwin = hedgeTwinExitPulse(hedgeFade, riderResult.hedge);
+      const startTwin = handoffTwin.pulsing ? handoffTwin : exitTwin;
       const handoffPulse = {
-        pulsing: Boolean(startMid.pulsing || handoffTwin.pulsing),
+        pulsing: Boolean(startMid.pulsing || startTwin.pulsing),
         midPip: startMid.midPip,
-        sidePips: handoffTwin.sidePips || [],
-        ms: startMid.pulsing ? startMid.ms : handoffTwin.ms,
+        sidePips: startTwin.sidePips || [],
+        ms: startMid.pulsing ? startMid.ms : startTwin.ms,
         paper: true,
       };
       riderPlay = {
@@ -453,7 +456,7 @@ root.addEventListener('submit', (ev) => {
         const nextHedge = riderResult && riderResult.hedge;
         const midPulse = hedgeFade.fadingIn ? hedgeMidPulse(hedgeFade, nextHedge) : emptyHedgePulse();
         const twinPulse = hedgeFade.fadingIn
-          ? hedgeTwinAfterFade(hedgeFade, nextHedge, handoffTwin)
+          ? hedgeTwinAfterFade(hedgeFade, nextHedge, startTwin)
           : emptyHedgePulse();
         const pulse = {
           pulsing: Boolean(midPulse.pulsing || twinPulse.pulsing),
