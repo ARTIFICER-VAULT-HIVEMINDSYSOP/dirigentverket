@@ -2,7 +2,7 @@
   "paper": true,
   "live": false,
   "send": false,
-  "updated": "2026-09-17",
+  "updated": "2026-09-18",
   "note": "Statusfält som kan uppdateras. Tom cell = saknas. Inga öppningsfrekvenser. Ingen send härifrån.",
   "campaigns": [
     {
@@ -23,17 +23,17 @@
     {
       "id": "semesterjag",
       "namn": "Semesterjag",
-      "status": "READY",
-      "sentBatches": "",
-      "blockedBatch": "",
-      "blocker": "",
-      "subject": "",
+      "status": "PAUSED",
+      "sentBatches": "01–04",
+      "blockedBatch": "05",
+      "blocker": "Zoho bounce på batch 05 — partners@",
+      "subject": "Ditt semesterjag behöver ett hem",
       "drop": "",
-      "sent": 0,
-      "clean": 471,
+      "sent": null,
+      "clean": null,
       "batches": 24,
       "openRate": null,
-      "note": "Paper tills namngivet ja. Skickar inte från HUD."
+      "note": "01–04 skickade. 05 pausad (Zoho). Resterande satser kvar. Paper. Skickar inte från HUD."
     }
   ]
 }
