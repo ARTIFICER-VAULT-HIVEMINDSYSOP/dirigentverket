@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Kapital i rörelse — tredjepart och escrow · Kapital och Strategi</title>
+<meta name="description" content="Utbildningsavsnitt: tredjepartsöverlämning, granskning, avtal och escrow som kapitaldisciplin. Tradingskolan · Kapital och Strategi." />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg:#0b1628; --card:#122033; --line:#334155;
+    --gold:#d4b06a; --gold2:#f0d59a; --ink:#f8fafc; --mute:#94a3b8;
+    --paper:#fffdf8; --ink2:#1a1206; --soft:#f7eccf;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin:0;
+    font:400 16px/1.6 "Source Sans 3", system-ui, sans-serif;
+    background: linear-gradient(180deg,#0b1628 0%, #071018 40%, #0b1628 100%);
+    color: var(--ink);
+    min-height: 100vh;
+  }
+  .wrap { max-width: 860px; margin: 0 auto; padding: 1.25rem 1rem 3.5rem; }
+  .brand {
+    font:600 .72rem "Source Sans 3", sans-serif;
+    letter-spacing: .14em; text-transform: uppercase;
+    color: var(--gold); margin: 0 0 .6rem;
+  }
+  header h1 {
+    font-family: Fraunces, serif;
+    margin: 0 0 .4rem;
+    font-size: clamp(1.55rem, 4vw, 2.05rem);
+    color: var(--gold2);
+    line-height: 1.2;
+  }
+  .lede { color: var(--mute); margin: 0 0 1rem; max-width: 40rem; }
+  .badge {
+    display:inline-block; font:600 .75rem inherit; letter-spacing:.04em;
+    color:#1a1206; background:var(--gold); border-radius:999px;
+    padding:.28rem .7rem; margin:0 .35rem .8rem 0;
+  }
+  .badge.ghost { background:transparent; color:var(--gold); border:1px solid var(--gold); }
+  .toolbar { display:flex; flex-wrap:wrap; gap:.5rem; margin:0 0 1.25rem; }
+  .toolbar button, .toolbar a.btn {
+    border:0; border-radius:999px; padding:.5rem 1rem;
+    font:600 .88rem "Source Sans 3", sans-serif; cursor:pointer;
+    background:var(--gold); color:#1a1206; text-decoration:none;
+  }
+  .toolbar a.btn.ghost { background:var(--card); color:var(--gold2); border:1px solid var(--line); }
+  .toc {
+    background: var(--card); border:1px solid var(--line);
+    border-radius:12px; padding:1rem 1.15rem 1.1rem; margin:0 0 1.35rem;
+  }
+  .toc h2 {
+    font:700 .85rem Fraunces, serif; margin:0 0 .55rem;
+    color:var(--gold2); letter-spacing:.02em;
+  }
+  .toc ol { margin:0; padding-left:1.2rem; }
+  .toc a { color:#cbd5e1; text-decoration:none; }
+  .toc a:hover { color:var(--gold2); }
+  .sheet {
+    background: var(--paper); color: var(--ink2);
+    border-radius:14px; padding:1.4rem 1.45rem 2rem;
+    border:1px solid #c9a24a55; box-shadow: 0 12px 40px rgba(0,0,0,.35);
+  }
+  .sheet h2 {
+    font:700 1.2rem Fraunces, serif; margin:1.6rem 0 .65rem;
+    color:#2a1c08; border-left:4px solid var(--gold); padding-left:.6rem;
+  }
+  .sheet h2:first-child { margin-top:.2rem; }
+  .sheet h3 { font:700 1.02rem Fraunces, serif; margin:1.1rem 0 .4rem; color:#3a2a10; }
+  .sheet p, .sheet li { font-size:.98rem; }
+  .sheet ul, .sheet ol { margin:.35rem 0 .8rem; padding-left:1.25rem; }
+  .callout {
+    margin:1rem 0; padding:.9rem 1rem; border-radius:10px;
+    background:var(--soft); border:2px solid var(--gold);
+  }
+  .callout strong { font-family:Fraunces,serif; display:block; margin-bottom:.25rem; font-size:1.05rem; }
+  .her {
+    margin:0 0 1.1rem; padding:.95rem 1.05rem; border-radius:10px;
+    background:#1a1206; color:#f7eccf; font-size:.95rem;
+  }
+  .her strong { color:var(--gold2); }
+  table { width:100%; border-collapse:collapse; font-size:.9rem; margin:.5rem 0 1rem; }
+  th, td { border:1px solid #c9a24a; padding:.55rem .65rem; text-align:left; vertical-align:top; }
+  th { background:var(--soft); font-weight:700; color:#2a1c08; }
+  .pre {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size:.82rem; background:#f3eee0; border-radius:8px;
+    padding:.85rem 1rem; white-space:pre; overflow-x:auto; color:#2a1c08;
+  }
+  .foot {
+    margin-top:1.5rem; padding-top:1rem; border-top:1px solid #e5d4a8;
+    font-size:.78rem; color:#8a7044; line-height:1.45;
+  }
+  .role {
+    margin:1rem 0; padding:1rem 1.05rem; border-radius:10px;
+    background:#122033; color:#e2e8f0; border:1px solid #d4b06a66;
+  }
+  .role strong { color:var(--gold2); font-family:Fraunces,serif; display:block; margin-bottom:.35rem; }
+  @media print {
+    body { background:#fff; color:#000; }
+    .no-print { display:none !important; }
+    .wrap { padding:0; max-width:none; }
+    .sheet { box-shadow:none; border:0; border-radius:0; padding:0; }
+    .toc { break-after: avoid; border:1px solid #ccc; }
+    a { color:inherit; text-decoration:none; }
+    .role { background:#f5f5f5; color:#111; border-color:#999; }
+    .role strong { color:#111; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <p class="brand">Kapital och Strategi · Tradingskolan</p>
+  <header>
+    <h1>Kapital i rörelse — tredjepart och escrow</h1>
+    <p class="lede">Ett helt utbildningsavsnitt om vägen pengar och dokument tar. Säkerhet före fart.</p>
+    <span class="badge">Utkast · paper</span>
+    <span class="badge ghost no-print">Öppna direkt · printvänlig</span>
+  </header>
+
+  <div class="toolbar no-print">
+    <button type="button" onclick="window.print()">Skriv ut / PDF</button>
+    <a class="btn ghost" href="#toc">Innehåll</a>
+  </div>
+
+  <nav class="toc no-print" id="toc" aria-label="Innehåll">
+    <h2>Innehåll</h2>
+    <ol>
+      <li><a href="#s1">Varför det hör hit</a></li>
+      <li><a href="#s2">Tredjepartsöverlämning</a></li>
+      <li><a href="#s3">Tredjepartsgranskning</a></li>
+      <li><a href="#s4">Tredjepartsavtal</a></li>
+      <li><a href="#s5">Escrow</a></li>
+      <li><a href="#s6">Kopplingen</a></li>
+      <li><a href="#s7">Så tänker du praktiskt — 10 frågor</a></li>
+      <li><a href="#s8">Kapital och Strategi i det här</a></li>
+    </ol>
+  </nav>
+
+  <article class="sheet">
+    <div class="her"><strong>Robban-linjen</strong>
+      Först säkerhetsutrustning. Sedan fart. Här lär du dig vad du ska tänka på när kapital är i rörelse mellan parter.</div>
+
+    <h2 id="s1">1. Varför det hör hit</h2>
+    <p>Kapitalstrategi handlar om mer än köp och sälj.</p>
+    <p>När pengar eller dokument ska byta händer finns alltid en <strong>väg</strong>: vem skickar, vem tar emot, vad som ska vara klart innan något frigörs, och hur du bevisar att stegen skett. Den vägen är en del av din riskram — samma logik som bälte och flytväst innan gasen.</p>
+    <div class="callout">
+      <strong>Kapitaldisciplin</strong>
+      Du vet vem som håller vad. Du vet vilka villkor som gäller innan något rör sig vidare. Du kan ställa frågor innan du binder dig — i lugn, inte under press.
+    </div>
+    <p>Det här avsnittet är utbildning i spelet runt kapital i rörelse.</p>
+
+    <h2 id="s2">2. Tredjepartsöverlämning</h2>
+    <h3>Vad det är</h3>
+    <p>En <strong>tredjepartsöverlämning</strong> betyder att något — pengar, nycklar, dokument, tillgångsbevis — går via en tredje part som står mellan dig och motparten. Tanken är enkel: ingen ska behöva lita blint på den andra medan villkoren ännu är öppna.</p>
+    <h3>När det används</h3>
+    <ul>
+      <li>Köpare och säljare ska mötas, men villkor måste uppfyllas först.</li>
+      <li>Dokument ska lagras neutralt tills båda sagt ja.</li>
+      <li>En granskning ska hinnas klart innan frigivning.</li>
+      <li>Parterna sitter i olika länder, banker eller tidzoner och behöver en gemensam hållpunkt.</li>
+    </ul>
+    <h3>Checklista — vem, vad, när, bevis</h3>
+    <table>
+      <thead><tr><th>Fråga</th><th>Du fyller i</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Vem</strong> är den tredje parten — namn, roll, kontakt?</td><td></td></tr>
+        <tr><td><strong>Vad</strong> överlämnas — belopp, dokument, nycklar, annat?</td><td></td></tr>
+        <tr><td><strong>När</strong> ska varje steg ske — datum eller villkor?</td><td></td></tr>
+        <tr><td><strong>Bevis</strong> — hur ser du att steget är gjort?</td><td></td></tr>
+        <tr><td>Vem får <strong>frigöra</strong>, och till vem?</td><td></td></tr>
+        <tr><td>Vad händer om ett steg <strong>missar</strong> tid eller villkor?</td><td></td></tr>
+      </tbody>
+    </table>
+    <p><strong>Tumregel:</strong> muntligt räcker sällan. Be om skrift och spårbart underlag.</p>
+
+    <h2 id="s3">3. Tredjepartsgranskning</h2>
+    <h3>Vad som granskas</h3>
+    <ul>
+      <li>Identitet och behörighet</li>
+      <li>Att avtalets villkor faktiskt är uppfyllda</li>
+      <li>Att bilagor och bevis hör ihop</li>
+      <li>Att tidshorisont och status stämmer</li>
+    </ul>
+    <h3>Oberoende</h3>
+    <p>En bra granskare har ett uppdrag som går att beskriva: <em>vad</em> som ska kontrolleras, <em>mot vilken lista</em>, och <em>när</em> resultatet ska vara klart.</p>
+    <h3>Intressekonflikt</h3>
+    <ul>
+      <li>Får granskaren betalt av bara ena sidan?</li>
+      <li>Har granskaren egen vinning i utfallet?</li>
+      <li>Kan samma person både sälja, granska och frigöra?</li>
+    </ul>
+    <p>Om samma hand både dömer och tjänar på domen — stanna upp och be om tydligare roller.</p>
+
+    <h2 id="s4">4. Tredjepartsavtal</h2>
+    <p>Pedagogiskt kapitel: så att du känner igen delarna. När du ska binda dig i skarpt läge hör juridisk genomgång till rätt fack — här lär du dig språket och strukturen.</p>
+    <h3>Roller</h3>
+    <ul>
+      <li><strong>Part A / Part B</strong> — de som gör affären eller överlämningen</li>
+      <li><strong>Tredje part</strong> — den som håller, förmedlar eller bekräftar enligt uppdrag</li>
+      <li><strong>Granskare</strong> — den som kontrollerar underlag</li>
+    </ul>
+    <p>Skriv upp namn och ansvar på en rad var. Otydliga roller ger otydlig frigivning.</p>
+    <h3>Villkor · frigivning · tvister</h3>
+    <p>Villkor är det som måste vara sant innan nästa steg. Frigivning är när tredje parten får släppa vidare det som hållits. Tvistväg: hur oenighet hanteras — ofta skrift först, hold medan det utreds, och en utpekad väg framåt.</p>
+
+    <h2 id="s5">5. Escrow</h2>
+    <p>Ett eget, kort kapitel. Escrow är ett <strong>verktyg</strong> inom tredjepartstemat — inte hela din kapitalstrategi.</p>
+    <h3>Vad escrow är</h3>
+    <p>I vardagsspråk: något (ofta pengar eller dokument) läggs hos en neutral hållare. Det släpps vidare först när överenskomna villkor är uppfyllda. Tänk «hållpunkt med checklista».</p>
+    <h3>Typiska steg</h3>
+    <ol>
+      <li>Parterna enas om villkor och tidshorisont.</li>
+      <li>Medel eller dokument deponeras enligt instruktion.</li>
+      <li>Bevis samlas in (mottagning, identitet, åtaganden).</li>
+      <li>Status: grönt → frigivning, eller hold om något saknas.</li>
+      <li>Avslut: till mottagare, åter till insättare, eller omförhandling enligt avtalet.</li>
+    </ol>
+    <h3>Vad du ska fråga innan du går in</h3>
+    <ul>
+      <li>Vem är hållaren, och under vilken form?</li>
+      <li>Vilket konto / vilken kanal — och hur verifierar du den?</li>
+      <li>Vilka bevis krävs innan frigivning?</li>
+      <li>Yttersta datum för dig <em>och</em> för motparten?</li>
+      <li>Hold, missad deadline, tvist — vad händer då?</li>
+      <li>Avgifter i skrift (jämför aldrig mot hörsägen).</li>
+    </ul>
+    <h3>Köpare, säljare och neutralt konto</h3>
+    <table>
+      <thead><tr><th>Roll</th><th>Vanlig oro</th><th>Bra fråga</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Köpare / insättare</strong></td><td>«Släpps det för tidigt?»</td><td>Vilka villkor måste vara gröna innan motparten får något?</td></tr>
+        <tr><td><strong>Säljare / mottagare</strong></td><td>«Blir det hängande i evighet?»</td><td>Vilken tidshorisont och vilket bevis stänger ärendet?</td></tr>
+        <tr><td><strong>Neutralt konto</strong></td><td>«Vems instruktion gäller?»</td><td>Vem får ge frigivningsorder — en, båda, eller checklista?</td></tr>
+      </tbody>
+    </table>
+    <h3>Frigöringsvillkor</h3>
+    <p>Skriv dem så konkreta att en utomstående kan bocka av dem. Diffusa meningar skapar friktion. Tydliga punkter + beviskrav skapar lugn.</p>
+
+    <h2 id="s6">6. Kopplingen</h2>
+    <div class="pre">Överlämning  →  någon håller / förmedlar
+Granskning   →  någon kontrollerar underlaget
+Avtal        →  roller, villkor, frigivning, tvistväg
+Escrow       →  ett konkret verktyg för hållpunkt + villkor</div>
+    <p>Escrow utan tydlig överlämning och granskning blir lätt bara ett konto med oklar checklista. Överlämning utan avtal blir lätt «vi hördes muntligt». Avtal utan beviskrav blir svårt att följa i praktiken.</p>
+    <p><strong>Kapitalstrategi:</strong> du väljer verktyg efter behov. Escrow är ett av dem — tillsammans med de tre andra delarna ovan.</p>
+
+    <h2 id="s7">7. Så tänker du praktiskt — 10 frågor</h2>
+    <ol>
+      <li>Vad ska röra sig — pengar, dokument, nycklar, eller flera saker?</li>
+      <li>Vem är motparten, och hur har du verifierat dem?</li>
+      <li>Vem är tredje part / hållare / granskare — tre olika, eller samma?</li>
+      <li>Vilka villkor måste vara uppfyllda innan frigivning?</li>
+      <li>Vilket bevis räknas för varje villkor?</li>
+      <li>Vilken tidshorisont har <em>du</em>, och vilken har <em>motparten</em>?</li>
+      <li>Vad händer om någon missar ett datum?</li>
+      <li>Vem får ge order om frigivning, hold eller återbetalning?</li>
+      <li>Var ligger tvistvägen — skrift, hold, forum?</li>
+      <li>Har du läst rollerna så att du vet vem som utbildar, vem som håller, och vem som bestämmer?</li>
+    </ol>
+    <p>Om någon fråga saknar svar: sakta ner. Säkerhet före fart.</p>
+
+    <h2 id="s8">8. Kapital och Strategi i det här</h2>
+    <div class="role">
+      <strong>KS = utbildare i kapital</strong>
+      Vi lär dig tredjepartstemat: överlämning, granskning, avtal och escrow som verktyg. Vi hjälper dig tänka i checklistor och tidshorisont — samma disciplin som i övriga skolan.
+      <p style="margin:.75rem 0 0;">Vi håller inte escrow, tar inte emot medel som escrow, och agerar inte escrow-agent. Den som eventuellt håller medel eller dokument i ett skarpt ärende är en utpekad part enligt det ärendets egna spår — separat från skolbänken.</p>
+      <p style="margin:.75rem 0 0;">Du går härifrån med bättre frågor. Det är poängen.</p>
+    </div>
+
+    <h2>Kort sammanfattning</h2>
+    <table>
+      <thead><tr><th>Del</th><th>Kom ihåg</th></tr></thead>
+      <tbody>
+        <tr><td>Överlämning</td><td>Vem, vad, när, bevis</td></tr>
+        <tr><td>Granskning</td><td>Oberoende uppdrag, se upp för blandade roller</td></tr>
+        <tr><td>Avtal</td><td>Roller, villkor, frigivning, tvistväg</td></tr>
+        <tr><td>Escrow</td><td>Hållpunkt med checklista — ett verktyg, inte hela strategin</td></tr>
+        <tr><td>KS</td><td>Utbildare i kapital</td></tr>
+      </tbody>
+    </table>
+
+    <p class="foot">
+      Kapital och Strategi · Tradingskolan · Utkast 18 sep 2026 (Europe/Sofia)<br />
+      Källa: utbildning/escrow-kapital/kapital-i-rorelse-tredjepart-escrow-utkast.md<br />
+      Status: utkast — öppningsbar HTML · live-nav när host/kod pekar hit
+    </p>
+  </article>
+</div>
+</body>
+</html>
