@@ -1043,6 +1043,90 @@ export function rideRokad(raw = {}) {
   };
 }
 
+export function emptyRokadFade() {
+  return {
+    fading: false,
+    from: null,
+    to: null,
+    ms: HEDGE_MID_PULSE_MS,
+    paper: true,
+  };
+}
+
+export function emptyRokadPulse() {
+  return {
+    pulsing: false,
+    from: null,
+    to: null,
+    ms: HEDGE_MID_PULSE_MS,
+    paper: true,
+  };
+}
+
+function knownRokadSide(v) {
+  return v === 'köp' || v === 'sälj' ? v : null;
+}
+
+function copyKnownRokadPath(rokad) {
+  if (!rokad || !rokad.tell) return null;
+  const from = knownRokadSide(rokad.from);
+  const to = knownRokadSide(rokad.to);
+  if (!from || !to || from === to) return null;
+  return { from, to };
+}
+
+/**
+ * Soft rokad-tell fade only when a known paper-rokad becomes absent.
+ * Copies last known from→to — never invents sides or volume.
+ * Still present / already absent / missing path = no fade.
+ */
+export function rokadFade(prev, next) {
+  const hold = emptyRokadFade();
+  const path = copyKnownRokadPath(prev);
+  if (!path) return hold;
+  if (next && next.tell) return hold;
+  return {
+    fading: true,
+    from: path.from,
+    to: path.to,
+    ms: HEDGE_MID_PULSE_MS,
+    paper: true,
+  };
+}
+
+function hedgeOneShotInFlight(hedgeFade, nextHedge) {
+  if (hedgeMidHandoffPulse(hedgeFade, nextHedge).pulsing) return true;
+  if (hedgeMidExitPulse(hedgeFade, nextHedge).pulsing) return true;
+  if (hedgeTwinHandoffPulse(hedgeFade, nextHedge).pulsing) return true;
+  if (hedgeTwinExitPulse(hedgeFade, nextHedge).pulsing) return true;
+  return false;
+}
+
+/**
+ * Soft one-shot rokad-tell pulse only when rokad fade present→absent starts.
+ * Same 32-bit ease-out family as mitt/twin exit (~900ms).
+ * Copies last known from→to — never invents.
+ * Quiet when no real rokad fade, no plan, under grind, still present, or already absent.
+ * Never stacks with twin/mitt landing/exit in the same transition — one one-shot.
+ */
+export function rokadExitPulse(fade, next, hedgeFade, nextHedge) {
+  const hold = emptyRokadPulse();
+  if (hedgeOneShotInFlight(hedgeFade, nextHedge)) return hold;
+  if (!fade || !fade.fading) return hold;
+  if (next && next.tell) return hold;
+  if (nextHedge && nextHedge.freqProgress) return hold;
+  const from = knownRokadSide(fade.from);
+  const to = knownRokadSide(fade.to);
+  if (!from || !to || from === to) return hold;
+  return {
+    pulsing: true,
+    from,
+    to,
+    ms: HEDGE_MID_PULSE_MS,
+    paper: true,
+  };
+}
+
 /**
  * First successful paper ride unlocks «små belopp» hint mode.
  * LIVE_LOCKED stays true either way.
@@ -1185,6 +1269,8 @@ export function emptyPlayState() {
     hedgeFade: emptyHedgeFade(),
     hedgePulse: emptyHedgePulse(),
     hedgeProgressPulse: emptyHedgeProgressPulse(),
+    rokadFade: emptyRokadFade(),
+    rokadPulse: emptyRokadPulse(),
   };
 }
 

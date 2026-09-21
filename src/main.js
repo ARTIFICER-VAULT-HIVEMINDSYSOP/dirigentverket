@@ -47,6 +47,10 @@ import {
   hedgeTwinHandoffPulse,
   hedgeTwinExitPulse,
   hedgeTwinAfterFade,
+  rokadFade,
+  rokadExitPulse,
+  emptyRokadFade,
+  emptyRokadPulse,
   LIVE_LOCKED,
   hasCompletedFirstRide,
   markFirstRideComplete,
@@ -406,6 +410,7 @@ root.addEventListener('submit', (ev) => {
     const now = Date.now();
     const midAir = riderPlay.hopping && now < riderPlay.hopUntil;
     const prevHedge = riderResult && riderResult.hedge;
+    const prevRokad = riderResult && riderResult.rokad;
     riderResult = computeRide({ ...riderDraft, midAir });
     let hedgeFade = hedgeBandFade(prevHedge, riderResult.hedge);
     if (!hedgeFade.fading) {
@@ -484,6 +489,23 @@ root.addEventListener('submit', (ev) => {
         hedgePulse: emptyHedgePulse(),
         hedgeProgressPulse: emptyHedgeProgressPulse(),
       };
+    }
+    const nextRokadFade = rokadFade(prevRokad, riderResult.rokad);
+    const nextRokadPulse = rokadExitPulse(nextRokadFade, riderResult.rokad, hedgeFade, riderResult.hedge);
+    if (nextRokadPulse.pulsing) {
+      const rokadUntil = now + nextRokadPulse.ms;
+      riderPlay = {
+        ...riderPlay,
+        rokadFade: { ...nextRokadFade, until: rokadUntil },
+        rokadPulse: { ...nextRokadPulse, until: rokadUntil },
+      };
+      window.setTimeout(() => {
+        if (!riderPlay.rokadPulse || riderPlay.rokadPulse.until !== rokadUntil) return;
+        riderPlay = { ...riderPlay, rokadFade: emptyRokadFade(), rokadPulse: emptyRokadPulse() };
+        render();
+      }, nextRokadPulse.ms);
+    } else {
+      riderPlay = { ...riderPlay, rokadFade: emptyRokadFade(), rokadPulse: emptyRokadPulse() };
     }
     if (riderResult.ok) {
       const wasDone = hasCompletedFirstRide();

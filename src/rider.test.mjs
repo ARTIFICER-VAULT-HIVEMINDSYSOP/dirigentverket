@@ -55,6 +55,10 @@ import {
   hedgeTwinExitPulse,
   hedgeTwinAfterFade,
   hedgeSidePips,
+  rokadFade,
+  rokadExitPulse,
+  emptyRokadFade,
+  emptyRokadPulse,
   HEDGE_FADE_MS,
   HEDGE_MID_PULSE_MS,
   RIDER_ROKAD_GATE,
@@ -921,6 +925,219 @@ test('rokad-tell syns mjukt på arena och silhuett-HUD', () => {
   assert.match(quiet, /data-rokad-tell="0"/);
   assert.ok(!/data-rider-rokad-tell/.test(quiet));
   assert.ok(!/data-mode="rokad"/.test(quiet));
+});
+
+test('rokad-exit engångs-puls när tell går present→absent; tyst annars', () => {
+  const on = computeRide({
+    entry: 100,
+    maxFel: 2,
+    rr: 2,
+    grav: 100,
+    side: 'köp',
+    prognos: 'sälj',
+    prognosRr: 2,
+    pilotVolume: 1,
+  });
+  const off = computeRide({
+    entry: 100,
+    maxFel: 2,
+    rr: 2,
+    grav: 100,
+    side: 'köp',
+    pilotVolume: 1,
+  });
+  const few = computeRide({
+    entry: 105,
+    maxFel: 2,
+    rr: 2,
+    grav: 105,
+    bbLower: 100,
+    bbUpper: 110,
+    priceSeries: '100\n110\n100',
+    side: 'köp',
+    prognos: 'sälj',
+    prognosRr: 2,
+  });
+  const fewOff = computeRide({
+    entry: 105,
+    maxFel: 2,
+    rr: 2,
+    grav: 105,
+    bbLower: 100,
+    bbUpper: 110,
+    priceSeries: '100\n110\n100',
+    side: 'köp',
+  });
+  const hedgeOn = computeRide({
+    entry: 105,
+    maxFel: 2,
+    rr: 2,
+    grav: 105,
+    bbLower: 100,
+    bbUpper: 110,
+    priceSeries: '100\n110\n100\n110',
+    side: 'köp',
+    prognos: 'sälj',
+    prognosRr: 2,
+  });
+  const hedgeOnOff = computeRide({
+    entry: 105,
+    maxFel: 2,
+    rr: 2,
+    grav: 105,
+    bbLower: 100,
+    bbUpper: 110,
+    priceSeries: '100\n110\n100\n110',
+    side: 'köp',
+  });
+  const grindFromPlan = computeRide({
+    entry: 105,
+    maxFel: 2,
+    rr: 2,
+    grav: 105,
+    bbLower: 100,
+    bbUpper: 110,
+    priceSeries: '100\n110\n100',
+    side: 'köp',
+  });
+
+  assert.equal(on.rokad.tell, true);
+  assert.equal(on.rokad.from, 'köp');
+  assert.equal(on.rokad.to, 'sälj');
+  assert.equal(off.rokad.tell, false);
+  assert.equal(few.hedge.freqProgress, true);
+  assert.equal(few.hedge.proposed, false);
+  assert.equal(hedgeOn.hedge.proposed, true);
+  assert.equal(hedgeOn.rokad.tell, true);
+
+  const fade = rokadFade(on.rokad, off.rokad);
+  const pulse = rokadExitPulse(fade, off.rokad, emptyHedgeFade(), off.hedge);
+  assert.equal(fade.fading, true);
+  assert.equal(fade.from, 'köp');
+  assert.equal(fade.to, 'sälj');
+  assert.equal(fade.ms, HEDGE_MID_PULSE_MS);
+  assert.equal(fade.paper, true);
+  assert.equal(pulse.pulsing, true);
+  assert.equal(pulse.paper, true);
+  assert.equal(pulse.ms, HEDGE_MID_PULSE_MS);
+  assert.equal(pulse.from, 'köp');
+  assert.equal(pulse.to, 'sälj');
+
+  assert.equal(rokadFade(on.rokad, on.rokad).fading, false);
+  assert.equal(rokadFade(off.rokad, off.rokad).fading, false);
+  assert.equal(rokadFade(off.rokad, on.rokad).fading, false);
+  assert.equal(rokadFade(null, off.rokad).fading, false);
+  assert.equal(rokadFade({ tell: true, from: 'köp', to: 'köp' }, off.rokad).fading, false);
+  assert.equal(rokadFade({ tell: true, from: 'köp' }, off.rokad).fading, false);
+  assert.equal(emptyRokadFade().fading, false);
+  assert.equal(emptyRokadFade().ms, HEDGE_MID_PULSE_MS);
+  assert.equal(emptyRokadPulse().pulsing, false);
+  assert.equal(emptyRokadPulse().ms, HEDGE_MID_PULSE_MS);
+  assert.equal(emptyPlayState().rokadPulse.pulsing, false);
+  assert.equal(emptyPlayState().rokadFade.fading, false);
+
+  assert.equal(rokadExitPulse(null, off.rokad).pulsing, false);
+  assert.equal(rokadExitPulse(emptyRokadFade(), off.rokad).pulsing, false);
+  assert.equal(rokadExitPulse(fade, on.rokad).pulsing, false);
+  assert.equal(rokadExitPulse(rokadFade(on.rokad, on.rokad), on.rokad).pulsing, false);
+  assert.equal(
+    rokadExitPulse({ fading: true, from: 'köp', to: 'köp', ms: HEDGE_MID_PULSE_MS, paper: true }, off.rokad)
+      .pulsing,
+    false,
+  );
+  assert.equal(
+    rokadExitPulse({ fading: true, from: 'köp', to: null, ms: HEDGE_MID_PULSE_MS, paper: true }, off.rokad)
+      .pulsing,
+    false,
+  );
+
+  const grindFade = rokadFade(few.rokad, fewOff.rokad);
+  assert.equal(grindFade.fading, true);
+  assert.equal(fewOff.hedge.freqProgress, true);
+  assert.equal(rokadExitPulse(grindFade, fewOff.rokad, emptyHedgeFade(), fewOff.hedge).pulsing, false);
+
+  const planFade = rokadFade(hedgeOn.rokad, hedgeOnOff.rokad);
+  const planPulse = rokadExitPulse(planFade, hedgeOnOff.rokad, emptyHedgeFade(), hedgeOnOff.hedge);
+  assert.equal(hedgeOnOff.hedge.proposed, true);
+  assert.equal(hedgeOnOff.hedge.freqProgress, false);
+  assert.equal(planPulse.pulsing, true);
+
+  const landFade = hedgeBandFadeIn(few.hedge, hedgeOn.hedge);
+  const exitFade = hedgeBandFade(hedgeOn.hedge, grindFromPlan.hedge);
+  assert.equal(hedgeTwinHandoffPulse(landFade, hedgeOn.hedge).pulsing, true);
+  assert.equal(hedgeMidHandoffPulse(landFade, hedgeOn.hedge).pulsing, true);
+  assert.equal(hedgeTwinExitPulse(exitFade, grindFromPlan.hedge).pulsing, true);
+  assert.equal(hedgeMidExitPulse(exitFade, grindFromPlan.hedge).pulsing, true);
+  assert.equal(
+    rokadExitPulse(rokadFade(hedgeOn.rokad, grindFromPlan.rokad), grindFromPlan.rokad, exitFade, grindFromPlan.hedge)
+      .pulsing,
+    false,
+  );
+  assert.equal(
+    rokadExitPulse(rokadFade(few.rokad, hedgeOn.rokad), hedgeOn.rokad, landFade, hedgeOn.hedge).pulsing,
+    false,
+  );
+  assert.equal(
+    rokadExitPulse(planFade, hedgeOnOff.rokad, landFade, hedgeOn.hedge).pulsing &&
+      hedgeTwinHandoffPulse(landFade, hedgeOn.hedge).pulsing,
+    false,
+  );
+  assert.equal(LIVE_LOCKED, true);
+
+  const pulseHtml = renderPlayArena(off, { rokadFade: fade, rokadPulse: pulse });
+  assert.match(pulseHtml, /data-rokad-pulse="1"/);
+  assert.match(pulseHtml, /has-rokad-pulse/);
+  assert.match(pulseHtml, /is-rokad-pulse/);
+  assert.match(pulseHtml, /data-rider-rokad-pulse/);
+  assert.match(pulseHtml, /data-rokad-tell="0"/);
+  assert.match(pulseHtml, /data-mode="rokad"/);
+  assert.match(pulseHtml, /data-rokad-from="köp"/);
+  assert.match(pulseHtml, /data-rokad-to="sälj"/);
+  assert.match(pulseHtml, /--hedge-pulse-ms:900ms/);
+  assert.ok(!/<button/i.test(pulseHtml));
+  assert.ok(!/<dialog/i.test(pulseHtml));
+  assert.ok(!/data-rider-pad|data-action="rider-key"/i.test(pulseHtml));
+  assert.ok(!/\d+\s*kr/i.test(pulseHtml));
+  assert.doesNotMatch(pulseHtml, /P&L|pnl/);
+
+  const fadeOnlyHtml = renderPlayArena(off, { rokadFade: fade });
+  assert.match(fadeOnlyHtml, /data-rokad-pulse="0"/);
+  assert.ok(!/has-rokad-pulse/.test(fadeOnlyHtml));
+  assert.ok(!/is-rokad-pulse/.test(fadeOnlyHtml));
+  assert.ok(!/data-rider-rokad-pulse/.test(fadeOnlyHtml));
+
+  const pulseWithoutFade = renderPlayArena(off, { rokadPulse: pulse });
+  assert.match(pulseWithoutFade, /data-rokad-pulse="0"/);
+  assert.ok(!/has-rokad-pulse/.test(pulseWithoutFade));
+  assert.ok(!/is-rokad-pulse/.test(pulseWithoutFade));
+
+  const stillOn = renderPlayArena(on, { rokadFade: fade, rokadPulse: pulse });
+  assert.match(stillOn, /data-rokad-tell="1"/);
+  assert.match(stillOn, /data-rokad-pulse="0"/);
+  assert.ok(!/has-rokad-pulse/.test(stillOn));
+
+  const grindHtml = renderPlayArena(fewOff, {
+    rokadFade: grindFade,
+    rokadPulse: rokadExitPulse(grindFade, fewOff.rokad, emptyHedgeFade(), fewOff.hedge),
+  });
+  assert.match(grindHtml, /data-rokad-pulse="0"/);
+  assert.match(grindHtml, /data-freq-progress="1"/);
+  assert.ok(!/is-rokad-pulse/.test(grindHtml));
+
+  const stackedHtml = renderPlayArena(grindFromPlan, {
+    hedgeFade: exitFade,
+    hedgePulse: hedgeTwinExitPulse(exitFade, grindFromPlan.hedge),
+    rokadFade: rokadFade(hedgeOn.rokad, grindFromPlan.rokad),
+    rokadPulse: rokadExitPulse(
+      rokadFade(hedgeOn.rokad, grindFromPlan.rokad),
+      grindFromPlan.rokad,
+      exitFade,
+      grindFromPlan.hedge,
+    ),
+  });
+  assert.match(stackedHtml, /data-rokad-pulse="0"/);
+  assert.ok(!/has-rokad-pulse/.test(stackedHtml));
+  assert.equal(LIVE_LOCKED, true);
 });
 
 test('mitt-hedge-tell: kursserie + band, tom serie = ingen tell', () => {

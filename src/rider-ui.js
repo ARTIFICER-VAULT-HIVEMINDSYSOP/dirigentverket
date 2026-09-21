@@ -58,6 +58,17 @@ function progressFadeOverlay(play) {
   return null;
 }
 
+function rokadExitOverlay(play) {
+  const fade = play && play.rokadFade && play.rokadFade.fading ? play.rokadFade : null;
+  const pulse = play && play.rokadPulse && play.rokadPulse.pulsing ? play.rokadPulse : null;
+  if (!fade || !pulse) return null;
+  const from = fade.from === 'sälj' || fade.from === 'köp' ? fade.from : null;
+  const to = fade.to === 'sälj' || fade.to === 'köp' ? fade.to : null;
+  if (!from || !to || from === to) return null;
+  if (pulse.from !== from || pulse.to !== to) return null;
+  return { pulsing: true, from, to };
+}
+
 function freqProgressPulseOn(play, overlay) {
   const pulse = play && play.hedgeProgressPulse;
   if (!pulse || !pulse.pulsing) return false;
@@ -115,10 +126,18 @@ function renderBitHud(lev, speed, railText, rails = [], play = {}, hopped = fals
   const rail = play.rail || 0;
   const sit = play.sit ?? rail;
   const rokadOn = Boolean(rokad && rokad.tell);
+  const rokadExit = rokadExitOverlay(play);
+  const rokadGhost = Boolean(!rokadOn && rokadExit);
+  const rokadFeel = rokadOn || rokadGhost;
+  const rokadPulseOn = Boolean(rokadGhost && rokadExit && rokadExit.pulsing);
   const hedgeOn = Boolean(hedge && hedge.tell);
-  const fromSide = rokad?.from || play.side || 'köp';
-  const toSide = rokadOn ? rokad.to : fromSide;
-  const mode = hopped ? 'hop' : trailed ? 'trail' : rokadOn ? 'rokad' : hedgeOn ? 'hedge' : 'hold';
+  const fromSide = rokadOn
+    ? rokad.from || play.side || 'köp'
+    : rokadGhost
+      ? rokadExit.from
+      : play.side || 'köp';
+  const toSide = rokadOn ? rokad.to : rokadGhost ? rokadExit.to : fromSide;
+  const mode = hopped ? 'hop' : trailed ? 'trail' : rokadFeel ? 'rokad' : hedgeOn ? 'hedge' : 'hold';
   const levBars = [1, 2, 3, 4]
     .map((n) => `<span class="rider-sil-bar${n <= lev ? ' is-on' : ''}" data-lev-bar="${n}"></span>`)
     .join('');
@@ -132,21 +151,22 @@ function renderBitHud(lev, speed, railText, rails = [], play = {}, hopped = fals
     : '<span class="rider-sil-rail-pip is-empty" data-rail-sil="-1"></span>';
   const freqOverlay = progressFadeOverlay(play);
   return `<div class="rider-play-hud rider-bit-hud" data-rider-sil data-verbs="w s f [ ] space">
-      <div class="rider-sil-mode" data-rider-mode-sil data-mode="${mode}" data-hop-tell="${hopped ? '1' : '0'}" data-trail-tell="${trailed ? '1' : '0'}" data-rokad-tell="${rokadOn ? '1' : '0'}" data-hedge-tell="${hedgeOn ? '1' : '0'}">
+      <div class="rider-sil-mode" data-rider-mode-sil data-mode="${mode}" data-hop-tell="${hopped ? '1' : '0'}" data-trail-tell="${trailed ? '1' : '0'}" data-rokad-tell="${rokadOn ? '1' : '0'}" data-rokad-pulse="${rokadPulseOn ? '1' : '0'}" data-hedge-tell="${hedgeOn ? '1' : '0'}">
         <span class="rider-sil-pip is-paper" data-mode-paper></span>
-        <span class="rider-sil-pip ${hopped ? 'is-hop is-tell' : trailed ? 'is-trail is-tell' : rokadOn ? 'is-rokad is-tell' : hedgeOn ? 'is-hedge is-tell' : 'is-hold'}" data-hop-sil></span>
+        <span class="rider-sil-pip ${hopped ? 'is-hop is-tell' : trailed ? 'is-trail is-tell' : rokadFeel ? `is-rokad is-tell${rokadPulseOn ? ' is-rokad-pulse' : ''}` : hedgeOn ? 'is-hedge is-tell' : 'is-hold'}" data-hop-sil></span>
         ${hopped ? '<span class="rider-sil-tell" data-rider-hop-tell>tell</span>' : ''}
         ${trailed ? '<span class="rider-sil-tell" data-rider-trail-tell>tell</span>' : ''}
         ${rokadOn ? '<span class="rider-sil-tell" data-rider-rokad-tell>tell</span>' : ''}
+        ${rokadPulseOn ? '<span class="rider-sil-tell is-rokad-pulse" data-rider-rokad-pulse>tell</span>' : ''}
         ${hedgeOn ? '<span class="rider-sil-tell" data-rider-hedge-tell>tell</span>' : ''}
         ${renderFreqPips(hedge, freqOverlay, freqProgressPulseOn(play, freqOverlay))}
       </div>
       ${
-        play.side || rokad
+        play.side || rokad || rokadGhost
           ? `<div class="rider-sil-side" data-rider-side-sil data-side="${escapeHtml(fromSide)}" data-rokad-from="${escapeHtml(fromSide)}" data-rokad-to="${escapeHtml(toSide)}">
         <span class="rider-sil-side-pip is-from" data-side-from="${escapeHtml(fromSide)}"></span>
-        ${rokadOn ? '<span class="rider-sil-side-arrow" aria-hidden="true">→</span>' : ''}
-        <span class="rider-sil-side-pip is-to${rokadOn ? ' is-rokad' : ''}" data-side-to="${escapeHtml(toSide)}"></span>
+        ${rokadFeel ? '<span class="rider-sil-side-arrow" aria-hidden="true">→</span>' : ''}
+        <span class="rider-sil-side-pip is-to${rokadFeel ? ' is-rokad' : ''}${rokadPulseOn ? ' is-rokad-pulse' : ''}" data-side-to="${escapeHtml(toSide)}"></span>
       </div>`
           : ''
       }
@@ -190,7 +210,7 @@ export function renderPlayArena(ride, play = {}) {
       })
       .join('');
     return `<div class="rider-play is-empty rider-bit is-dry-run" data-rider-play data-bit="32" data-dry-run="1" role="status"
-      data-freq-pip="${ride?.hedge?.freqPip ? '1' : '0'}" data-freq-saknas="${!ride || !ride.hedge || ride.hedge.saknas ? '1' : '0'}" data-freq-progress="${ride?.hedge?.freqProgress ? '1' : '0'}" data-freq-progress-fade="0" data-freq-progress-fade-in="0" data-freq-progress-pulse="0" data-hedge-ghost="0" data-hedge-band="0" data-hedge-mid-pip="0" data-hedge-fade="0" data-hedge-fade-in="0" data-hedge-mid-pulse="0" data-hedge-side-pips="0" data-hedge-side-fade="0" data-hedge-side-fade-in="0" data-hedge-side-pulse="0"
+      data-freq-pip="${ride?.hedge?.freqPip ? '1' : '0'}" data-freq-saknas="${!ride || !ride.hedge || ride.hedge.saknas ? '1' : '0'}" data-freq-progress="${ride?.hedge?.freqProgress ? '1' : '0'}" data-freq-progress-fade="0" data-freq-progress-fade-in="0" data-freq-progress-pulse="0" data-hedge-ghost="0" data-hedge-band="0" data-hedge-mid-pip="0" data-hedge-fade="0" data-hedge-fade-in="0" data-hedge-mid-pulse="0" data-hedge-side-pips="0" data-hedge-side-fade="0" data-hedge-side-fade-in="0" data-hedge-side-pulse="0" data-rokad-pulse="0"
       data-leverage="${lev}" data-speed="${speed}" data-lens="${lens}" data-rail="${rail}" data-sit="${sit}"
       style="--rider-speed:${speed};--rider-lens:${lens};--rider-coast-ms:${coastPeriodMs(lev)}ms;">
       ${renderScanlines()}
@@ -489,15 +509,29 @@ export function renderPlayArena(ride, play = {}) {
   const progressPulseOn = freqProgressPulseOn(play, progressOverlay);
   const progressOn = Boolean((ride.hedge && ride.hedge.freqProgress) || progressFadeOn || progressFadeInOn);
   const progressPulse = play.hedgeProgressPulse;
+  const rokadExit = rokadExitOverlay(play);
+  const rokadPulseOn = Boolean(!rokadOn && rokadExit && rokadExit.pulsing);
   const pulseMs =
     pulse && pulse.ms != null
       ? pulse.ms
       : progressPulse && progressPulse.ms != null
         ? progressPulse.ms
-        : HEDGE_MID_PULSE_MS;
-  return `<div class="rider-play rider-bit is-looking ${jumped ? 'has-hop' : 'has-hold'}${trailed ? ' has-trail' : ''}${rokadOn ? ' has-rokad' : ''}${hedgeOn ? ' has-hedge' : ''}${fadeOn ? ' has-hedge-fade' : ''}${fadeInOn ? ' has-hedge-fade-in' : ''}${pulseOn ? ' has-hedge-mid-pulse' : ''}${sidePipsOn ? ' has-hedge-side-pips' : ''}${sideFadeOn ? ' has-hedge-side-fade' : ''}${sideFadeInOn ? ' has-hedge-side-fade-in' : ''}${sidePulseOn ? ' has-hedge-side-pulse' : ''}${progressFadeOn ? ' has-freq-progress-fade' : ''}${progressFadeInOn ? ' has-freq-progress-fade-in' : ''}${progressPulseOn ? ' has-freq-progress-pulse' : ''}" data-rider-play data-bit="32" data-look="1"
-      data-hop-tell="${tell ? '1' : '0'}" data-trail-tell="${trailed ? '1' : '0'}" data-rokad-tell="${rokadOn ? '1' : '0'}" data-hedge-tell="${hedgeOn ? '1' : '0'}" data-freq-pip="${ride.hedge && ride.hedge.freqPip ? '1' : '0'}" data-freq-saknas="${ride.hedge && ride.hedge.saknas ? '1' : '0'}" data-freq-progress="${progressOn ? '1' : '0'}" data-freq-progress-fade="${progressFadeOn ? '1' : '0'}" data-freq-progress-fade-in="${progressFadeInOn ? '1' : '0'}" data-freq-progress-pulse="${progressPulseOn ? '1' : '0'}" data-hedge-ghost="${ghostOn ? '1' : '0'}" data-hedge-band="${bandOn ? '1' : '0'}" data-hedge-mid-pip="${midPipOn ? '1' : '0'}" data-hedge-fade="${fadeOn ? '1' : '0'}" data-hedge-fade-in="${fadeInOn ? '1' : '0'}" data-hedge-mid-pulse="${pulseOn ? '1' : '0'}" data-hedge-side-pips="${sidePipsOn ? '1' : '0'}" data-hedge-side-fade="${sideFadeOn ? '1' : '0'}" data-hedge-side-fade-in="${sideFadeInOn ? '1' : '0'}" data-hedge-side-pulse="${sidePulseOn ? '1' : '0'}"
-      data-side="${escapeHtml(ride.input?.side || 'köp')}" data-rokad-from="${escapeHtml(ride.rokad?.from || ride.input?.side || 'köp')}" data-rokad-to="${escapeHtml(ride.rokad?.to || ride.input?.side || 'köp')}"
+        : rokadPulseOn && play.rokadPulse && play.rokadPulse.ms != null
+          ? play.rokadPulse.ms
+          : HEDGE_MID_PULSE_MS;
+  const rokadFrom = rokadOn
+    ? ride.rokad?.from || ride.input?.side || 'köp'
+    : rokadPulseOn
+      ? rokadExit.from
+      : ride.rokad?.from || ride.input?.side || 'köp';
+  const rokadTo = rokadOn
+    ? ride.rokad?.to || ride.input?.side || 'köp'
+    : rokadPulseOn
+      ? rokadExit.to
+      : ride.rokad?.to || ride.input?.side || 'köp';
+  return `<div class="rider-play rider-bit is-looking ${jumped ? 'has-hop' : 'has-hold'}${trailed ? ' has-trail' : ''}${rokadOn ? ' has-rokad' : ''}${rokadPulseOn ? ' has-rokad-pulse' : ''}${hedgeOn ? ' has-hedge' : ''}${fadeOn ? ' has-hedge-fade' : ''}${fadeInOn ? ' has-hedge-fade-in' : ''}${pulseOn ? ' has-hedge-mid-pulse' : ''}${sidePipsOn ? ' has-hedge-side-pips' : ''}${sideFadeOn ? ' has-hedge-side-fade' : ''}${sideFadeInOn ? ' has-hedge-side-fade-in' : ''}${sidePulseOn ? ' has-hedge-side-pulse' : ''}${progressFadeOn ? ' has-freq-progress-fade' : ''}${progressFadeInOn ? ' has-freq-progress-fade-in' : ''}${progressPulseOn ? ' has-freq-progress-pulse' : ''}" data-rider-play data-bit="32" data-look="1"
+      data-hop-tell="${tell ? '1' : '0'}" data-trail-tell="${trailed ? '1' : '0'}" data-rokad-tell="${rokadOn ? '1' : '0'}" data-rokad-pulse="${rokadPulseOn ? '1' : '0'}" data-hedge-tell="${hedgeOn ? '1' : '0'}" data-freq-pip="${ride.hedge && ride.hedge.freqPip ? '1' : '0'}" data-freq-saknas="${ride.hedge && ride.hedge.saknas ? '1' : '0'}" data-freq-progress="${progressOn ? '1' : '0'}" data-freq-progress-fade="${progressFadeOn ? '1' : '0'}" data-freq-progress-fade-in="${progressFadeInOn ? '1' : '0'}" data-freq-progress-pulse="${progressPulseOn ? '1' : '0'}" data-hedge-ghost="${ghostOn ? '1' : '0'}" data-hedge-band="${bandOn ? '1' : '0'}" data-hedge-mid-pip="${midPipOn ? '1' : '0'}" data-hedge-fade="${fadeOn ? '1' : '0'}" data-hedge-fade-in="${fadeInOn ? '1' : '0'}" data-hedge-mid-pulse="${pulseOn ? '1' : '0'}" data-hedge-side-pips="${sidePipsOn ? '1' : '0'}" data-hedge-side-fade="${sideFadeOn ? '1' : '0'}" data-hedge-side-fade-in="${sideFadeInOn ? '1' : '0'}" data-hedge-side-pulse="${sidePulseOn ? '1' : '0'}"
+      data-side="${escapeHtml(ride.input?.side || 'köp')}" data-rokad-from="${escapeHtml(rokadFrom)}" data-rokad-to="${escapeHtml(rokadTo)}"
       data-leverage="${lev}" data-speed="${speed}" data-lens="${lens}" data-rail="${rail}" data-sit="${sit}"
       style="--rider-speed:${speed};--rider-lens:${lens};--rider-coast-ms:${coastMs}ms;--hop-window:${HOP_WINDOW_MS}ms;--hedge-fade-ms:${fadeMs}ms;--hedge-pulse-ms:${pulseMs}ms;"
       role="img" aria-label="Paper-arena">
