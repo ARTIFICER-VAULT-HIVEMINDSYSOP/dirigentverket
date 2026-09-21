@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Dirigentverket — funktionskatalog (publik)</title>
+<meta name="description" content="Publik funktionskatalog för Dirigentverket. Funktion och förmåga — inte kundkö, belopp eller personuppgifter." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg:#0b1628; --card:#122033; --line:#334155;
+    --gold:#d4b06a; --gold2:#f0d59a; --ink:#f8fafc; --mute:#94a3b8;
+    --paper:#fffdf8; --ink2:#1a1206; --soft:#f7eccf;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin:0;
+    font:400 16px/1.6 "Source Sans 3", system-ui, sans-serif;
+    background: linear-gradient(180deg,#0b1628 0%, #071018 40%, #0b1628 100%);
+    color: var(--ink);
+    min-height: 100vh;
+  }
+  a { color: inherit; }
+  .wrap { max-width: 860px; margin: 0 auto; padding: 1.25rem 1rem 3.5rem; }
+  .brand {
+    font:600 .72rem "Source Sans 3", sans-serif;
+    letter-spacing: .14em; text-transform: uppercase;
+    color: var(--gold); margin: 0 0 .6rem;
+  }
+  header h1 {
+    font-family: Fraunces, serif;
+    margin: 0 0 .4rem;
+    font-size: clamp(1.55rem, 4vw, 2.05rem);
+    color: var(--gold2);
+    line-height: 1.2;
+  }
+  .meta {
+    color: var(--mute); margin: 0 0 .85rem; max-width: 42rem;
+  }
+  .meta p { margin: 0 0 .35rem; }
+  .badge {
+    display:inline-block; font:600 .75rem inherit; letter-spacing:.04em;
+    color:#1a1206; background:var(--gold); border-radius:999px;
+    padding:.28rem .7rem; margin:0 .35rem .8rem 0;
+  }
+  .badge.ghost { background:transparent; color:var(--gold); border:1px solid var(--gold); }
+  .toc {
+    background: var(--card); border:1px solid var(--line);
+    border-radius:12px; padding:1rem 1.15rem 1.1rem; margin:0 0 1.35rem;
+  }
+  .toc h2 {
+    font:700 .85rem Fraunces, serif; margin:0 0 .55rem;
+    color:var(--gold2); letter-spacing:.02em;
+  }
+  .toc ol { margin:0; padding-left:1.2rem; columns: 1; }
+  @media (min-width: 640px) {
+    .toc ol { columns: 2; column-gap: 1.5rem; }
+  }
+  .toc li { break-inside: avoid; margin: .15rem 0; }
+  .toc a { color:#cbd5e1; text-decoration:none; }
+  .toc a:hover { color:var(--gold2); text-decoration: underline; }
+  .sheet {
+    background: var(--paper); color: var(--ink2);
+    border-radius:14px; padding:1.4rem 1.45rem 2rem;
+    border:1px solid #c9a24a55; box-shadow: 0 12px 40px rgba(0,0,0,.35);
+  }
+  .sheet h2 {
+    font:700 1.2rem Fraunces, serif; margin:1.7rem 0 .65rem;
+    color:#2a1c08; border-left:4px solid var(--gold); padding-left:.6rem;
+    scroll-margin-top: 1rem;
+  }
+  .sheet h2:first-child { margin-top:.2rem; }
+  .sheet p, .sheet li { font-size:.98rem; }
+  .sheet ul { margin:.35rem 0 .8rem; padding-left:1.25rem; }
+  .sheet li { margin: .2rem 0; }
+  .sheet strong { font-weight: 700; }
+  .lead-note {
+    margin: 0 0 1rem;
+    padding: .85rem 1rem;
+    border-radius: 10px;
+    background: var(--soft);
+    border: 1px solid #c9a24a66;
+  }
+  .foot {
+    margin-top:1.5rem; padding-top:1rem; border-top:1px solid #e5d4a8;
+    font-size:.85rem; color:#8a7044; line-height:1.45;
+    font-style: italic;
+  }
+  .src {
+    margin-top: .75rem;
+    font-size: .78rem;
+    color: var(--mute);
+  }
+  .src a { color: var(--gold2); }
+  @media print {
+    body { background:#fff; color:#000; }
+    .wrap { padding:0; max-width:none; }
+    .sheet { box-shadow:none; border:0; border-radius:0; padding:0; }
+    .toc { break-after: avoid; border:1px solid #ccc; background:#fff; }
+    .toc h2, header h1, .brand { color:#2a1c08; }
+    .meta { color:#333; }
+    .badge { border: 1px solid #333; }
+    a { color:inherit; text-decoration:none; }
+    .src { color:#555; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <p class="brand">Dirigentverket · publik katalog</p>
+  <header>
+    <h1>Dirigentverket — funktionskatalog (publik)</h1>
+    <div class="meta">
+      <p><strong>Datum:</strong> 2026-09-21</p>
+      <p><strong>Axel:</strong> funktion / förmåga · inte kundkö eller statuslistor</p>
+    </div>
+    <span class="badge">Sanerad</span>
+    <span class="badge ghost">Ingen kund-PII</span>
+  </header>
+
+  <nav class="toc" id="toc" aria-label="Innehåll">
+    <h2>Innehåll (alla H2)</h2>
+    <ol>
+      <li><a href="#kapitalstrategi-ks">Kapitalstrategi (KS)</a></li>
+      <li><a href="#magasin">Magasin</a></li>
+      <li><a href="#verktygslåda-toolbox">Verktygslåda (toolbox)</a></li>
+      <li><a href="#agentinstruktioner">Agentinstruktioner</a></li>
+      <li><a href="#uträkningar">Uträkningar</a></li>
+      <li><a href="#bankkarta">Bankkarta</a></li>
+      <li><a href="#utbildningar">Utbildningar</a></li>
+      <li><a href="#ui-stil">UI-stil</a></li>
+      <li><a href="#mötesbokning--kalender">Mötesbokning &amp; kalender</a></li>
+      <li><a href="#crm-kommentar">CRM-kommentar</a></li>
+      <li><a href="#kunddokument">Kunddokument</a></li>
+      <li><a href="#mejl-utkast--utskick">Mejl-utkast &amp; utskick</a></li>
+      <li><a href="#fu-premium-utskick">FU premium-utskick</a></li>
+      <li><a href="#nyhetsbrev">Nyhetsbrev</a></li>
+      <li><a href="#stab--orkestrering">Stab / orkestrering</a></li>
+      <li><a href="#trading-paper--rider">Trading paper / Rider</a></li>
+      <li><a href="#artificer-ai">Artificer AI</a></li>
+      <li><a href="#telegram-bot">Telegram-bot</a></li>
+      <li><a href="#pipe-tavla">Pipe-tavla</a></li>
+      <li><a href="#connectpoint">ConnectPoint</a></li>
+      <li><a href="#solros">Solros</a></li>
+      <li><a href="#övriga-stödfunktioner">Övriga stödfunktioner</a></li>
+    </ol>
+  </nav>
+
+  <article class="sheet">
+    <p class="lead-note"><strong>Not:</strong> Sanerad — ingen kund-PII, inga CRM-id, e-post, telefon eller personliga Desktop-sökvägar. Intern stab har full karta.</p>
+
+    <h2 id="kapitalstrategi-ks">Kapitalstrategi (KS)</h2>
+    <ul>
+      <li>Vite/React-sajt för klustret (Kapital och Strategi, Tradingskolan, admin, Rider, assistent).</li>
+      <li>Live-host och www/Pages-spår; DNS/CNAME-guider för custom domain.</li>
+      <li>Admin-sektioner (contracts, newsletter, courses, …); magasin-genväg på admin ofärdig.</li>
+      <li>Tradingskolan / prova-först; escrow-utbildning under school-path.</li>
+      <li>i18n dokumenterat (SV/EN/UA i UI; EN/FR escrow-handshake).</li>
+      <li>Sajt-hälsa-rutin + underhållspolicy; fallback lokal utskick → www → live.</li>
+    </ul>
+
+    <h2 id="magasin">Magasin</h2>
+    <ul>
+      <li>Lokal magasin-server + HTML/JS/CSS-UI (dedikerad port).</li>
+      <li>Separata köer per bokare; no-recycle (served-flagga + cooldown).</li>
+      <li>Magasin-utfall → sparad CRM-kommentar (Create på detalj, inte Call/Mail).</li>
+      <li>Magasin-data stannar lokalt (ej publik git); kod synkas via repo/backup.</li>
+    </ul>
+
+    <h2 id="verktygslåda-toolbox">Verktygslåda (toolbox)</h2>
+    <ul>
+      <li>Desktop-låda med P0-länkar/smoke (lokal HTML, ingen död dev-port).</li>
+      <li>Kundjämförelse-, FU-formulär-, avtal-/contracts-verktyg.</li>
+      <li>Luckor/leads-vyer; Pipe-chip i samma pack.</li>
+      <li>Gap-/builder-dokumentation för crystal-HUD och pipe.</li>
+    </ul>
+
+    <h2 id="agentinstruktioner">Agentinstruktioner</h2>
+    <ul>
+      <li><strong>Orkestrering:</strong> ett spår, leverans=bevis, park-först, INPUT vid auth, WIP-tak.</li>
+      <li><strong>Spegel:</strong> gemensam aktiv/park/bevis.</li>
+      <li><strong>Orgning:</strong> ÖB → VD → chefer; kväll ≠ dag.</li>
+      <li><strong>Ofärdigt-</strong> och <strong>onboarding-checklistor</strong>.</li>
+      <li><strong>OSINT:</strong> gemensam utbildning + skill; 28 förmågekluster.</li>
+      <li><strong>Skills:</strong> CRM-kort/positioner, mötesbokare, sälj/uppföljning, kundjämförelse, FU Zoho-BCC, artikelbild, gemensam-osint.</li>
+      <li><strong>Lås:</strong> Create≠Call; utkast≠live; PII i CRM; namngivet ja för live; bättre agenter först.</li>
+      <li><strong>Rutiner:</strong> park-kö, ofärdigt, sajt-hälsa, utskicks-bevakning.</li>
+    </ul>
+
+    <h2 id="uträkningar">Uträkningar</h2>
+    <p>Funktion — beskriver <em>vad</em> som räknas, inte belopp.</p>
+    <ul>
+      <li>Kundjämförelse-verktyg: %-ökning från insatt→saldo; speglas på Brons/Silver/Guld-trösklar; handelskredit = gap till mål-nivå; PDF-utskrift.</li>
+      <li>Kontotyp/nivå i admin-avtalspanel (benefitDelta / nästa kontotyp).</li>
+      <li>Nivå-HTML + intern nivå-JS; kreditkalkylator (flerspråkiga forms).</li>
+      <li>Paper-robot: SL/TP/RR och storlek från ifylld risk — tom = saknas.</li>
+      <li>Regel: siffror bara från namngivet underlag.</li>
+    </ul>
+
+    <h2 id="bankkarta">Bankkarta</h2>
+    <ul>
+      <li><code>bankkarta.html</code> — bank vs trading / jämförelsekarta.</li>
+      <li>Kundjämförelse-mallar med bank-vs-trading-spår.</li>
+      <li>OSINT-bankjämförelser (sourced, ingen kund-PII).</li>
+      <li>Admin-sektion banks.</li>
+    </ul>
+
+    <h2 id="utbildningar">Utbildningar</h2>
+    <ul>
+      <li>Tradingskolan (steg/rank, lektionskarta, live-host).</li>
+      <li>Escrow / tredjepart («Kapital i rörelse») + Pages-deploy.</li>
+      <li>OSINT gemensam låda + mini-övning + onboarding.</li>
+      <li>Robban-linje (säkerhetsutrustning före fart) i skola/chat.</li>
+      <li>Rider paper / policy / demo-copy.</li>
+      <li>AI-risk-kursutkast (coming soon); SL/TP-grind-utkast.</li>
+      <li>Agent-onboarding + drillmanus.</li>
+    </ul>
+
+    <h2 id="ui-stil">UI-stil</h2>
+    <ul>
+      <li>WATCHERS: sten + lampa (+ 16-bit fordon) i intern panel/robot/Rider.</li>
+      <li>KS: React-produkt-UI (skola, Rider, assistent, språkväljare).</li>
+      <li>Magasin: mörk operatörs-UI; HUD/patronbälte skilt från snabbknappar.</li>
+      <li>Verktyg-HTML: mörk sten/ton, chip-rad (crystal-HUD draft).</li>
+      <li>Artikelbild: license-klar stock + credit; ingen feed-foto.</li>
+    </ul>
+
+    <h2 id="mötesbokning--kalender">Mötesbokning &amp; kalender</h2>
+    <ul>
+      <li>CRM Create + kalender; mötesbokare äger luckor; manus + luckor/leads-HTML.</li>
+    </ul>
+
+    <h2 id="crm-kommentar">CRM-kommentar</h2>
+    <ul>
+      <li>Create på detaljkort; dubblettförbud; saldo tom=saknas; retro magasin-utfall; skill för kort/positioner.</li>
+    </ul>
+
+    <h2 id="kunddokument">Kunddokument</h2>
+    <ul>
+      <li>Mappstruktur + jämförelse HTML/PDF + manus; deploy-hjälp för synk.</li>
+    </ul>
+
+    <h2 id="mejl-utkast--utskick">Mejl-utkast &amp; utskick</h2>
+    <ul>
+      <li>Lokalt utkast; skick efter namngivet ja; massutskick-grind (ämne/teaser/PDF/batch).</li>
+    </ul>
+
+    <h2 id="fu-premium-utskick">FU premium-utskick</h2>
+    <ul>
+      <li>Intro-mallar → PDF; Zoho-BCC-skill; kampanjbatch med send-lock / cooldown.</li>
+    </ul>
+
+    <h2 id="nyhetsbrev">Nyhetsbrev</h2>
+    <ul>
+      <li>Utskick-pipeline; admin newsletter; finansnyheter kopplad till OSINT.</li>
+    </ul>
+
+    <h2 id="stab--orkestrering">Stab / orkestrering</h2>
+    <ul>
+      <li>Spegel + orkestrering + orgning + ofärdigt; 1–2–3 LIVE; WIP-tak.</li>
+    </ul>
+
+    <h2 id="trading-paper--rider">Trading paper / Rider</h2>
+    <ul>
+      <li>Paper/live-grind; SL/TP-watch; Rider PR:er; IPO/budget/intäkt-paper.</li>
+    </ul>
+
+    <h2 id="artificer-ai">Artificer AI</h2>
+    <ul>
+      <li>Automatisk handel under VD; paper-robot/Rider internt; skiljs från publik assistent.</li>
+    </ul>
+
+    <h2 id="telegram-bot">Telegram-bot</h2>
+    <ul>
+      <li>Extern kundkanal (meny/poller test); produktion efter namngivet ja; WA-spår parkerat.</li>
+    </ul>
+
+    <h2 id="pipe-tavla">Pipe-tavla</h2>
+    <ul>
+      <li>Del av verktygslådan; POP vid bokat; export JSON; Desktop-pack + smoke.</li>
+    </ul>
+
+    <h2 id="connectpoint">ConnectPoint</h2>
+    <ul>
+      <li>Paper: transcript → godkännande → CRM Create; API i agent-UI saknas.</li>
+    </ul>
+
+    <h2 id="solros">Solros</h2>
+    <ul>
+      <li>Paper-arkitektur för Telegram-handel (fysisk vara) — ej produktion i stab-kärnan.</li>
+    </ul>
+
+    <h2 id="övriga-stödfunktioner">Övriga stödfunktioner</h2>
+    <ul>
+      <li>Frihetsbibliotek (publik sida); NFT-advisory paper; white-label paper; kvälls-/spelspår.</li>
+    </ul>
+
+    <p class="foot">Publik spegel av funktionsaxeln. Tom rad = saknas i källa. Inga påhittade belopp.</p>
+  </article>
+
+  <p class="src">Källa: <a href="./index.md">index.md</a> · samma brödtext som den sanerade katalogen.</p>
+</div>
+</body>
+</html>

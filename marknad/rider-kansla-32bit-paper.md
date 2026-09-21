@@ -87,6 +87,8 @@ https://github.com/ARTIFICER-VAULT-HIVEMINDSYSOP/dirigentverket/pull/4
 
 **14:42 Sofia 18 sep (ständig-process):** Magasin 8765 HTTP 200. PR #13 draft CLEAN/MERGEABLE, 25 ahead/0 behind after conflict-fix `defe446` (head `1842f0dd`). Cloud bc-45f735b0: mjuk mitt-pip exit-puls proposed→grind (samma draft, ingen merge). PR #11 CLEAN. PR #14 update-branch. PR #9 lamp = kväll. Morgonbackup 1043 hade magasin-JSON/telefon-referens — eftermiddagsbackup byggs PII-fri. Merge väntar namngivet ja. No live/send/merge.
 
+**Kväll 21 sep ~18:20 Europe/Sofia (PR #9):** lamp-branch synkad mot `origin/main` (`956ec03`, PR #19 publik funktionskatalog). Inga konflikter. `LIVE_LOCKED`/`paperLock`/`live=false` kvar. Lamp/WATCHERS paper-skinn oförändrat. Draft kvar. Ingen merge.
+
 ## Prova-känsla (nu på main — paper)
 När ÖB öppnar `#/rider` ska det kännas så här, i den ordningen:
 1. Arena först — grafen syns innan någon formvägg.

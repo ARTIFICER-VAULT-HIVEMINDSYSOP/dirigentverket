@@ -10,6 +10,8 @@
 
 **Synk 18 sep kväll ~18:05 Sthlm:** merge `origin/main` (`7ef2db6`, rider-kansla + escrow-utbildning). Konflikt i rider-kansla-status löst: mitt-hedge/rokad från main behållen, lamp/WATCHERS-pekare kvar. `LIVE_LOCKED`/`paperLock`/`live=false` kvar. Draft stannar draft. Merge väntar namngivet ÖB-ja. Ingen merge.
 
+**Synk 21 sep kväll ~18:20 Europe/Sofia:** merge `origin/main` (`956ec03`, PR #19 publik funktionskatalog). Inga konflikter — katalogfilerna är nya. `LIVE_LOCKED`/`paperLock`/`live=false` kvar. Lamp/WATCHERS paper-skinn oförändrat. Draft stannar draft. Merge väntar namngivet ÖB-ja. Ingen merge.
+
 ## Vad som landat
 
 Paper-skinn på befintlig Artificer-yta (`#/robot`) i Dirigentverket-nexus. Inte en sidapp.
