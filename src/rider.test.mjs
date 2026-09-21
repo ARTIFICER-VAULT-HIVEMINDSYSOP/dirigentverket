@@ -56,7 +56,9 @@ import {
   hedgeTwinAfterFade,
   hedgeSidePips,
   rokadFade,
+  rokadFadeIn,
   rokadExitPulse,
+  rokadEnterPulse,
   emptyRokadFade,
   emptyRokadPulse,
   HEDGE_FADE_MS,
@@ -1133,6 +1135,221 @@ test('rokad-exit engångs-puls när tell går present→absent; tyst annars', ()
       grindFromPlan.rokad,
       exitFade,
       grindFromPlan.hedge,
+    ),
+  });
+  assert.match(stackedHtml, /data-rokad-pulse="0"/);
+  assert.ok(!/has-rokad-pulse/.test(stackedHtml));
+  assert.equal(LIVE_LOCKED, true);
+});
+
+test('rokad-enter engångs-puls när tell går absent→present; tyst annars', () => {
+  const on = computeRide({
+    entry: 100,
+    maxFel: 2,
+    rr: 2,
+    grav: 100,
+    side: 'köp',
+    prognos: 'sälj',
+    prognosRr: 2,
+    pilotVolume: 1,
+  });
+  const off = computeRide({
+    entry: 100,
+    maxFel: 2,
+    rr: 2,
+    grav: 100,
+    side: 'köp',
+    pilotVolume: 1,
+  });
+  const few = computeRide({
+    entry: 105,
+    maxFel: 2,
+    rr: 2,
+    grav: 105,
+    bbLower: 100,
+    bbUpper: 110,
+    priceSeries: '100\n110\n100',
+    side: 'köp',
+    prognos: 'sälj',
+    prognosRr: 2,
+  });
+  const fewOff = computeRide({
+    entry: 105,
+    maxFel: 2,
+    rr: 2,
+    grav: 105,
+    bbLower: 100,
+    bbUpper: 110,
+    priceSeries: '100\n110\n100',
+    side: 'köp',
+  });
+  const hedgeOn = computeRide({
+    entry: 105,
+    maxFel: 2,
+    rr: 2,
+    grav: 105,
+    bbLower: 100,
+    bbUpper: 110,
+    priceSeries: '100\n110\n100\n110',
+    side: 'köp',
+    prognos: 'sälj',
+    prognosRr: 2,
+  });
+  const hedgeOnOff = computeRide({
+    entry: 105,
+    maxFel: 2,
+    rr: 2,
+    grav: 105,
+    bbLower: 100,
+    bbUpper: 110,
+    priceSeries: '100\n110\n100\n110',
+    side: 'köp',
+  });
+  const grindFromPlan = computeRide({
+    entry: 105,
+    maxFel: 2,
+    rr: 2,
+    grav: 105,
+    bbLower: 100,
+    bbUpper: 110,
+    priceSeries: '100\n110\n100',
+    side: 'köp',
+  });
+
+  assert.equal(on.rokad.tell, true);
+  assert.equal(on.rokad.from, 'köp');
+  assert.equal(on.rokad.to, 'sälj');
+  assert.equal(off.rokad.tell, false);
+  assert.equal(few.hedge.freqProgress, true);
+  assert.equal(few.hedge.proposed, false);
+  assert.equal(hedgeOn.hedge.proposed, true);
+  assert.equal(hedgeOn.rokad.tell, true);
+  assert.equal(hedgeOnOff.rokad.tell, false);
+
+  const fade = rokadFadeIn(off.rokad, on.rokad);
+  const pulse = rokadEnterPulse(fade, on.rokad, emptyHedgeFade(), on.hedge);
+  assert.equal(fade.fading, true);
+  assert.equal(fade.fadingIn, true);
+  assert.equal(fade.from, 'köp');
+  assert.equal(fade.to, 'sälj');
+  assert.equal(fade.ms, HEDGE_MID_PULSE_MS);
+  assert.equal(fade.paper, true);
+  assert.equal(pulse.pulsing, true);
+  assert.equal(pulse.paper, true);
+  assert.equal(pulse.ms, HEDGE_MID_PULSE_MS);
+  assert.equal(pulse.from, 'köp');
+  assert.equal(pulse.to, 'sälj');
+
+  assert.equal(rokadFadeIn(on.rokad, on.rokad).fading, false);
+  assert.equal(rokadFadeIn(off.rokad, off.rokad).fading, false);
+  assert.equal(rokadFadeIn(on.rokad, off.rokad).fading, false);
+  assert.equal(rokadFadeIn(null, off.rokad).fading, false);
+  assert.equal(rokadFadeIn(null, on.rokad).fading, true);
+  assert.equal(rokadFadeIn(null, on.rokad).fadingIn, true);
+  assert.equal(rokadFadeIn(off.rokad, { tell: true, from: 'köp', to: 'köp' }).fading, false);
+  assert.equal(rokadFadeIn(off.rokad, { tell: true, from: 'köp' }).fading, false);
+  assert.equal(emptyRokadFade().fadingIn, false);
+  assert.equal(emptyPlayState().rokadFade.fadingIn, false);
+
+  assert.equal(rokadEnterPulse(null, on.rokad).pulsing, false);
+  assert.equal(rokadEnterPulse(emptyRokadFade(), on.rokad).pulsing, false);
+  assert.equal(rokadEnterPulse(fade, off.rokad).pulsing, false);
+  assert.equal(rokadEnterPulse(rokadFadeIn(on.rokad, on.rokad), on.rokad).pulsing, false);
+  assert.equal(rokadEnterPulse(rokadFade(on.rokad, off.rokad), off.rokad).pulsing, false);
+  assert.equal(
+    rokadEnterPulse({ fading: true, fadingIn: true, from: 'köp', to: 'köp', ms: HEDGE_MID_PULSE_MS, paper: true }, on.rokad)
+      .pulsing,
+    false,
+  );
+  assert.equal(
+    rokadEnterPulse({ fading: true, fadingIn: true, from: 'köp', to: null, ms: HEDGE_MID_PULSE_MS, paper: true }, on.rokad)
+      .pulsing,
+    false,
+  );
+
+  const grindFade = rokadFadeIn(fewOff.rokad, few.rokad);
+  assert.equal(grindFade.fading, true);
+  assert.equal(grindFade.fadingIn, true);
+  assert.equal(few.hedge.freqProgress, true);
+  assert.equal(rokadEnterPulse(grindFade, few.rokad, emptyHedgeFade(), few.hedge).pulsing, false);
+
+  const planFade = rokadFadeIn(hedgeOnOff.rokad, hedgeOn.rokad);
+  const planPulse = rokadEnterPulse(planFade, hedgeOn.rokad, emptyHedgeFade(), hedgeOn.hedge);
+  assert.equal(hedgeOn.hedge.proposed, true);
+  assert.equal(hedgeOn.hedge.freqProgress, false);
+  assert.equal(planPulse.pulsing, true);
+
+  const landFade = hedgeBandFadeIn(fewOff.hedge, hedgeOn.hedge);
+  const exitFade = hedgeBandFade(hedgeOn.hedge, grindFromPlan.hedge);
+  assert.equal(hedgeTwinHandoffPulse(landFade, hedgeOn.hedge).pulsing, true);
+  assert.equal(hedgeMidHandoffPulse(landFade, hedgeOn.hedge).pulsing, true);
+  assert.equal(hedgeTwinExitPulse(exitFade, grindFromPlan.hedge).pulsing, true);
+  assert.equal(hedgeMidExitPulse(exitFade, grindFromPlan.hedge).pulsing, true);
+  assert.equal(
+    rokadEnterPulse(rokadFadeIn(fewOff.rokad, hedgeOn.rokad), hedgeOn.rokad, landFade, hedgeOn.hedge).pulsing,
+    false,
+  );
+  assert.equal(
+    rokadEnterPulse(rokadFadeIn(hedgeOnOff.rokad, few.rokad), few.rokad, exitFade, few.hedge).pulsing,
+    false,
+  );
+  assert.equal(
+    rokadEnterPulse(planFade, hedgeOn.rokad, landFade, hedgeOn.hedge).pulsing &&
+      hedgeTwinHandoffPulse(landFade, hedgeOn.hedge).pulsing,
+    false,
+  );
+  assert.equal(LIVE_LOCKED, true);
+
+  const pulseHtml = renderPlayArena(on, { rokadFade: fade, rokadPulse: pulse });
+  assert.match(pulseHtml, /data-rokad-pulse="1"/);
+  assert.match(pulseHtml, /has-rokad-pulse/);
+  assert.match(pulseHtml, /is-rokad-pulse/);
+  assert.match(pulseHtml, /data-rider-rokad-pulse/);
+  assert.match(pulseHtml, /data-rokad-tell="1"/);
+  assert.match(pulseHtml, /data-rider-rokad-tell/);
+  assert.match(pulseHtml, /data-mode="rokad"/);
+  assert.match(pulseHtml, /data-rokad-from="köp"/);
+  assert.match(pulseHtml, /data-rokad-to="sälj"/);
+  assert.match(pulseHtml, /--hedge-pulse-ms:900ms/);
+  assert.ok(!/<button/i.test(pulseHtml));
+  assert.ok(!/<dialog/i.test(pulseHtml));
+  assert.ok(!/data-rider-pad|data-action="rider-key"/i.test(pulseHtml));
+  assert.ok(!/\d+\s*kr/i.test(pulseHtml));
+  assert.doesNotMatch(pulseHtml, /P&L|pnl/);
+
+  const fadeOnlyHtml = renderPlayArena(on, { rokadFade: fade });
+  assert.match(fadeOnlyHtml, /data-rokad-pulse="0"/);
+  assert.ok(!/has-rokad-pulse/.test(fadeOnlyHtml));
+  assert.ok(!/is-rokad-pulse/.test(fadeOnlyHtml));
+  assert.ok(!/data-rider-rokad-pulse/.test(fadeOnlyHtml));
+
+  const pulseWithoutFade = renderPlayArena(on, { rokadPulse: pulse });
+  assert.match(pulseWithoutFade, /data-rokad-pulse="0"/);
+  assert.ok(!/has-rokad-pulse/.test(pulseWithoutFade));
+  assert.ok(!/is-rokad-pulse/.test(pulseWithoutFade));
+
+  const stillOff = renderPlayArena(off, { rokadFade: fade, rokadPulse: pulse });
+  assert.match(stillOff, /data-rokad-tell="0"/);
+  assert.match(stillOff, /data-rokad-pulse="0"/);
+  assert.ok(!/has-rokad-pulse/.test(stillOff));
+
+  const grindHtml = renderPlayArena(few, {
+    rokadFade: grindFade,
+    rokadPulse: rokadEnterPulse(grindFade, few.rokad, emptyHedgeFade(), few.hedge),
+  });
+  assert.match(grindHtml, /data-rokad-pulse="0"/);
+  assert.match(grindHtml, /data-freq-progress="1"/);
+  assert.ok(!/is-rokad-pulse/.test(grindHtml));
+
+  const stackedHtml = renderPlayArena(hedgeOn, {
+    hedgeFade: landFade,
+    hedgePulse: hedgeTwinHandoffPulse(landFade, hedgeOn.hedge),
+    rokadFade: rokadFadeIn(fewOff.rokad, hedgeOn.rokad),
+    rokadPulse: rokadEnterPulse(
+      rokadFadeIn(fewOff.rokad, hedgeOn.rokad),
+      hedgeOn.rokad,
+      landFade,
+      hedgeOn.hedge,
     ),
   });
   assert.match(stackedHtml, /data-rokad-pulse="0"/);

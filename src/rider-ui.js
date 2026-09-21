@@ -58,15 +58,44 @@ function progressFadeOverlay(play) {
   return null;
 }
 
-function rokadExitOverlay(play) {
-  const fade = play && play.rokadFade && play.rokadFade.fading ? play.rokadFade : null;
-  const pulse = play && play.rokadPulse && play.rokadPulse.pulsing ? play.rokadPulse : null;
+function rokadPathFromFade(fade, pulse) {
   if (!fade || !pulse) return null;
   const from = fade.from === 'sälj' || fade.from === 'köp' ? fade.from : null;
   const to = fade.to === 'sälj' || fade.to === 'köp' ? fade.to : null;
   if (!from || !to || from === to) return null;
   if (pulse.from !== from || pulse.to !== to) return null;
   return { pulsing: true, from, to };
+}
+
+function rokadExitOverlay(play) {
+  const fade = play && play.rokadFade && play.rokadFade.fading && !play.rokadFade.fadingIn ? play.rokadFade : null;
+  const pulse = play && play.rokadPulse && play.rokadPulse.pulsing ? play.rokadPulse : null;
+  return rokadPathFromFade(fade, pulse);
+}
+
+function rokadEnterOverlay(play) {
+  const fade = play && play.rokadFade && play.rokadFade.fading && play.rokadFade.fadingIn ? play.rokadFade : null;
+  const pulse = play && play.rokadPulse && play.rokadPulse.pulsing ? play.rokadPulse : null;
+  const path = rokadPathFromFade(fade, pulse);
+  return path ? { ...path, fadingIn: true } : null;
+}
+
+function rokadHudState(play, rokad) {
+  const rokadOn = Boolean(rokad && rokad.tell);
+  const rokadExit = rokadExitOverlay(play);
+  const rokadEnter = rokadEnterOverlay(play);
+  const rokadGhost = Boolean(!rokadOn && rokadExit);
+  const rokadPulseOn = Boolean(
+    (rokadGhost && rokadExit && rokadExit.pulsing) || (rokadOn && rokadEnter && rokadEnter.pulsing),
+  );
+  return {
+    rokadOn,
+    rokadExit,
+    rokadEnter,
+    rokadGhost,
+    rokadPulseOn,
+    rokadFeel: rokadOn || rokadGhost,
+  };
 }
 
 function freqProgressPulseOn(play, overlay) {
@@ -125,11 +154,7 @@ function renderFreqPips(hedge, overlay = null, pulseOn = false) {
 function renderBitHud(lev, speed, railText, rails = [], play = {}, hopped = false, trailed = false, rokad = null, hedge = null) {
   const rail = play.rail || 0;
   const sit = play.sit ?? rail;
-  const rokadOn = Boolean(rokad && rokad.tell);
-  const rokadExit = rokadExitOverlay(play);
-  const rokadGhost = Boolean(!rokadOn && rokadExit);
-  const rokadFeel = rokadOn || rokadGhost;
-  const rokadPulseOn = Boolean(rokadGhost && rokadExit && rokadExit.pulsing);
+  const { rokadOn, rokadExit, rokadGhost, rokadPulseOn, rokadFeel } = rokadHudState(play, rokad);
   const hedgeOn = Boolean(hedge && hedge.tell);
   const fromSide = rokadOn
     ? rokad.from || play.side || 'köp'
@@ -156,8 +181,8 @@ function renderBitHud(lev, speed, railText, rails = [], play = {}, hopped = fals
         <span class="rider-sil-pip ${hopped ? 'is-hop is-tell' : trailed ? 'is-trail is-tell' : rokadFeel ? `is-rokad is-tell${rokadPulseOn ? ' is-rokad-pulse' : ''}` : hedgeOn ? 'is-hedge is-tell' : 'is-hold'}" data-hop-sil></span>
         ${hopped ? '<span class="rider-sil-tell" data-rider-hop-tell>tell</span>' : ''}
         ${trailed ? '<span class="rider-sil-tell" data-rider-trail-tell>tell</span>' : ''}
-        ${rokadOn ? '<span class="rider-sil-tell" data-rider-rokad-tell>tell</span>' : ''}
-        ${rokadPulseOn ? '<span class="rider-sil-tell is-rokad-pulse" data-rider-rokad-pulse>tell</span>' : ''}
+        ${rokadOn && !rokadPulseOn ? '<span class="rider-sil-tell" data-rider-rokad-tell>tell</span>' : ''}
+        ${rokadPulseOn ? `<span class="rider-sil-tell is-rokad-pulse" data-rider-rokad-pulse${rokadOn ? ' data-rider-rokad-tell' : ''}>tell</span>` : ''}
         ${hedgeOn ? '<span class="rider-sil-tell" data-rider-hedge-tell>tell</span>' : ''}
         ${renderFreqPips(hedge, freqOverlay, freqProgressPulseOn(play, freqOverlay))}
       </div>
@@ -509,8 +534,8 @@ export function renderPlayArena(ride, play = {}) {
   const progressPulseOn = freqProgressPulseOn(play, progressOverlay);
   const progressOn = Boolean((ride.hedge && ride.hedge.freqProgress) || progressFadeOn || progressFadeInOn);
   const progressPulse = play.hedgeProgressPulse;
-  const rokadExit = rokadExitOverlay(play);
-  const rokadPulseOn = Boolean(!rokadOn && rokadExit && rokadExit.pulsing);
+  const rokadHud = rokadHudState(play, ride.rokad);
+  const rokadPulseOn = rokadHud.rokadPulseOn;
   const pulseMs =
     pulse && pulse.ms != null
       ? pulse.ms
@@ -522,12 +547,12 @@ export function renderPlayArena(ride, play = {}) {
   const rokadFrom = rokadOn
     ? ride.rokad?.from || ride.input?.side || 'köp'
     : rokadPulseOn
-      ? rokadExit.from
+      ? rokadHud.rokadExit.from
       : ride.rokad?.from || ride.input?.side || 'köp';
   const rokadTo = rokadOn
     ? ride.rokad?.to || ride.input?.side || 'köp'
     : rokadPulseOn
-      ? rokadExit.to
+      ? rokadHud.rokadExit.to
       : ride.rokad?.to || ride.input?.side || 'köp';
   return `<div class="rider-play rider-bit is-looking ${jumped ? 'has-hop' : 'has-hold'}${trailed ? ' has-trail' : ''}${rokadOn ? ' has-rokad' : ''}${rokadPulseOn ? ' has-rokad-pulse' : ''}${hedgeOn ? ' has-hedge' : ''}${fadeOn ? ' has-hedge-fade' : ''}${fadeInOn ? ' has-hedge-fade-in' : ''}${pulseOn ? ' has-hedge-mid-pulse' : ''}${sidePipsOn ? ' has-hedge-side-pips' : ''}${sideFadeOn ? ' has-hedge-side-fade' : ''}${sideFadeInOn ? ' has-hedge-side-fade-in' : ''}${sidePulseOn ? ' has-hedge-side-pulse' : ''}${progressFadeOn ? ' has-freq-progress-fade' : ''}${progressFadeInOn ? ' has-freq-progress-fade-in' : ''}${progressPulseOn ? ' has-freq-progress-pulse' : ''}" data-rider-play data-bit="32" data-look="1"
       data-hop-tell="${tell ? '1' : '0'}" data-trail-tell="${trailed ? '1' : '0'}" data-rokad-tell="${rokadOn ? '1' : '0'}" data-rokad-pulse="${rokadPulseOn ? '1' : '0'}" data-hedge-tell="${hedgeOn ? '1' : '0'}" data-freq-pip="${ride.hedge && ride.hedge.freqPip ? '1' : '0'}" data-freq-saknas="${ride.hedge && ride.hedge.saknas ? '1' : '0'}" data-freq-progress="${progressOn ? '1' : '0'}" data-freq-progress-fade="${progressFadeOn ? '1' : '0'}" data-freq-progress-fade-in="${progressFadeInOn ? '1' : '0'}" data-freq-progress-pulse="${progressPulseOn ? '1' : '0'}" data-hedge-ghost="${ghostOn ? '1' : '0'}" data-hedge-band="${bandOn ? '1' : '0'}" data-hedge-mid-pip="${midPipOn ? '1' : '0'}" data-hedge-fade="${fadeOn ? '1' : '0'}" data-hedge-fade-in="${fadeInOn ? '1' : '0'}" data-hedge-mid-pulse="${pulseOn ? '1' : '0'}" data-hedge-side-pips="${sidePipsOn ? '1' : '0'}" data-hedge-side-fade="${sideFadeOn ? '1' : '0'}" data-hedge-side-fade-in="${sideFadeInOn ? '1' : '0'}" data-hedge-side-pulse="${sidePulseOn ? '1' : '0'}"

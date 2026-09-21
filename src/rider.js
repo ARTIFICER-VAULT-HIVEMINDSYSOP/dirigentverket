@@ -1046,6 +1046,7 @@ export function rideRokad(raw = {}) {
 export function emptyRokadFade() {
   return {
     fading: false,
+    fadingIn: false,
     from: null,
     to: null,
     ms: HEDGE_MID_PULSE_MS,
@@ -1087,6 +1088,27 @@ export function rokadFade(prev, next) {
   if (next && next.tell) return hold;
   return {
     fading: true,
+    fadingIn: false,
+    from: path.from,
+    to: path.to,
+    ms: HEDGE_MID_PULSE_MS,
+    paper: true,
+  };
+}
+
+/**
+ * Soft rokad-tell fade-in only when a known paper-rokad becomes present.
+ * Copies next from→to — never invents sides or volume.
+ * Already present / still absent / missing path = no fade-in.
+ */
+export function rokadFadeIn(prev, next) {
+  const hold = emptyRokadFade();
+  if (prev && prev.tell) return hold;
+  const path = copyKnownRokadPath(next);
+  if (!path) return hold;
+  return {
+    fading: true,
+    fadingIn: true,
     from: path.from,
     to: path.to,
     ms: HEDGE_MID_PULSE_MS,
@@ -1112,12 +1134,39 @@ function hedgeOneShotInFlight(hedgeFade, nextHedge) {
 export function rokadExitPulse(fade, next, hedgeFade, nextHedge) {
   const hold = emptyRokadPulse();
   if (hedgeOneShotInFlight(hedgeFade, nextHedge)) return hold;
-  if (!fade || !fade.fading) return hold;
+  if (!fade || !fade.fading || fade.fadingIn) return hold;
   if (next && next.tell) return hold;
   if (nextHedge && nextHedge.freqProgress) return hold;
   const from = knownRokadSide(fade.from);
   const to = knownRokadSide(fade.to);
   if (!from || !to || from === to) return hold;
+  return {
+    pulsing: true,
+    from,
+    to,
+    ms: HEDGE_MID_PULSE_MS,
+    paper: true,
+  };
+}
+
+/**
+ * Soft one-shot rokad-tell pulse only when rokad fade-in absent→present starts.
+ * Same 32-bit ease-out family as mitt/twin enter/landing (~900ms).
+ * Copies next from→to — never invents.
+ * Quiet when no real rokad fade-in, no plan, under grind, already present, or still absent.
+ * Never stacks with twin/mitt landing/exit in the same transition — one one-shot.
+ */
+export function rokadEnterPulse(fade, next, hedgeFade, nextHedge) {
+  const hold = emptyRokadPulse();
+  if (hedgeOneShotInFlight(hedgeFade, nextHedge)) return hold;
+  if (!fade || !fade.fading || !fade.fadingIn) return hold;
+  if (!next || !next.tell) return hold;
+  if (nextHedge && nextHedge.freqProgress) return hold;
+  const from = knownRokadSide(fade.from);
+  const to = knownRokadSide(fade.to);
+  if (!from || !to || from === to) return hold;
+  const path = copyKnownRokadPath(next);
+  if (!path || path.from !== from || path.to !== to) return hold;
   return {
     pulsing: true,
     from,

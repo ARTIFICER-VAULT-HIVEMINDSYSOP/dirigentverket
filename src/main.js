@@ -48,7 +48,9 @@ import {
   hedgeTwinExitPulse,
   hedgeTwinAfterFade,
   rokadFade,
+  rokadFadeIn,
   rokadExitPulse,
+  rokadEnterPulse,
   emptyRokadFade,
   emptyRokadPulse,
   LIVE_LOCKED,
@@ -490,8 +492,13 @@ root.addEventListener('submit', (ev) => {
         hedgeProgressPulse: emptyHedgeProgressPulse(),
       };
     }
-    const nextRokadFade = rokadFade(prevRokad, riderResult.rokad);
-    const nextRokadPulse = rokadExitPulse(nextRokadFade, riderResult.rokad, hedgeFade, riderResult.hedge);
+    let nextRokadFade = rokadFade(prevRokad, riderResult.rokad);
+    if (!nextRokadFade.fading) {
+      nextRokadFade = rokadFadeIn(prevRokad, riderResult.rokad);
+    }
+    const nextRokadPulse = nextRokadFade.fadingIn
+      ? rokadEnterPulse(nextRokadFade, riderResult.rokad, hedgeFade, riderResult.hedge)
+      : rokadExitPulse(nextRokadFade, riderResult.rokad, hedgeFade, riderResult.hedge);
     if (nextRokadPulse.pulsing) {
       const rokadUntil = now + nextRokadPulse.ms;
       riderPlay = {
