@@ -23,7 +23,7 @@ Vite lyssnar pa port 5173.
 - Portfolio: kort eller tabell.
 - Kalkyl: saknar utfall tills budget och kostnad fylls i.
 - Synergier: hypoteser utan paahittade kronor.
-- Robot: paper / utredning under Tradingskolan.
+- Robot: paper / utredning under Tradingskolan. WATCHERS-skinn (sten + lampa) pa samma yta.
 - Pilotsele: paper-sele som binder volym + SL/TP till ROBOT-klustret. Älvor ärver, höjer aldrig.
 - Nyhetssele: paper-remmar för vardagsmorgon. Skickar inte.
 - Magasinet: primär klient/lead-kö (patron + hammer). Inte nyhetsbrev. Inte Trade Rider.
@@ -38,7 +38,7 @@ Vite lyssnar pa port 5173.
 
 ## Robot
 
-Paper / utredning i samma app. Foreslar SL och TP. Lagger inga ordrar. Inga kurser hamtas. Ingen live-maklare.
+Paper / utredning i samma app. Foreslar SL och TP. Lagger inga ordrar. Inga kurser hamtas. Ingen live-maklare. WATCHERS-kammare (paper-skinn) pa `#/robot`. LIVE_LOCKED.
 
 SL flyttas bara när RSI närmar sig ett Bollinger-band och bud studsar mot bandet. Paper. Användaren skriver RSI, band och budstuds själv.
 

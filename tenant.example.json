@@ -5,7 +5,11 @@
     "name": "Exempel",
     "logo": "./logo.png",
     "hero": "./hero.png",
-    "lang": "sv"
+    "lang": "sv",
+    "watchers": {
+      "kicker": "WATCHERS · anden i lampan",
+      "chamber": ""
+    }
   },
   "crm": {
     "kind": "adapter",
