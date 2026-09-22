@@ -12,6 +12,8 @@
 
 **Synk 21 sep kväll ~18:20 Europe/Sofia:** merge `origin/main` (`956ec03`, PR #19 publik funktionskatalog). Inga konflikter — katalogfilerna är nya. `LIVE_LOCKED`/`paperLock`/`live=false` kvar. Lamp/WATCHERS paper-skinn oförändrat. Draft stannar draft. Merge väntar namngivet ÖB-ja. Ingen merge.
 
+**Synk 22 sep kväll ~18:10 Europe/Sofia:** `origin/main` tip `956ec03` (`956ec03052e53633822c70e01dccf5039ce1e028`, PR #19). Redan ancestor sedan synken 21 sep. `git merge origin/main` → Already up to date. Inget nytt från main. Inga konflikter. `LIVE_LOCKED`/`paperLock`/`live=false` kvar. Rider mitt-hedge/rokad från main orörd. Lamp/WATCHERS paper-skinn oförändrat. `node --test src/*.test.mjs` 147/147 pass, 0 fail. Mergeable `CLEAN`. Draft stannar draft. Merge väntar namngivet ÖB-ja. Ingen merge.
+
 ## Vad som landat
 
 Paper-skinn på befintlig Artificer-yta (`#/robot`) i Dirigentverket-nexus. Inte en sidapp.
