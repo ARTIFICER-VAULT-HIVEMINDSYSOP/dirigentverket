@@ -1,0 +1,12 @@
+node_modules
+dist
+dist-static
+dist-try
+.output
+.nitro
+.vinxi
+.tanstack
+*.local
+.env
+.env.*
+*.tsbuildinfo
