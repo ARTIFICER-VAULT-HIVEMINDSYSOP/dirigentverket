@@ -27,6 +27,7 @@ Vite lyssnar pa port 5173.
 - Pilotsele: paper-sele som binder volym + SL/TP till ROBOT-klustret. Älvor ärver, höjer aldrig.
 - Nyhetssele: paper-remmar för vardagsmorgon. Skickar inte.
 - Magasinet: primär klient/lead-kö (patron + hammer). Inte nyhetsbrev. Inte Trade Rider.
+- Traderider (`traderider/`): separat NVDA-paperdesk, tåg på Bollinger-räls. Inte Magasinet.
 
 ## Synergi
 
