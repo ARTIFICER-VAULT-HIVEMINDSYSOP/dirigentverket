@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Blotter } from './Blotter'
 import { BrokerPanel } from './BrokerPanel'
+import { LessonsPanel, PositionSizeBox, PracticeBanner, RailNoteView, SkolaToggle } from './SkolaLayer'
 import { drawRide } from '../lib/drawRide'
 import {
   loadBrokerSession,
@@ -24,6 +25,15 @@ import {
 import { formatPct, px as formatPx } from '../lib/format'
 import { commandFromKey, type Command } from '../lib/keys'
 import { sideOf } from '../lib/market'
+import {
+  bandAtProgress,
+  normalizeLessonBase,
+  railChangeBetween,
+  readSkolaEnabled,
+  suggestedStop,
+  writeSkolaEnabled,
+  type RailNote,
+} from '../lib/skola'
 import type { Candle, NvdaSource } from '../lib/types'
 
 type DeskProps = {
@@ -33,6 +43,8 @@ type DeskProps = {
   autoRun?: boolean
   /** Server desk can talk to `/api/broker`. Static GitHub Pages builds pass false. */
   brokerEnabled?: boolean
+  /** Prefix for Tradingskolan lesson files. Defaults to `../tradingskolan/`. */
+  lessonBase?: string
 }
 
 function measure(canvas: HTMLCanvasElement | null, state: DeskState): DeskState {
@@ -44,16 +56,46 @@ function measure(canvas: HTMLCanvasElement | null, state: DeskState): DeskState 
   return { ...state, viewport: { width, height } }
 }
 
-export function Desk({ candles, source, label, autoRun = true, brokerEnabled = true }: DeskProps) {
+export function Desk({
+  candles,
+  source,
+  label,
+  autoRun = true,
+  brokerEnabled = true,
+  lessonBase,
+}: DeskProps) {
+  const lessonsRoot = normalizeLessonBase(lessonBase ?? import.meta.env.VITE_TRADERIDER_LESSON_BASE)
   const [snap, setSnap] = useState(() => createDesk(candles))
+  const [skolaOn, setSkolaOn] = useState(true)
+  const [railNote, setRailNote] = useState<RailNote | null>(null)
   const stateRef = useRef(snap)
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const applyRef = useRef<(fn: (state: DeskState) => DeskState) => void>(() => {})
   const runRef = useRef<(cmd: Command) => void>(() => {})
+  const railCursor = useRef<number | null>(null)
   const mounted = useRef(true)
+
+  function syncRail(state: DeskState) {
+    const index = Math.floor(state.progress)
+    const prev = railCursor.current
+    if (prev == null) {
+      railCursor.current = index
+      return
+    }
+    if (index === prev) return
+    if (index < prev) {
+      railCursor.current = index
+      setRailNote(null)
+      return
+    }
+    const found = railChangeBetween(state.candles, state.bands, prev, index)
+    railCursor.current = index
+    if (found) setRailNote(found)
+  }
 
   function apply(fn: (state: DeskState) => DeskState) {
     stateRef.current = fn(stateRef.current)
+    syncRail(stateRef.current)
     setSnap(stateRef.current)
     drawRide(canvasRef.current, stateRef.current)
   }
@@ -124,9 +166,20 @@ export function Desk({ candles, source, label, autoRun = true, brokerEnabled = t
         ? 'Local book reset. Live broker position was not flattened.'
         : 'Local book reset. Flat on the 20-SMA.'
     stateRef.current = fresh
+    railCursor.current = Math.floor(fresh.progress)
+    setRailNote(null)
     setSnap(fresh)
     drawRide(canvasRef.current, fresh)
   }
+
+  function setSkola(next: boolean) {
+    setSkolaOn(next)
+    writeSkolaEnabled(window.localStorage, next)
+  }
+
+  useEffect(() => {
+    setSkolaOn(readSkolaEnabled(window.localStorage))
+  }, [])
 
   useEffect(() => {
     mounted.current = true
@@ -166,6 +219,7 @@ export function Desk({ candles, source, label, autoRun = true, brokerEnabled = t
   }, [])
 
   useEffect(() => {
+    if (railCursor.current == null) railCursor.current = Math.floor(stateRef.current.progress)
     const canvas = canvasRef.current
     stateRef.current = measure(canvas, stateRef.current)
     drawRide(canvas, stateRef.current)
@@ -185,6 +239,7 @@ export function Desk({ candles, source, label, autoRun = true, brokerEnabled = t
       last = now
       stateRef.current = measure(canvas, stateRef.current)
       stateRef.current = stepDesk(stateRef.current, dt)
+      syncRail(stateRef.current)
       drawRide(canvas, stateRef.current)
       acc += dt
       if (acc >= 160) {
@@ -202,15 +257,20 @@ export function Desk({ candles, source, label, autoRun = true, brokerEnabled = t
 
   const speed = trackSpeed(snap.leverage)
   const marked = markFromCandles(snap.candles, snap.progress)
+  const band = bandAtProgress(snap.bands, snap.progress)
+  const stopSuggestion = suggestedStop(sideOf(snap.book), band)
   const pctTone =
     marked.pct == null ? 'text-ink' : marked.pct > 0 ? 'text-nvda' : marked.pct < 0 ? 'text-brick' : 'text-ink'
+  const gridClass = `desk-grid${skolaOn ? ' has-skola' : ''}${skolaOn && railNote ? ' has-note' : ''}`
 
   return (
     <div data-desk="traderider" className="min-h-screen overflow-x-clip bg-paper text-ink">
+      <PracticeBanner />
       <header className="mx-auto flex max-w-[1100px] flex-wrap items-end justify-between gap-3 border-b border-brass px-3 py-4">
         <div className="min-w-0">
           <p className="text-[11px] uppercase tracking-[0.18em] text-ink/60">Paper desk · NVDA</p>
           <h1 className="font-display text-4xl font-medium leading-none">Traderider</h1>
+          <SkolaToggle on={skolaOn} onChange={setSkola} />
         </div>
         <div className="min-w-0 text-left sm:text-right">
           <p className="text-[11px] uppercase tracking-[0.16em] text-ink/60">NVDA close</p>
@@ -219,8 +279,19 @@ export function Desk({ candles, source, label, autoRun = true, brokerEnabled = t
         </div>
       </header>
 
-      <main className="mx-auto grid max-w-[1100px] grid-cols-1 gap-3 px-3 py-3 lg:grid-cols-[minmax(0,1fr)_340px]">
-        <section className="min-w-0">
+      <div className="mx-auto max-w-[1100px] px-3 py-3">
+      <main className={gridClass}>
+        {skolaOn && railNote ? (
+          <div className="desk-note">
+            <RailNoteView key={railNote.index} note={railNote} base={lessonsRoot} />
+          </div>
+        ) : null}
+        {skolaOn ? (
+          <div className="desk-skola min-w-0">
+            <PositionSizeBox mark={marked.close} suggestedStop={stopSuggestion} base={lessonsRoot} />
+          </div>
+        ) : null}
+        <section className="desk-chart min-w-0">
           {source === 'fallback' ? (
             <p className="mb-2 border border-brick/40 px-3 py-2 text-sm text-brick" role="status">
               {label}. Bundled NVDA candles, not a live Yahoo fetch.
@@ -252,7 +323,8 @@ export function Desk({ candles, source, label, autoRun = true, brokerEnabled = t
             />
           </div>
         </section>
-        <aside className="flex min-w-0 flex-col gap-3">
+        <div className="desk-book flex min-w-0 flex-col gap-3">
+          {skolaOn ? <LessonsPanel base={lessonsRoot} /> : null}
           <Blotter state={snap} onReset={onReset} />
           {brokerEnabled ? (
             <BrokerPanel />
@@ -264,8 +336,9 @@ export function Desk({ candles, source, label, autoRun = true, brokerEnabled = t
               </p>
             </section>
           )}
-        </aside>
+        </div>
       </main>
+      </div>
     </div>
   )
 }
