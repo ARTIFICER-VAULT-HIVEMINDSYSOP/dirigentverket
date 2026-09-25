@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest'
-import { fallbackPayload, loadNvdaCandles, loadNvdaForStatic, parseYahooChart } from './lib/loadNvda'
+import { fallbackPayload, loadNvdaCandles, loadNvdaForDesk, loadNvdaForStatic, parseYahooChart } from './lib/loadNvda'
 
 test('bundled fallback is labelled NVDA candles', () => {
   const payload = fallbackPayload()
@@ -49,6 +49,19 @@ test('static loader uses the bundle when the browser fetch fails', async () => {
   })
   expect(thrown.source).toBe('fallback')
   expect(thrown.candles.length).toBeGreaterThanOrEqual(20)
+})
+
+test('offline try package uses the bundled candles and does not fetch', async () => {
+  let called = false
+  const payload = await loadNvdaForDesk(true, async () => {
+    called = true
+    throw new Error('should not fetch')
+  })
+  expect(called).toBe(false)
+  expect(payload.fallback).toBe(true)
+  expect(payload.source).toBe('fallback')
+  expect(payload.label).toBe('Fallback data — Yahoo unavailable')
+  expect(payload.candles.length).toBeGreaterThanOrEqual(20)
 })
 
 test('static loader keeps Yahoo candles when the chart fetch succeeds', async () => {

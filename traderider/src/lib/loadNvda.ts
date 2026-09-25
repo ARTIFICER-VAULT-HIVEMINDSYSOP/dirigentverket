@@ -55,6 +55,17 @@ export function fallbackPayload(): NvdaPayload {
   }
 }
 
+/** Try-it package. The bundled snapshot only — no Yahoo request, so file:// and offline opens do not fail on CORS. */
+export function loadNvdaOffline(): Promise<NvdaPayload> {
+  return Promise.resolve(fallbackPayload())
+}
+
+/** Pages static build may try Yahoo. The folder package passes offline=true and never fetches. */
+export function loadNvdaForDesk(offline: boolean, fetchImpl: typeof fetch = fetch): Promise<NvdaPayload> {
+  if (offline) return loadNvdaOffline()
+  return loadNvdaForStatic(fetchImpl)
+}
+
 /** Browser fetch for the static build. No User-Agent header (browsers forbid it). CORS or network failure uses the bundle. */
 export async function loadNvdaForStatic(fetchImpl: typeof fetch = fetch): Promise<NvdaPayload> {
   try {

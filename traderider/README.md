@@ -71,4 +71,15 @@ Open http://localhost:3019/traderider/v2/
 
 The static desk tries Yahoo in the browser. That request sends no `User-Agent` header. If CORS or the network blocks it, the desk uses the bundled `src/data/nvda-fallback.json` and shows **Fallback data — Yahoo unavailable**. The Alpaca panel is hidden. Orders stay in the local paper book and are not sent to `/api/broker`.
 
+## Try it from a folder (file://)
+
+Chrome and Edge can open this build by double-clicking `index.html`. There is no server. The base path is `./`. The page is a single screen, so it does not need hash routing. Script, styles, fonts, and the NVDA snapshot are inlined in `index.html`. The page does not call Yahoo, so an offline open does not fail on CORS. The broker panel is off.
+
+```bash
+cd traderider
+npm run build:try
+```
+
+Output folder: `traderider/dist-try/`. Zip that folder. Unzip it, then double-click `index.html` in Chrome or Edge. `README.txt` in the same folder says the same thing.
+
 Do not commit API keys, `.env` files, or customer data. This repository is public. Broker credentials belong in the browser tab only.
