@@ -25,6 +25,7 @@ function fixture(): Candle[] {
 afterEach(() => {
   cleanup()
   sessionStorage.clear()
+  localStorage.clear()
   delete window.__controlsTest
 })
 

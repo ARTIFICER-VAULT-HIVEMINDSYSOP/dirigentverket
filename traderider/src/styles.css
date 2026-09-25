@@ -54,6 +54,63 @@ body {
   box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.45);
 }
 
+.practice-banner {
+  margin: 0;
+  background: #2f5a45;
+  color: #e9e3d6;
+  border-bottom: 1px solid #a68446;
+  padding: 0.6rem 0.9rem;
+  text-align: center;
+  font-size: 0.95rem;
+  line-height: 1.45;
+}
+
+.skola-note {
+  margin: 0;
+  background: #101412;
+  color: #e9e3d6;
+  border: 1px solid #a68446;
+  padding: 0.7rem 0.85rem;
+  font-size: 0.95rem;
+  line-height: 1.45;
+}
+
+.skola-link {
+  color: #e9e3d6;
+  text-underline-offset: 0.15em;
+}
+
+.skola-input {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 2.5rem;
+  margin-top: 0.2rem;
+  padding: 0.4rem 0.55rem;
+  background: #101412;
+  color: #e9e3d6;
+  border: 1px solid #a68446;
+  font: inherit;
+}
+
+.skola-input:focus {
+  outline: 2px solid #a68446;
+  outline-offset: 1px;
+}
+
+.skola-toggle {
+  accent-color: #a68446;
+  width: 1rem;
+  height: 1rem;
+}
+
+.desk-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.75rem;
+  align-items: start;
+}
+
 .ride-canvas {
   display: block;
   width: 100%;
@@ -69,5 +126,44 @@ body {
 @media (min-width: 768px) {
   .ride-canvas {
     height: 460px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .desk-grid {
+    grid-template-columns: minmax(0, 1fr) 340px;
+  }
+
+  .desk-grid.has-skola.has-note {
+    grid-template-areas:
+      "note note"
+      "chart skola"
+      "chart book";
+  }
+
+  .desk-grid.has-skola:not(.has-note) {
+    grid-template-areas:
+      "chart skola"
+      "chart book";
+  }
+
+  .desk-grid:not(.has-skola) {
+    grid-template-areas: "chart book";
+  }
+
+  .desk-note {
+    grid-area: note;
+  }
+
+  .desk-chart {
+    grid-area: chart;
+  }
+
+  .desk-skola {
+    grid-area: skola;
+  }
+
+  .desk-book {
+    grid-area: book;
   }
 }
