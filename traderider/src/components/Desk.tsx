@@ -202,7 +202,7 @@ export function Desk({ candles, source, label, autoRun = true, brokerEnabled = t
 
   return (
     <div data-desk="traderider" className="min-h-screen overflow-x-clip bg-paper text-ink">
-      <header className="mx-auto flex max-w-[1100px] flex-wrap items-end justify-between gap-3 border-b border-ink/15 px-3 py-4">
+      <header className="mx-auto flex max-w-[1100px] flex-wrap items-end justify-between gap-3 border-b border-brass px-3 py-4">
         <div className="min-w-0">
           <p className="text-[11px] uppercase tracking-[0.18em] text-ink/60">Paper desk · NVDA</p>
           <h1 className="font-display text-4xl font-medium leading-none">Traderider</h1>
@@ -249,7 +249,7 @@ export function Desk({ candles, source, label, autoRun = true, brokerEnabled = t
           {brokerEnabled ? (
             <BrokerPanel />
           ) : (
-            <section className="border border-ink/15 px-3 py-3">
+            <section className="armor-panel px-3 py-3">
               <h2 className="font-display text-2xl leading-none">Paper book</h2>
               <p className="mt-2 text-sm leading-snug">
                 Static paper book. Broker is off. Orders stay in this browser and are not sent to Alpaca.
@@ -281,7 +281,7 @@ function DeskButton({
       type="button"
       onClick={onClick}
       aria-pressed={pressed}
-      className="min-h-11 min-w-0 border border-ink/20 bg-paper px-2 py-2 text-sm font-medium"
+      className="desk-key min-h-11 min-w-0 px-2 py-2 text-sm font-medium"
     >
       <span className={color}>{label}</span>
       <span className="ml-1 hidden text-[10px] uppercase tracking-wide text-ink/45 sm:inline">{hint}</span>

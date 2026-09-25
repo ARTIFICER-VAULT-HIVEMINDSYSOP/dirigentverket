@@ -118,7 +118,7 @@ export function BrokerPanel() {
   }
 
   return (
-    <section className="min-w-0 border border-ink/15 bg-paper p-3">
+    <section className="armor-panel min-w-0 p-3">
       <h2 className="font-display text-2xl leading-none">Broker</h2>
       <p className="mt-1 text-xs leading-relaxed text-ink/65">
         Optional. NVDA market orders only, through /api/broker. Keys stay in sessionStorage for this tab and are not logged. The game book does not need a broker.
@@ -128,14 +128,14 @@ export function BrokerPanel() {
         <button
           type="button"
           onClick={() => chooseEnv('paper')}
-          className={`min-h-11 border px-2 text-sm ${env === 'paper' ? 'border-ink bg-ink text-paper' : 'border-ink/25'}`}
+          className={`min-h-11 px-2 text-sm ${env === 'paper' ? 'border border-ink bg-ink text-paper' : 'desk-key'}`}
         >
           Alpaca paper
         </button>
         <button
           type="button"
           onClick={() => chooseEnv('live')}
-          className={`min-h-11 border px-2 text-sm ${env === 'live' ? 'border-brick bg-brick text-paper' : 'border-ink/25'}`}
+          className={`min-h-11 px-2 text-sm ${env === 'live' ? 'border border-brick bg-brick text-paper' : 'desk-key'}`}
         >
           Alpaca live
         </button>
@@ -167,7 +167,7 @@ export function BrokerPanel() {
           onChange={(event) => setKeyId(event.target.value)}
           autoComplete="off"
           spellCheck={false}
-          className="mt-1 w-full min-w-0 border border-ink/20 bg-paper px-2 py-2 text-sm text-ink outline-none"
+          className="mt-1 w-full min-w-0 border border-brass bg-paper px-2 py-2 text-sm text-ink outline-none"
         />
       </label>
       <label className="mt-2 block text-[10px] uppercase tracking-[0.14em] text-ink/55">
@@ -178,19 +178,19 @@ export function BrokerPanel() {
           type="password"
           autoComplete="off"
           spellCheck={false}
-          className="mt-1 w-full min-w-0 border border-ink/20 bg-paper px-2 py-2 text-sm text-ink outline-none"
+          className="mt-1 w-full min-w-0 border border-brass bg-paper px-2 py-2 text-sm text-ink outline-none"
         />
       </label>
 
       <div className="mt-3 grid grid-cols-2 gap-2">
-        <button type="button" onClick={save} className="min-h-11 border border-ink/25 px-2 text-sm">
+        <button type="button" onClick={save} className="desk-key min-h-11 px-2 text-sm">
           Save keys
         </button>
-        <button type="button" onClick={clearKeys} className="min-h-11 border border-ink/25 px-2 text-sm">
+        <button type="button" onClick={clearKeys} className="desk-key min-h-11 px-2 text-sm">
           Clear keys
         </button>
       </div>
-      <button type="button" onClick={() => void checkAccount()} className="mt-2 min-h-11 w-full border border-ink/25 px-2 text-sm">
+      <button type="button" onClick={() => void checkAccount()} className="desk-key mt-2 min-h-11 w-full px-2 text-sm">
         Check account
       </button>
       <p className="mt-3 break-words text-xs leading-relaxed text-ink/75">{line}</p>

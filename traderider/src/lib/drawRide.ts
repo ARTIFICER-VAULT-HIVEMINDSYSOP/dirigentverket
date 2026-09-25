@@ -109,65 +109,149 @@ function roundRect(
   ctx.closePath()
 }
 
+const ARMOR = '#2f5a45'
+const NVDA = '#76b900'
+const BRASS = '#a68446'
+const BRASS_HI = '#e6d3a4'
+const INK = '#1c1915'
+const PAPER = '#f3ede2'
+const BRICK = '#9a3b2a'
+
+function steelFill(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number) {
+  const g = ctx.createLinearGradient(x, y, x + w * 0.2, y + h)
+  g.addColorStop(0, '#f2eee6')
+  g.addColorStop(0.32, '#c9c4ba')
+  g.addColorStop(0.5, '#8d8880')
+  g.addColorStop(0.7, '#ddd8ce')
+  g.addColorStop(1, '#a39e94')
+  return g
+}
+
+function armorPlate(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number) {
+  roundRect(ctx, x, y, w, h, 2)
+  ctx.fillStyle = steelFill(ctx, x, y, w, h)
+  ctx.fill()
+  ctx.strokeStyle = BRASS
+  ctx.lineWidth = 1.15
+  ctx.stroke()
+  ctx.beginPath()
+  ctx.moveTo(x + 2, y + 1.6)
+  ctx.lineTo(x + w - 2, y + 1.6)
+  ctx.strokeStyle = BRASS_HI
+  ctx.lineWidth = 0.8
+  ctx.stroke()
+}
+
+function drawChevronPlate(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number) {
+  armorPlate(ctx, x, y, w, h)
+  ctx.strokeStyle = BRASS_HI
+  ctx.lineWidth = 0.7
+  ctx.strokeRect(x + 2.2, y + 2.2, w - 4.4, h - 4.4)
+  ctx.beginPath()
+  ctx.moveTo(x + 4, y + 4)
+  ctx.lineTo(x + w / 2, y + h - 3.2)
+  ctx.lineTo(x + w - 4, y + 4)
+  ctx.strokeStyle = NVDA
+  ctx.lineWidth = 2.1
+  ctx.lineJoin = 'round'
+  ctx.lineCap = 'round'
+  ctx.stroke()
+}
+
 function drawTrain(ctx: CanvasRenderingContext2D, x: number, y: number, angle: number, side: Side) {
   ctx.save()
   ctx.translate(x, y)
   ctx.rotate(angle)
-  const body = side === 'long' ? '#76b900' : side === 'short' ? '#9a3b2a' : '#1c1915'
+  const accent = side === 'short' ? BRICK : side === 'long' ? NVDA : BRASS
 
-  ctx.strokeStyle = '#1c1915'
-  ctx.lineWidth = 1.4
+  ctx.strokeStyle = BRASS
+  ctx.lineWidth = 1.6
   ctx.beginPath()
-  ctx.moveTo(-28, -6)
-  ctx.lineTo(26, -6)
+  ctx.moveTo(-30, -6)
+  ctx.lineTo(30, -6)
   ctx.stroke()
 
   for (const wx of [-26, -10, 8, 24]) {
     ctx.beginPath()
-    ctx.arc(wx, -6, 5.5, 0, Math.PI * 2)
-    ctx.fillStyle = '#1c1915'
+    ctx.arc(wx, -6, 5.6, 0, Math.PI * 2)
+    ctx.fillStyle = steelFill(ctx, wx - 6, -12, 12, 12)
+    ctx.fill()
+    ctx.strokeStyle = BRASS
+    ctx.lineWidth = 1
+    ctx.stroke()
+    ctx.beginPath()
+    ctx.arc(wx, -6, 2.1, 0, Math.PI * 2)
+    ctx.fillStyle = INK
     ctx.fill()
     ctx.beginPath()
-    ctx.arc(wx, -6, 2, 0, Math.PI * 2)
-    ctx.fillStyle = '#f3ede2'
+    ctx.arc(wx, -6, 0.85, 0, Math.PI * 2)
+    ctx.fillStyle = BRASS_HI
     ctx.fill()
   }
 
+  const body = ctx.createLinearGradient(0, -27, 0, -8)
+  body.addColorStop(0, '#3d6b54')
+  body.addColorStop(0.55, ARMOR)
+  body.addColorStop(1, '#243f32')
   ctx.fillStyle = body
-  roundRect(ctx, -36, -24, 64, 16, 7)
+  roundRect(ctx, -40, -27, 70, 19, 6)
   ctx.fill()
-  ctx.strokeStyle = '#1c1915'
-  ctx.lineWidth = 1
+  ctx.strokeStyle = BRASS
+  ctx.lineWidth = 1.25
+  ctx.stroke()
+  ctx.beginPath()
+  ctx.moveTo(-32, -25.4)
+  ctx.lineTo(24, -25.4)
+  ctx.strokeStyle = BRASS_HI
+  ctx.lineWidth = 0.9
   ctx.stroke()
 
-  ctx.fillStyle = '#1c1915'
-  roundRect(ctx, 6, -38, 24, 22, 2)
-  ctx.fill()
-  ctx.fillStyle = '#f3ede2'
-  ctx.fillRect(11, -33, 13, 8)
+  armorPlate(ctx, -36, -24, 14, 13)
+  armorPlate(ctx, -20, -24, 14, 13)
+  ctx.fillStyle = accent
+  ctx.fillRect(-36, -12.4, 48, 1.7)
 
-  ctx.fillStyle = '#1c1915'
-  ctx.fillRect(-24, -34, 8, 12)
-  ctx.fillRect(-27, -36, 14, 3)
-
-  ctx.fillStyle = side === 'short' ? '#f3ede2' : '#76b900'
+  armorPlate(ctx, 4, -42, 28, 24)
+  ctx.fillStyle = PAPER
+  ctx.fillRect(9, -37, 16, 8)
+  ctx.strokeStyle = BRASS
+  ctx.lineWidth = 0.8
+  ctx.strokeRect(9, -37, 16, 8)
   ctx.beginPath()
-  ctx.arc(26, -16, 2.4, 0, Math.PI * 2)
-  ctx.fill()
+  ctx.moveTo(17, -37)
+  ctx.lineTo(17, -29)
+  ctx.stroke()
 
-  ctx.fillStyle = '#1c1915'
+  drawChevronPlate(ctx, 9, -28, 18, 13)
+
+  armorPlate(ctx, -30, -38, 12, 12)
+  ctx.fillStyle = BRASS
+  ctx.fillRect(-32, -39.2, 16, 2)
+
   ctx.beginPath()
-  ctx.moveTo(28, -10)
-  ctx.lineTo(44, -2)
-  ctx.lineTo(28, -2)
+  ctx.arc(30, -20, 2.5, 0, Math.PI * 2)
+  ctx.fillStyle = accent
+  ctx.fill()
+  ctx.strokeStyle = BRASS
+  ctx.lineWidth = 0.8
+  ctx.stroke()
+
+  ctx.beginPath()
+  ctx.moveTo(30, -14)
+  ctx.lineTo(46, -3)
+  ctx.lineTo(30, -4)
   ctx.closePath()
+  ctx.fillStyle = steelFill(ctx, 30, -14, 16, 12)
   ctx.fill()
+  ctx.strokeStyle = BRASS
+  ctx.lineWidth = 1.1
+  ctx.stroke()
 
-  ctx.globalAlpha = 0.35
-  ctx.fillStyle = '#1c1915'
+  ctx.globalAlpha = 0.28
+  ctx.fillStyle = INK
   ctx.beginPath()
-  ctx.arc(-34, -42, 3.5, 0, Math.PI * 2)
-  ctx.arc(-42, -50, 5.5, 0, Math.PI * 2)
+  ctx.arc(-36, -44, 3.2, 0, Math.PI * 2)
+  ctx.arc(-44, -52, 5, 0, Math.PI * 2)
   ctx.fill()
   ctx.restore()
 }

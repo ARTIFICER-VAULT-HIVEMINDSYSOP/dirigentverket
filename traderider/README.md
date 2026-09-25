@@ -8,7 +8,7 @@ This folder is its own app. It does not replace the Magasin or the ROBOT rider i
 
 - Ride Yahoo Finance NVDA candles (`interval=1h`, `range=1mo`). `GET /api/nvda` loads them. If Yahoo fails, the desk uses `src/data/nvda-fallback.json` and shows **Fallback data — Yahoo unavailable**.
 - Bollinger bands: period 20, k = 2 (population standard deviation). The canvas keeps at least 108px between the upper and lower rails.
-- The rider is a locomotive on ties and two rails. It starts **FLAT** on the mid rail.
+- The rider is a locomotive on ties and two rails. The body is deep green (`#2f5a45`) with brushed-steel plates, brass edges, and a V plate on the cab. NVDA green (`#76b900`) is the accent. It starts **FLAT** on the mid rail. The desk stays paper (`#f3ede2`) and ink (`#1c1915`), with thin brass rules on the panels.
 - **BUY** opens a long and the train takes the upper rail. **SELL** opens a short and the train takes the lower rail. **FLAT** closes. An opposite order closes the open position and stops. It does not flip long to short, or short to long, in one action.
 - Leverage is 1×–4×. It scales train speed and day-trade buying power together. 10× is clamped to 4×.
 - Paper book starts at **$100,000**. Whole shares only. Buys fill at the offer plus one cent of slippage. Sells fill at the bid minus that slippage. Fills never use the mid. Bid and offer are the candle close ± a half-spread of 1.5 bps (minimum one cent). That spread is a desk rule, not a claimed NBBO feed. Equity is marked at the candle close.

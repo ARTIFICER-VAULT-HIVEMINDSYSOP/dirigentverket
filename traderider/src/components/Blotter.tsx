@@ -35,7 +35,7 @@ export function Blotter({ state, onReset }: { state: DeskState; onReset: () => v
   const fills = state.book.fills.slice(-8).reverse()
 
   return (
-    <section className="min-w-0 border border-ink/15 bg-paper p-3">
+    <section className="armor-panel min-w-0 p-3">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <h2 className="font-display text-2xl leading-none">Book</h2>
@@ -44,7 +44,7 @@ export function Blotter({ state, onReset }: { state: DeskState; onReset: () => v
         <button
           type="button"
           onClick={onReset}
-          className="shrink-0 border border-ink/25 px-3 py-2 text-xs font-medium uppercase tracking-wide"
+          className="desk-key shrink-0 px-3 py-2 text-xs font-medium uppercase tracking-wide"
         >
           Reset book
         </button>
@@ -78,7 +78,7 @@ export function Blotter({ state, onReset }: { state: DeskState; onReset: () => v
         Buy fills at offer + slip. Sell fills at bid − slip. Mark is the candle close. Maintenance is 25% on longs and 30% on shorts. A breach liquidates the local book.
       </p>
 
-      <h3 className="mt-4 font-display text-lg">Fills</h3>
+      <h3 className="mt-4 border-t border-brass pt-3 font-display text-lg">Fills</h3>
       {fills.length === 0 ? (
         <p className="mt-2 text-sm text-ink/60">No fills.</p>
       ) : (
