@@ -6,19 +6,16 @@ import tailwindcss from '@tailwindcss/vite'
 import { normalizeBasePath } from './src/lib/staticBase'
 
 function renameStaticHtml(): Plugin {
+  let outDir = resolve('dist-static')
   return {
     name: 'rename-static-html',
     apply: 'build',
-    generateBundle(_options, bundle) {
-      for (const file of Object.values(bundle)) {
-        if (file.type === 'asset' && file.fileName.endsWith('static.html')) {
-          file.fileName = file.fileName.replace(/static\.html$/, 'index.html')
-        }
-      }
+    configResolved(config) {
+      outDir = config.build.outDir
     },
     closeBundle() {
-      const from = resolve('dist-static/static.html')
-      const to = resolve('dist-static/index.html')
+      const from = resolve(outDir, 'static.html')
+      const to = resolve(outDir, 'index.html')
       if (existsSync(from) && !existsSync(to)) renameSync(from, to)
     },
   }
