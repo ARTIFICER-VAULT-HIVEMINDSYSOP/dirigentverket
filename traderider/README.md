@@ -48,4 +48,27 @@ npm start
 
 `npm start` serves the production build from `.output/server/index.mjs` (Nitro). It listens on port 3000 unless `PORT` is set. The dev server uses port **3017**.
 
+`npm run build` is the primary build. It produces the TanStack Start server.
+
+## Static build (GitHub Pages)
+
+kapitalstrategi.com is a Vite site on GitHub Pages and has no server. A second build writes a static desk for a sub-path such as `/traderider/v2/`.
+
+```bash
+cd traderider
+TRADERIDER_BASE=/traderider/v2/ npm run build:static
+```
+
+Output folder: `traderider/dist-static/`. Copy that folder’s contents into `traderider/v2/` on the kapitalstrategi Pages site. `TRADERIDER_BASE` is the public path those files are served from. It defaults to `/traderider/v2/`. A missing leading or trailing slash is added. Use `/` only when the desk is the site root.
+
+Preview the static folder locally (set the same `TRADERIDER_BASE` you used for the build):
+
+```bash
+TRADERIDER_BASE=/traderider/v2/ npm run preview:static
+```
+
+Open http://localhost:3019/traderider/v2/
+
+The static desk tries Yahoo in the browser. That request sends no `User-Agent` header. If CORS or the network blocks it, the desk uses the bundled `src/data/nvda-fallback.json` and shows **Fallback data — Yahoo unavailable**. The Alpaca panel is hidden. Orders stay in the local paper book and are not sent to `/api/broker`.
+
 Do not commit API keys, `.env` files, or customer data. This repository is public. Broker credentials belong in the browser tab only.

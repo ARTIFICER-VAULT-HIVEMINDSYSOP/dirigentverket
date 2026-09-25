@@ -55,6 +55,29 @@ export function fallbackPayload(): NvdaPayload {
   }
 }
 
+/** Browser fetch for the static build. No User-Agent header (browsers forbid it). CORS or network failure uses the bundle. */
+export async function loadNvdaForStatic(fetchImpl: typeof fetch = fetch): Promise<NvdaPayload> {
+  try {
+    const res = await fetchImpl(YAHOO_URL, {
+      headers: { accept: 'application/json' },
+      signal: AbortSignal.timeout(8000),
+    })
+    if (!res.ok) throw new Error('yahoo_http')
+    const json: unknown = await res.json()
+    const candles = parseYahooChart(json)
+    return {
+      source: 'yahoo',
+      fallback: false,
+      label: 'Yahoo NVDA',
+      symbol: 'NVDA',
+      interval: '1h',
+      candles,
+    }
+  } catch {
+    return fallbackPayload()
+  }
+}
+
 export async function loadNvdaCandles(fetchImpl: typeof fetch = fetch): Promise<NvdaPayload> {
   try {
     const res = await fetchImpl(YAHOO_URL, {

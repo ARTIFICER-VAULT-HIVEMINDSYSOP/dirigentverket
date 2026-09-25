@@ -29,6 +29,8 @@ type DeskProps = {
   source: NvdaSource
   label: string
   autoRun?: boolean
+  /** Server desk can talk to `/api/broker`. Static GitHub Pages builds pass false. */
+  brokerEnabled?: boolean
 }
 
 function measure(canvas: HTMLCanvasElement | null, state: DeskState): DeskState {
@@ -40,7 +42,7 @@ function measure(canvas: HTMLCanvasElement | null, state: DeskState): DeskState 
   return { ...state, viewport: { width, height } }
 }
 
-export function Desk({ candles, source, label, autoRun = true }: DeskProps) {
+export function Desk({ candles, source, label, autoRun = true, brokerEnabled = true }: DeskProps) {
   const [snap, setSnap] = useState(() => createDesk(candles))
   const stateRef = useRef(snap)
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
@@ -56,6 +58,7 @@ export function Desk({ candles, source, label, autoRun = true }: DeskProps) {
   applyRef.current = apply
 
   async function relay(action: 'buy' | 'sell', qty: number, kind: RelayKind) {
+    if (!brokerEnabled) return
     const session = loadBrokerSession(window.sessionStorage)
     if (!session) return
     if (!shouldRelayToBroker({ kind, env: session.env, liveAcknowledged: session.liveAcknowledged })) return
@@ -110,7 +113,7 @@ export function Desk({ candles, source, label, autoRun = true }: DeskProps) {
   runRef.current = run
 
   function onReset() {
-    const session = loadBrokerSession(window.sessionStorage)
+    const session = brokerEnabled ? loadBrokerSession(window.sessionStorage) : null
     const env = session?.env ?? 'off'
     const fresh = createDesk(candles)
     fresh.viewport = stateRef.current.viewport
@@ -243,7 +246,16 @@ export function Desk({ candles, source, label, autoRun = true }: DeskProps) {
         </section>
         <aside className="flex min-w-0 flex-col gap-3">
           <Blotter state={snap} onReset={onReset} />
-          <BrokerPanel />
+          {brokerEnabled ? (
+            <BrokerPanel />
+          ) : (
+            <section className="border border-ink/15 px-3 py-3">
+              <h2 className="font-display text-2xl leading-none">Paper book</h2>
+              <p className="mt-2 text-sm leading-snug">
+                Static paper book. Broker is off. Orders stay in this browser and are not sent to Alpaca.
+              </p>
+            </section>
+          )}
         </aside>
       </main>
     </div>

@@ -7,6 +7,8 @@
   "scripts": {
     "dev": "vite dev --port 3017 --host",
     "build": "vite build",
+    "build:static": "vite build --config vite.static.config.ts",
+    "preview:static": "vite preview --config vite.static.config.ts --port 3019 --host",
     "start": "node .output/server/index.mjs",
     "typecheck": "tsc --noEmit",
     "test": "vitest run"

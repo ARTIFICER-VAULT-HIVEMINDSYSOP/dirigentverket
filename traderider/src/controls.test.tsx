@@ -118,6 +118,49 @@ test('reset does not call the broker when the session is live', async () => {
   }
 })
 
+test('static desk hides the broker and does not call /api/broker', async () => {
+  sessionStorage.setItem(
+    SESSION_KEY,
+    JSON.stringify({
+      env: 'live',
+      keyId: 'key-test-id',
+      secret: 'secret-test-value',
+      liveAcknowledged: true,
+    }),
+  )
+  const calls: string[] = []
+  const original = globalThis.fetch
+  globalThis.fetch = (async (input: RequestInfo | URL) => {
+    calls.push(String(input))
+    return new Response('{}', { status: 500 })
+  }) as typeof fetch
+  try {
+    const view = render(
+      <Desk
+        candles={fixture()}
+        source="fallback"
+        label="Fallback data — Yahoo unavailable"
+        autoRun={false}
+        brokerEnabled={false}
+      />,
+    )
+    expect(view.queryByRole('heading', { name: 'Broker' })).toBeNull()
+    expect(view.getByText(/Static paper book\. Broker is off/)).toBeTruthy()
+    await act(async () => {
+      view.getByRole('button', { name: /Buy/ }).click()
+    })
+    expect(calls.filter((url) => url.includes('/api/broker'))).toEqual([])
+    await act(async () => {
+      view.getByRole('button', { name: 'Reset book' }).click()
+    })
+    expect(view.getByText(/Local book reset\. Flat on the 20-SMA/)).toBeTruthy()
+    expect(view.queryByText(/Live broker position was not flattened/)).toBeNull()
+    expect(document.body.textContent ?? '').not.toContain('secret-test-value')
+  } finally {
+    globalThis.fetch = original
+  }
+})
+
 test('keyboard map covers the desk controls', () => {
   expect(commandFromKey('w')).toBe('buy')
   expect(commandFromKey('ArrowUp')).toBe('buy')
