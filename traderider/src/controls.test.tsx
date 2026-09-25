@@ -1,7 +1,7 @@
 import { act, cleanup, render } from '@testing-library/react'
 import { afterEach, expect, test } from 'vitest'
 import { Desk } from './components/Desk'
-import { createDesk, priceScale, sampleBand, trainScreenY } from './lib/deskState'
+import { createDesk, markFromCandles, priceScale, sampleBand, trainDrawScale, trainScreenY } from './lib/deskState'
 import { commandFromKey } from './lib/keys'
 import { SESSION_KEY } from './lib/brokerSession'
 import type { Candle } from './lib/types'
@@ -159,6 +159,28 @@ test('static desk hides the broker and does not call /api/broker', async () => {
   } finally {
     globalThis.fetch = original
   }
+})
+
+test('mark is the current close versus the previous close', () => {
+  const candles = fixture()
+  const mark = markFromCandles(candles, 20)
+  expect(mark.close).toBe(candles[20]?.c)
+  const prev = candles[19]?.c
+  if (mark.close == null || prev == null) throw new Error('missing close')
+  expect(mark.pct).toBeCloseTo(((mark.close - prev) / prev) * 100, 8)
+  expect(markFromCandles(candles, 0).pct).toBeNull()
+  expect(markFromCandles([], 3).close).toBeNull()
+})
+
+test('the locomotive is larger on a desktop width than at 390px', () => {
+  expect(trainDrawScale(1280)).toBeGreaterThanOrEqual(2)
+  expect(trainDrawScale(1280)).toBeLessThanOrEqual(3)
+  expect(trainDrawScale(390)).toBeGreaterThan(1)
+  expect(trainDrawScale(390)).toBeLessThan(trainDrawScale(1280))
+  const desk = createDesk(fixture())
+  const band = sampleBand(desk.bands, desk.progress)
+  if (!band) throw new Error('missing band')
+  expect(priceScale(280, band, 390).gapPx).toBeGreaterThanOrEqual(108)
 })
 
 test('keyboard map covers the desk controls', () => {

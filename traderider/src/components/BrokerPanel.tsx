@@ -128,14 +128,14 @@ export function BrokerPanel() {
         <button
           type="button"
           onClick={() => chooseEnv('paper')}
-          className={`min-h-11 px-2 text-sm ${env === 'paper' ? 'border border-ink bg-ink text-paper' : 'desk-key'}`}
+          className={`min-h-11 px-2 text-sm ${env === 'paper' ? 'border border-brass bg-armor text-ink' : 'desk-key'}`}
         >
           Alpaca paper
         </button>
         <button
           type="button"
           onClick={() => chooseEnv('live')}
-          className={`min-h-11 px-2 text-sm ${env === 'live' ? 'border border-brick bg-brick text-paper' : 'desk-key'}`}
+          className={`min-h-11 px-2 text-sm ${env === 'live' ? 'border border-brick bg-brick text-ink' : 'desk-key'}`}
         >
           Alpaca live
         </button>

@@ -6,8 +6,8 @@
 @import "@fontsource/ibm-plex-sans/latin-600.css";
 
 @theme {
-  --color-paper: #f3ede2;
-  --color-ink: #1c1915;
+  --color-paper: #101412;
+  --color-ink: #e9e3d6;
   --color-nvda: #76b900;
   --color-brick: #9a3b2a;
   --color-armor: #2f5a45;
@@ -18,9 +18,10 @@
 
 html,
 body {
-  background: #f3ede2;
-  color: #1c1915;
+  background: #101412;
+  color: #e9e3d6;
   overflow-x: clip;
+  color-scheme: dark;
 }
 
 body {
@@ -29,24 +30,28 @@ body {
 }
 
 .armor-panel {
-  background: #f3ede2;
+  background:
+    linear-gradient(165deg, rgba(198, 196, 188, 0.22) 0%, rgba(198, 196, 188, 0.05) 28%, transparent 46%),
+    #2f5a45;
   border: 1px solid #a68446;
   box-shadow:
-    inset 1px 1px 0 rgba(255, 248, 236, 0.95),
-    inset -1px -1px 0 rgba(28, 25, 21, 0.08);
+    inset 0 1px 0 rgba(230, 211, 164, 0.5),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.4);
+  color: #e9e3d6;
 }
 
 .desk-key {
   border: 1px solid #a68446;
-  background: #f3ede2;
+  background: linear-gradient(180deg, #2c3330 0%, #161b18 100%);
+  color: #e9e3d6;
   box-shadow:
-    inset 0 1px 0 #f8f3ea,
-    inset 0 -1px 0 rgba(28, 25, 21, 0.12);
+    inset 0 1px 0 rgba(230, 211, 164, 0.4),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.5);
 }
 
 .desk-key[aria-pressed='true'] {
-  background: #efe6d6;
-  box-shadow: inset 0 1px 2px rgba(28, 25, 21, 0.16);
+  background: #2f5a45;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.45);
 }
 
 .ride-canvas {
@@ -54,11 +59,11 @@ body {
   width: 100%;
   max-width: 100%;
   height: 280px;
-  background: #f3ede2;
+  background: #161b18;
   border: 1px solid #a68446;
   box-shadow:
-    inset 0 1px 0 rgba(230, 211, 164, 0.55),
-    inset 0 -1px 0 rgba(28, 25, 21, 0.06);
+    inset 0 1px 0 rgba(230, 211, 164, 0.35),
+    inset 0 0 0 1px #101412;
 }
 
 @media (min-width: 768px) {

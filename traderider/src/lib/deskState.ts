@@ -18,8 +18,6 @@ export const BASE_CANDLES_PER_SEC = 0.65
 export const MIN_BAND_GAP_PX = 108
 export const DEFAULT_VIEWPORT = { width: 960, height: 480 }
 
-const V_PAD = 36
-
 export type DeskState = {
   candles: Candle[]
   bands: (Band | null)[]
@@ -58,27 +56,55 @@ export function railPrice(band: Band, side: Side): number {
   return band.sma
 }
 
-/** Maps price to canvas Y. Upper and lower bands are at least 108px apart. */
-export function priceScale(height: number, band: Band) {
+/** Desktop locomotive scale is 2–3× the base sprite. Narrow screens use a smaller scale. */
+export function trainDrawScale(width: number): number {
+  const w = Number.isFinite(width) && width > 0 ? width : DEFAULT_VIEWPORT.width
+  if (w <= 400) return 1.5
+  if (w >= 760) return 2.55
+  const t = (w - 400) / (760 - 400)
+  return 1.5 + (2.55 - 1.5) * t
+}
+
+const TRAIN_ABOVE_RAIL = 66
+
+/** Maps price to canvas Y. Upper and lower bands are at least 108px apart, with room for the locomotive above the upper rail. */
+export function priceScale(height: number, band: Band, width = DEFAULT_VIEWPORT.width) {
   const span = band.upper - band.lower
   const safeSpan = span > 1e-8 ? span : 1
-  const gap = Math.max(MIN_BAND_GAP_PX, height - V_PAD * 2)
+  const trainH = TRAIN_ABOVE_RAIL * trainDrawScale(width)
+  const bottomPad = 28
+  const maxGap = height - trainH - bottomPad
+  const gap = Math.max(MIN_BAND_GAP_PX, Math.min(Math.max(MIN_BAND_GAP_PX, maxGap), Math.max(MIN_BAND_GAP_PX, height * 0.42)))
   const pxPerPrice = gap / safeSpan
   const mid = band.sma
   const center = height / 2
+  const upperY = center - ((band.upper - mid) / safeSpan) * gap
+  const yShift = upperY < trainH ? trainH - upperY : 0
   return {
     y(price: number) {
-      return center - (price - mid) * pxPerPrice
+      return center + yShift - (price - mid) * pxPerPrice
     },
     gapPx: span > 1e-8 ? span * pxPerPrice : 0,
   }
 }
 
+/** The mark is this candle's close. Percent is versus the previous close. Missing previous close stays null. */
+export function markFromCandles(candles: Candle[], progress: number): { close: number | null; pct: number | null } {
+  if (candles.length === 0) return { close: null, pct: null }
+  const i = Math.min(candles.length - 1, Math.max(0, Math.floor(progress)))
+  const close = candles[i]?.c
+  if (close == null || !Number.isFinite(close)) return { close: null, pct: null }
+  const prev = i > 0 ? candles[i - 1]?.c : undefined
+  if (prev == null || !Number.isFinite(prev) || prev === 0) return { close, pct: null }
+  return { close, pct: ((close - prev) / prev) * 100 }
+}
+
 export function trainScreenY(state: DeskState): number {
   const height = state.viewport.height || DEFAULT_VIEWPORT.height
+  const width = state.viewport.width || DEFAULT_VIEWPORT.width
   const band = sampleBand(state.bands, state.progress)
   if (!band) return height / 2
-  return priceScale(height, band).y(railPrice(band, sideOf(state.book)))
+  return priceScale(height, band, width).y(railPrice(band, sideOf(state.book)))
 }
 
 export function candleAt(state: DeskState): Candle | null {

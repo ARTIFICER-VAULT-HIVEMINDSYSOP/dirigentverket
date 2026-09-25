@@ -1,6 +1,7 @@
 import type { Band } from './bollinger'
+import { markFromCandles, priceScale, railPrice, sampleBand, trainDrawScale, type DeskState } from './deskState'
+import { formatPct, px } from './format'
 import { sideOf } from './market'
-import { priceScale, railPrice, sampleBand, type DeskState } from './deskState'
 import type { Side } from './types'
 
 type Pt = { x: number; y: number }
@@ -47,11 +48,26 @@ function trackPoints(
   return pts
 }
 
+function strokeCenter(ctx: CanvasRenderingContext2D, pts: Pt[]) {
+  ctx.beginPath()
+  for (let i = 0; i < pts.length; i++) {
+    if (i === 0) ctx.moveTo(pts[i].x, pts[i].y)
+    else ctx.lineTo(pts[i].x, pts[i].y)
+  }
+}
+
 function drawTrack(ctx: CanvasRenderingContext2D, pts: Pt[], color: string, active: boolean) {
   if (pts.length < 2) return
-  const railOffset = active ? 5 : 3.5
+  const railOffset = active ? 4.5 : 3.2
+  strokeCenter(ctx, pts)
+  ctx.strokeStyle = '#101412'
+  ctx.lineWidth = active ? 14 : 10
+  ctx.lineJoin = 'round'
+  ctx.lineCap = 'round'
+  ctx.stroke()
+
   let dist = 0
-  let nextTie = 10
+  let nextTie = 12
   ctx.lineCap = 'butt'
   for (let i = 1; i < pts.length; i++) {
     const a = pts[i - 1]
@@ -66,12 +82,12 @@ function drawTrack(ctx: CanvasRenderingContext2D, pts: Pt[], color: string, acti
       const x = a.x + dx * t
       const y = a.y + dy * t
       ctx.beginPath()
-      ctx.moveTo(x + nx * 11, y + ny * 11)
-      ctx.lineTo(x - nx * 11, y - ny * 11)
-      ctx.strokeStyle = active ? 'rgba(28,25,21,0.72)' : 'rgba(28,25,21,0.28)'
-      ctx.lineWidth = active ? 3 : 2
+      ctx.moveTo(x + nx * 9, y + ny * 9)
+      ctx.lineTo(x - nx * 9, y - ny * 9)
+      ctx.strokeStyle = active ? 'rgba(166,132,70,0.85)' : 'rgba(185,180,170,0.35)'
+      ctx.lineWidth = active ? 2.4 : 1.4
       ctx.stroke()
-      nextTie += 14
+      nextTie += 16
     }
     dist += len
   }
@@ -85,7 +101,7 @@ function drawTrack(ctx: CanvasRenderingContext2D, pts: Pt[], color: string, acti
       else ctx.lineTo(x, y)
     }
     ctx.strokeStyle = color
-    ctx.lineWidth = active ? 2.6 : 1.35
+    ctx.lineWidth = active ? 2.4 : 1.5
     ctx.lineJoin = 'round'
     ctx.lineCap = 'round'
     ctx.stroke()
@@ -113,9 +129,10 @@ const ARMOR = '#2f5a45'
 const NVDA = '#76b900'
 const BRASS = '#a68446'
 const BRASS_HI = '#e6d3a4'
-const INK = '#1c1915'
-const PAPER = '#f3ede2'
+const GROUND = '#101412'
+const LIGHT = '#e9e3d6'
 const BRICK = '#9a3b2a'
+const GLASS = '#1a2420'
 
 function steelFill(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number) {
   const g = ctx.createLinearGradient(x, y, x + w * 0.2, y + h)
@@ -158,78 +175,77 @@ function drawChevronPlate(ctx: CanvasRenderingContext2D, x: number, y: number, w
   ctx.stroke()
 }
 
-function drawTrain(ctx: CanvasRenderingContext2D, x: number, y: number, angle: number, side: Side) {
-  ctx.save()
-  ctx.translate(x, y)
-  ctx.rotate(angle)
+/** Local y=0 is the rail. Wheel bottoms sit on that line. Caller rotates to the rail tangent. */
+function drawTrain(ctx: CanvasRenderingContext2D, side: Side) {
   const accent = side === 'short' ? BRICK : side === 'long' ? NVDA : BRASS
+  const wheelR = 6
 
   ctx.strokeStyle = BRASS
   ctx.lineWidth = 1.6
   ctx.beginPath()
-  ctx.moveTo(-30, -6)
-  ctx.lineTo(30, -6)
+  ctx.moveTo(-32, -wheelR)
+  ctx.lineTo(32, -wheelR)
   ctx.stroke()
 
   for (const wx of [-26, -10, 8, 24]) {
     ctx.beginPath()
-    ctx.arc(wx, -6, 5.6, 0, Math.PI * 2)
+    ctx.arc(wx, -wheelR, wheelR, 0, Math.PI * 2)
     ctx.fillStyle = steelFill(ctx, wx - 6, -12, 12, 12)
     ctx.fill()
     ctx.strokeStyle = BRASS
     ctx.lineWidth = 1
     ctx.stroke()
     ctx.beginPath()
-    ctx.arc(wx, -6, 2.1, 0, Math.PI * 2)
-    ctx.fillStyle = INK
+    ctx.arc(wx, -wheelR, 2.1, 0, Math.PI * 2)
+    ctx.fillStyle = GROUND
     ctx.fill()
     ctx.beginPath()
-    ctx.arc(wx, -6, 0.85, 0, Math.PI * 2)
+    ctx.arc(wx, -wheelR, 0.85, 0, Math.PI * 2)
     ctx.fillStyle = BRASS_HI
     ctx.fill()
   }
 
-  const body = ctx.createLinearGradient(0, -27, 0, -8)
+  const body = ctx.createLinearGradient(0, -28, 0, -8)
   body.addColorStop(0, '#3d6b54')
   body.addColorStop(0.55, ARMOR)
   body.addColorStop(1, '#243f32')
   ctx.fillStyle = body
-  roundRect(ctx, -40, -27, 70, 19, 6)
+  roundRect(ctx, -40, -28, 72, 20, 6)
   ctx.fill()
   ctx.strokeStyle = BRASS
   ctx.lineWidth = 1.25
   ctx.stroke()
   ctx.beginPath()
-  ctx.moveTo(-32, -25.4)
-  ctx.lineTo(24, -25.4)
+  ctx.moveTo(-32, -26.4)
+  ctx.lineTo(26, -26.4)
   ctx.strokeStyle = BRASS_HI
   ctx.lineWidth = 0.9
   ctx.stroke()
 
-  armorPlate(ctx, -36, -24, 14, 13)
-  armorPlate(ctx, -20, -24, 14, 13)
+  armorPlate(ctx, -36, -25, 14, 13)
+  armorPlate(ctx, -20, -25, 14, 13)
   ctx.fillStyle = accent
-  ctx.fillRect(-36, -12.4, 48, 1.7)
+  ctx.fillRect(-36, -13, 50, 1.8)
 
-  armorPlate(ctx, 4, -42, 28, 24)
-  ctx.fillStyle = PAPER
-  ctx.fillRect(9, -37, 16, 8)
+  armorPlate(ctx, 6, -46, 28, 26)
+  ctx.fillStyle = GLASS
+  ctx.fillRect(11, -41, 16, 8)
   ctx.strokeStyle = BRASS
   ctx.lineWidth = 0.8
-  ctx.strokeRect(9, -37, 16, 8)
+  ctx.strokeRect(11, -41, 16, 8)
   ctx.beginPath()
-  ctx.moveTo(17, -37)
-  ctx.lineTo(17, -29)
+  ctx.moveTo(19, -41)
+  ctx.lineTo(19, -33)
   ctx.stroke()
 
-  drawChevronPlate(ctx, 9, -28, 18, 13)
+  drawChevronPlate(ctx, 11, -31, 18, 13)
 
-  armorPlate(ctx, -30, -38, 12, 12)
+  armorPlate(ctx, -30, -42, 12, 14)
   ctx.fillStyle = BRASS
-  ctx.fillRect(-32, -39.2, 16, 2)
+  ctx.fillRect(-32, -43.2, 16, 2.2)
 
   ctx.beginPath()
-  ctx.arc(30, -20, 2.5, 0, Math.PI * 2)
+  ctx.arc(32, -24, 2.6, 0, Math.PI * 2)
   ctx.fillStyle = accent
   ctx.fill()
   ctx.strokeStyle = BRASS
@@ -237,23 +253,23 @@ function drawTrain(ctx: CanvasRenderingContext2D, x: number, y: number, angle: n
   ctx.stroke()
 
   ctx.beginPath()
-  ctx.moveTo(30, -14)
-  ctx.lineTo(46, -3)
-  ctx.lineTo(30, -4)
+  ctx.moveTo(32, -16)
+  ctx.lineTo(48, -2)
+  ctx.lineTo(32, -4)
   ctx.closePath()
-  ctx.fillStyle = steelFill(ctx, 30, -14, 16, 12)
+  ctx.fillStyle = steelFill(ctx, 32, -16, 16, 14)
   ctx.fill()
   ctx.strokeStyle = BRASS
   ctx.lineWidth = 1.1
   ctx.stroke()
 
-  ctx.globalAlpha = 0.28
-  ctx.fillStyle = INK
+  ctx.globalAlpha = 0.35
+  ctx.fillStyle = LIGHT
   ctx.beginPath()
-  ctx.arc(-36, -44, 3.2, 0, Math.PI * 2)
-  ctx.arc(-44, -52, 5, 0, Math.PI * 2)
+  ctx.arc(-36, -50, 3.2, 0, Math.PI * 2)
+  ctx.arc(-44, -58, 5, 0, Math.PI * 2)
   ctx.fill()
-  ctx.restore()
+  ctx.globalAlpha = 1
 }
 
 function pointOnRail(state: DeskState, progress: number, side: Side, width: number, yOf: (price: number) => number): Pt {
@@ -276,7 +292,7 @@ function drawCandles(
     const candle = state.candles[i]
     if (!candle) continue
     const x = xFor(state.progress, i, width)
-    ctx.strokeStyle = 'rgba(28,25,21,0.28)'
+    ctx.strokeStyle = 'rgba(233,227,214,0.22)'
     ctx.lineWidth = 1
     ctx.beginPath()
     ctx.moveTo(x, yOf(candle.h))
@@ -285,21 +301,28 @@ function drawCandles(
     const yOpen = yOf(candle.o)
     const yClose = yOf(candle.c)
     const top = Math.min(yOpen, yClose)
-    const h = Math.max(1.5, Math.abs(yClose - yOpen))
-    ctx.fillStyle = candle.c >= candle.o ? 'rgba(118,185,0,0.4)' : 'rgba(154,59,42,0.4)'
-    ctx.fillRect(x - px * 0.28, top, Math.max(2, px * 0.56), h)
+    const h = Math.max(1.2, Math.abs(yClose - yOpen))
+    ctx.fillStyle = candle.c >= candle.o ? 'rgba(118,185,0,0.22)' : 'rgba(154,59,42,0.22)'
+    ctx.fillRect(x - px * 0.16, top, Math.max(1.5, px * 0.32), h)
   }
 }
 
 function drawLabel(ctx: CanvasRenderingContext2D, text: string, x: number, y: number, color: string) {
-  ctx.font = '12px "IBM Plex Sans", sans-serif'
+  ctx.font = '11px "IBM Plex Sans", sans-serif'
   ctx.textAlign = 'right'
   ctx.textBaseline = 'middle'
   const w = ctx.measureText(text).width
-  ctx.fillStyle = 'rgba(243,237,226,0.9)'
-  ctx.fillRect(x - w - 8, y - 8, w + 12, 16)
+  const boxW = w + 12
+  const boxH = 16
+  ctx.fillStyle = GROUND
+  ctx.strokeStyle = BRASS
+  ctx.lineWidth = 1
+  ctx.beginPath()
+  ctx.rect(x - boxW, y - boxH / 2, boxW, boxH)
+  ctx.fill()
+  ctx.stroke()
   ctx.fillStyle = color
-  ctx.fillText(text, x, y)
+  ctx.fillText(text, x - 6, y)
 }
 
 export function drawRide(canvas: HTMLCanvasElement | null, state: DeskState): void {
@@ -319,21 +342,22 @@ export function drawRide(canvas: HTMLCanvasElement | null, state: DeskState): vo
   }
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
   ctx.clearRect(0, 0, width, height)
-  ctx.fillStyle = '#f3ede2'
+  ctx.fillStyle = '#161b18'
   ctx.fillRect(0, 0, width, height)
 
   const focus: Band | null = sampleBand(state.bands, state.progress)
   if (!focus) {
-    ctx.fillStyle = '#1c1915'
+    ctx.fillStyle = LIGHT
     ctx.font = '14px "IBM Plex Sans", sans-serif'
     ctx.textAlign = 'left'
     ctx.fillText('Waiting for a 20-period band.', 16, 32)
     return
   }
 
-  const scale = priceScale(height, focus)
+  const scale = priceScale(height, focus, width)
   const yOf = (price: number) => scale.y(price)
   const side = sideOf(state.book)
+  const marked = markFromCandles(state.candles, state.progress)
 
   ctx.save()
   ctx.beginPath()
@@ -342,9 +366,9 @@ export function drawRide(canvas: HTMLCanvasElement | null, state: DeskState): vo
   drawCandles(ctx, state, width, yOf)
 
   const layers: Array<{ which: 'upper' | 'mid' | 'lower'; color: string; on: boolean }> = [
-    { which: 'upper', color: '#76b900', on: side === 'long' },
-    { which: 'mid', color: '#1c1915', on: side === 'flat' },
-    { which: 'lower', color: '#9a3b2a', on: side === 'short' },
+    { which: 'upper', color: NVDA, on: side === 'long' },
+    { which: 'mid', color: side === 'flat' ? BRASS_HI : '#c8c2b6', on: side === 'flat' },
+    { which: 'lower', color: BRICK, on: side === 'short' },
   ]
   for (const layer of layers.filter((layer) => !layer.on)) {
     drawTrack(ctx, trackPoints(state, layer.which, width, yOf), layer.color, false)
@@ -354,27 +378,37 @@ export function drawRide(canvas: HTMLCanvasElement | null, state: DeskState): vo
   }
 
   const here = pointOnRail(state, state.progress, side, width, yOf)
-  const ahead = pointOnRail(state, state.progress + 0.35, side, width, yOf)
-  const behind = pointOnRail(state, Math.max(0, state.progress - 0.35), side, width, yOf)
-  const angle = Math.max(-0.55, Math.min(0.55, Math.atan2(ahead.y - behind.y, ahead.x - behind.x)))
-  drawTrain(ctx, here.x, here.y, angle, side)
+  const ahead = pointOnRail(state, state.progress + 0.45, side, width, yOf)
+  const behind = pointOnRail(state, Math.max(0, state.progress - 0.45), side, width, yOf)
+  const angle = Math.atan2(ahead.y - behind.y, ahead.x - behind.x)
+  ctx.save()
+  ctx.translate(here.x, here.y)
+  ctx.rotate(angle)
+  ctx.scale(trainDrawScale(width), trainDrawScale(width))
+  drawTrain(ctx, side)
+  ctx.restore()
   ctx.restore()
 
-  ctx.fillStyle = '#1c1915'
+  ctx.fillStyle = LIGHT
   ctx.textAlign = 'left'
   ctx.textBaseline = 'top'
   ctx.font = '600 15px Fraunces, Georgia, serif'
   ctx.fillText('NVDA', 12, 10)
+  ctx.font = '600 22px Fraunces, Georgia, serif'
+  ctx.fillText(px(marked.close), 12, 30)
+  ctx.font = '12px "IBM Plex Sans", sans-serif'
+  ctx.fillStyle = marked.pct == null ? LIGHT : marked.pct > 0 ? NVDA : marked.pct < 0 ? BRICK : LIGHT
+  ctx.fillText(`${formatPct(marked.pct)} vs previous close`, 12, 56)
+  ctx.fillStyle = 'rgba(233,227,214,0.72)'
   ctx.font = '11px "IBM Plex Sans", sans-serif'
-  ctx.fillStyle = 'rgba(28,25,21,0.72)'
   const railName = side === 'long' ? 'LONG · upper rail' : side === 'short' ? 'SHORT · lower rail' : 'FLAT · mid rail'
-  ctx.fillText(`Bollinger 20 · 2σ · ${railName}`, 12, 30)
+  ctx.fillText(railName, 12, 74)
   if (state.paused) {
-    ctx.fillStyle = '#9a3b2a'
-    ctx.fillText('PAUSED', 12, 46)
+    ctx.fillStyle = BRICK
+    ctx.fillText('PAUSED', 12, 90)
   }
 
-  drawLabel(ctx, focus.upper.toFixed(2), width - 8, yOf(focus.upper), '#76b900')
-  drawLabel(ctx, focus.sma.toFixed(2), width - 8, yOf(focus.sma), '#1c1915')
-  drawLabel(ctx, focus.lower.toFixed(2), width - 8, yOf(focus.lower), '#9a3b2a')
+  drawLabel(ctx, `Upper ${focus.upper.toFixed(2)}`, width - 8, yOf(focus.upper), NVDA)
+  drawLabel(ctx, `20-SMA ${focus.sma.toFixed(2)}`, width - 8, yOf(focus.sma), LIGHT)
+  drawLabel(ctx, `Lower ${focus.lower.toFixed(2)}`, width - 8, yOf(focus.lower), BRICK)
 }

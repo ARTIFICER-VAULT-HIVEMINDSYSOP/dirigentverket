@@ -1,4 +1,4 @@
-import { candleAt, type DeskState } from '../lib/deskState'
+import { markFromCandles, type DeskState } from '../lib/deskState'
 import { formatTime, money, px } from '../lib/format'
 import {
   buyingPower,
@@ -20,9 +20,9 @@ function Cell({ label, value, tone }: { label: string; value: string; tone?: 'br
 }
 
 export function Blotter({ state, onReset }: { state: DeskState; onReset: () => void }) {
-  const candle = candleAt(state)
-  const quote = candle ? deriveQuote(candle.c) : null
-  const mark = quote?.last ?? null
+  const marked = markFromCandles(state.candles, state.progress)
+  const mark = marked.close
+  const quote = mark === null ? null : deriveQuote(mark)
   const equity = mark === null ? null : markEquity(state.book, mark)
   const requirement = mark === null ? null : maintenanceRequirement(state.book, mark)
   const unrealized = mark === null ? null : unrealizedPnl(state.book, mark)
@@ -60,7 +60,7 @@ export function Blotter({ state, onReset }: { state: DeskState; onReset: () => v
       <div className="mt-4 grid grid-cols-2 gap-x-3 gap-y-3">
         <Cell label="Shares" value={side === 'flat' ? '0' : String(Math.abs(state.book.shares))} tone={sideTone} />
         <Cell label="Avg fill" value={px(state.book.avgFill)} />
-        <Cell label="Last" value={px(mark)} />
+        <Cell label="Mark" value={px(mark)} />
         <Cell label="Bid" value={px(quote?.bid)} />
         <Cell label="Offer" value={px(quote?.offer)} />
         <Cell label="Slip" value={px(quote?.slippage)} />

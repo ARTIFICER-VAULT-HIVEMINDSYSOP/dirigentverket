@@ -13,6 +13,7 @@ import {
   commandFlatten,
   commandSell,
   createDesk,
+  markFromCandles,
   setDeskLeverage,
   stepDesk,
   togglePause,
@@ -20,6 +21,7 @@ import {
   trainScreenY,
   type DeskState,
 } from '../lib/deskState'
+import { formatPct, px as formatPx } from '../lib/format'
 import { commandFromKey, type Command } from '../lib/keys'
 import { sideOf } from '../lib/market'
 import type { Candle, NvdaSource } from '../lib/types'
@@ -199,6 +201,9 @@ export function Desk({ candles, source, label, autoRun = true, brokerEnabled = t
   }, [autoRun])
 
   const speed = trackSpeed(snap.leverage)
+  const marked = markFromCandles(snap.candles, snap.progress)
+  const pctTone =
+    marked.pct == null ? 'text-ink' : marked.pct > 0 ? 'text-nvda' : marked.pct < 0 ? 'text-brick' : 'text-ink'
 
   return (
     <div data-desk="traderider" className="min-h-screen overflow-x-clip bg-paper text-ink">
@@ -207,9 +212,11 @@ export function Desk({ candles, source, label, autoRun = true, brokerEnabled = t
           <p className="text-[11px] uppercase tracking-[0.18em] text-ink/60">Paper desk · NVDA</p>
           <h1 className="font-display text-4xl font-medium leading-none">Traderider</h1>
         </div>
-        <p className="max-w-sm text-sm leading-snug text-ink/80">
-          The train rides the rail of the position. Upper band long, lower band short, 20-SMA flat.
-        </p>
+        <div className="min-w-0 text-left sm:text-right">
+          <p className="text-[11px] uppercase tracking-[0.16em] text-ink/60">NVDA close</p>
+          <p className="font-display text-3xl tabular-nums leading-none">{formatPx(marked.close)}</p>
+          <p className={`mt-1 text-sm tabular-nums ${pctTone}`}>{formatPct(marked.pct)} vs previous close</p>
+        </div>
       </header>
 
       <main className="mx-auto grid max-w-[1100px] grid-cols-1 gap-3 px-3 py-3 lg:grid-cols-[minmax(0,1fr)_340px]">
@@ -228,7 +235,8 @@ export function Desk({ candles, source, label, autoRun = true, brokerEnabled = t
           />
           <p className="mt-2 text-sm leading-snug">{snap.status}</p>
           <p className="mt-1 text-xs tabular-nums text-ink/60">
-            {snap.leverage}× · {speed.toFixed(2)} candles/s · {snap.paused ? 'paused' : 'running'}
+            Mark {formatPx(marked.close)} · {formatPct(marked.pct)} · {snap.leverage}× · {speed.toFixed(2)} candles/s ·{' '}
+            {snap.paused ? 'paused' : 'running'}
           </p>
           <div className="mt-3 grid grid-cols-3 gap-2">
             <DeskButton label="Buy" hint="W" tone="nvda" onClick={() => run('buy')} />
