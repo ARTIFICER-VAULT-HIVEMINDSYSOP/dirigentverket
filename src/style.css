@@ -1,4 +1,5 @@
 @import './magazine-hud.css';
+@import './verktygslada.css';
 
 /* Dirigentverket — dark, calm investigation surface */
 
@@ -815,7 +816,8 @@ body.view-rider .nav-artificer {
   background: rgba(10, 14, 10, 0.62);
 }
 
-.nav-artificer a {
+.nav-artificer a,
+.nav-artificer button.linkish {
   color: #c4b89a;
 }
 

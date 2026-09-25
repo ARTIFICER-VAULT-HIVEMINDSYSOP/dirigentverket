@@ -1,0 +1,39 @@
+{
+  "paper": true,
+  "live": false,
+  "send": false,
+  "updated": "2026-09-18",
+  "note": "Statusfält som kan uppdateras. Tom cell = saknas. Inga öppningsfrekvenser. Ingen send härifrån.",
+  "campaigns": [
+    {
+      "id": "fu-premium-zoho",
+      "namn": "FU premium Zoho",
+      "status": "SENT",
+      "sentBatches": "01–24",
+      "blockedBatch": null,
+      "blocker": null,
+      "subject": "Premiuminbjudan från din mäklare · FastigheterUtomlands",
+      "drop": "test@ / test. junk",
+      "sent": null,
+      "clean": null,
+      "batches": null,
+      "openRate": null,
+      "note": "Batch 01–24 skickade (sep). Ingen omsänd utan nytt ja."
+    },
+    {
+      "id": "semesterjag",
+      "namn": "Semesterjag",
+      "status": "PAUSED",
+      "sentBatches": "01–15",
+      "blockedBatch": "16",
+      "blocker": "Zoho 500.3.4 Unusual sending activity — väntar cooldown/ÖB «fortsätt 16»",
+      "subject": "Ditt semesterjag behöver ett hem",
+      "drop": "",
+      "sent": null,
+      "clean": null,
+      "batches": 24,
+      "openRate": null,
+      "note": "01–15 SENT (~300 BCC). 16–24 pending. STOPP jasmine.miller@gmail.com blockad. Paper. Skickar inte från HUD."
+    }
+  ]
+}

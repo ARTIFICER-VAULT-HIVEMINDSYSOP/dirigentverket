@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FUMB · hub</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=IBM+Plex+Mono:wght@400;500&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #12110e; --card: #1c1b14; --line: #2f2c22; --gold: #c9a66b;
+      --gold2: #e0c48a; --ink: #ece7dc; --mute: #9c9688; --warn: #c4a04a;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; background: var(--bg); color: var(--ink); font: 400 16px/1.55 "Source Sans 3", sans-serif; }
+    .wrap { max-width: 44rem; margin: 0 auto; padding: 2rem 1.2rem 4rem; }
+    .kicker { font: 600 0.72rem "IBM Plex Mono", ui-monospace, monospace; letter-spacing: .16em; text-transform: uppercase; color: var(--gold); margin: 0 0 .4rem; }
+    h1 { font: 600 1.7rem Fraunces, serif; margin: 0 0 .4rem; color: var(--gold2); }
+    h2 { font: 600 1.05rem Fraunces, serif; color: var(--gold2); margin: 1.3rem 0 .4rem; }
+    .lede, p { color: var(--mute); }
+    .banner {
+      border: 1px solid rgba(196,160,74,.5); background: rgba(40,28,10,.55);
+      color: #e6d3a2; padding: .8rem 1rem; border-radius: 10px; margin: 0 0 1.2rem;
+    }
+    article {
+      background: var(--card); border: 1px solid var(--line); border-radius: 12px;
+      padding: 1rem 1.1rem; margin: 0 0 .8rem;
+    }
+    article p { color: var(--ink); margin: 0; }
+    .saknas { color: var(--warn); }
+    code { font: 500 .85rem "IBM Plex Mono", ui-monospace, monospace; color: var(--gold2); }
+    a { color: var(--gold); }
+    .links { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: 1rem; }
+    .links a {
+      border: 1px solid rgba(201,166,107,.45); border-radius: 999px; padding: .4rem .85rem;
+      text-decoration: none; font-size: .88rem;
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <p class="kicker">Paper · FUMB · öppnar, startar inte</p>
+    <h1>FUMB</h1>
+    <p class="lede">Hub för desktop-appen. Scoreboard-länk i boken. Exe levereras av Bob på Desktop — inte från git.</p>
+    <div class="banner" role="status">Den här ytan startar inte <code>FUMB.exe</code> och skickar inte mejl. Tom cell = saknas. Inga påhittade poäng.</div>
+
+    <article>
+      <h2>Desktop (Bob)</h2>
+      <p>Lokal sökväg: <code>Desktop\FUMB\FUMB.exe</code>. Bob levererar Desktop separat. Moln-HUD öppnar bara HTML-hubben och scoreboard.</p>
+    </article>
+    <article>
+      <h2>Scoreboard</h2>
+      <p>Paper-tavla i boken. Rader utan signal = <span class="saknas">saknas</span>. Live-siffror kommer från desktop-appen när den körs — de hittas inte på här.</p>
+    </article>
+    <article>
+      <h2>Läge</h2>
+      <p>Paper. Live släckt. Ingen order. Ingen kurs-hämtning.</p>
+    </article>
+
+    <div class="links">
+      <a href="/utskick/fumb-scoreboard.html">FUMB scoreboard</a>
+      <a href="/magasin.html">Magasinet</a>
+      <a href="/utskick/verktygslada-preview.html">Verktygslåda preview</a>
+    </div>
+  </main>
+</body>
+</html>
