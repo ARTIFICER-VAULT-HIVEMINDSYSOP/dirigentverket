@@ -38,7 +38,21 @@ import {
   hedgeBandFadeIn,
   emptyHedgeFade,
   hedgeMidPulse,
+  hedgeTwinPulse,
   emptyHedgePulse,
+  hedgeProgressPulse,
+  emptyHedgeProgressPulse,
+  hedgeMidHandoffPulse,
+  hedgeMidExitPulse,
+  hedgeTwinHandoffPulse,
+  hedgeTwinExitPulse,
+  hedgeTwinAfterFade,
+  rokadFade,
+  rokadFadeIn,
+  rokadExitPulse,
+  rokadEnterPulse,
+  emptyRokadFade,
+  emptyRokadPulse,
   LIVE_LOCKED,
   hasCompletedFirstRide,
   markFirstRideComplete,
@@ -398,6 +412,7 @@ root.addEventListener('submit', (ev) => {
     const now = Date.now();
     const midAir = riderPlay.hopping && now < riderPlay.hopUntil;
     const prevHedge = riderResult && riderResult.hedge;
+    const prevRokad = riderResult && riderResult.rokad;
     riderResult = computeRide({ ...riderDraft, midAir });
     let hedgeFade = hedgeBandFade(prevHedge, riderResult.hedge);
     if (!hedgeFade.fading) {
@@ -405,12 +420,58 @@ root.addEventListener('submit', (ev) => {
     }
     if (hedgeFade.fading) {
       const until = now + hedgeFade.ms;
-      riderPlay = { ...riderPlay, hedgeFade: { ...hedgeFade, until }, hedgePulse: emptyHedgePulse() };
+      const progressPulse = hedgeProgressPulse(hedgeFade, riderResult.hedge);
+      const handoffMid = hedgeMidHandoffPulse(hedgeFade, riderResult.hedge);
+      const exitMid = hedgeMidExitPulse(hedgeFade, riderResult.hedge);
+      const startMid = handoffMid.pulsing ? handoffMid : exitMid;
+      const handoffTwin = hedgeTwinHandoffPulse(hedgeFade, riderResult.hedge);
+      const exitTwin = hedgeTwinExitPulse(hedgeFade, riderResult.hedge);
+      const startTwin = handoffTwin.pulsing ? handoffTwin : exitTwin;
+      const handoffPulse = {
+        pulsing: Boolean(startMid.pulsing || startTwin.pulsing),
+        midPip: startMid.midPip,
+        sidePips: startTwin.sidePips || [],
+        ms: startMid.pulsing ? startMid.ms : startTwin.ms,
+        paper: true,
+      };
+      riderPlay = {
+        ...riderPlay,
+        hedgeFade: { ...hedgeFade, until },
+        hedgePulse: handoffPulse,
+        hedgeProgressPulse: progressPulse,
+      };
+      if (progressPulse.pulsing) {
+        const progressPulseUntil = now + progressPulse.ms;
+        riderPlay = { ...riderPlay, hedgeProgressPulse: { ...progressPulse, until: progressPulseUntil } };
+        window.setTimeout(() => {
+          if (!riderPlay.hedgeProgressPulse || riderPlay.hedgeProgressPulse.until !== progressPulseUntil) return;
+          riderPlay = { ...riderPlay, hedgeProgressPulse: emptyHedgeProgressPulse() };
+          render();
+        }, progressPulse.ms);
+      }
+      if (handoffPulse.pulsing) {
+        const midPulseUntil = now + handoffPulse.ms;
+        riderPlay = { ...riderPlay, hedgePulse: { ...handoffPulse, until: midPulseUntil } };
+        window.setTimeout(() => {
+          if (!riderPlay.hedgePulse || riderPlay.hedgePulse.until !== midPulseUntil) return;
+          riderPlay = { ...riderPlay, hedgePulse: emptyHedgePulse() };
+          render();
+        }, handoffPulse.ms);
+      }
       window.setTimeout(() => {
         if (!riderPlay.hedgeFade || riderPlay.hedgeFade.until !== until) return;
-        const pulse = hedgeFade.fadingIn
-          ? hedgeMidPulse(hedgeFade, riderResult && riderResult.hedge)
+        const nextHedge = riderResult && riderResult.hedge;
+        const midPulse = hedgeFade.fadingIn ? hedgeMidPulse(hedgeFade, nextHedge) : emptyHedgePulse();
+        const twinPulse = hedgeFade.fadingIn
+          ? hedgeTwinAfterFade(hedgeFade, nextHedge, startTwin)
           : emptyHedgePulse();
+        const pulse = {
+          pulsing: Boolean(midPulse.pulsing || twinPulse.pulsing),
+          midPip: midPulse.midPip,
+          sidePips: twinPulse.sidePips || [],
+          ms: midPulse.pulsing ? midPulse.ms : twinPulse.ms,
+          paper: true,
+        };
         riderPlay = { ...riderPlay, hedgeFade: emptyHedgeFade(), hedgePulse: pulse };
         if (pulse.pulsing) {
           const pulseUntil = Date.now() + pulse.ms;
@@ -424,7 +485,34 @@ root.addEventListener('submit', (ev) => {
         render();
       }, hedgeFade.ms);
     } else {
-      riderPlay = { ...riderPlay, hedgeFade, hedgePulse: emptyHedgePulse() };
+      riderPlay = {
+        ...riderPlay,
+        hedgeFade,
+        hedgePulse: emptyHedgePulse(),
+        hedgeProgressPulse: emptyHedgeProgressPulse(),
+      };
+    }
+    let nextRokadFade = rokadFade(prevRokad, riderResult.rokad);
+    if (!nextRokadFade.fading) {
+      nextRokadFade = rokadFadeIn(prevRokad, riderResult.rokad);
+    }
+    const nextRokadPulse = nextRokadFade.fadingIn
+      ? rokadEnterPulse(nextRokadFade, riderResult.rokad, hedgeFade, riderResult.hedge)
+      : rokadExitPulse(nextRokadFade, riderResult.rokad, hedgeFade, riderResult.hedge);
+    if (nextRokadPulse.pulsing) {
+      const rokadUntil = now + nextRokadPulse.ms;
+      riderPlay = {
+        ...riderPlay,
+        rokadFade: { ...nextRokadFade, until: rokadUntil },
+        rokadPulse: { ...nextRokadPulse, until: rokadUntil },
+      };
+      window.setTimeout(() => {
+        if (!riderPlay.rokadPulse || riderPlay.rokadPulse.until !== rokadUntil) return;
+        riderPlay = { ...riderPlay, rokadFade: emptyRokadFade(), rokadPulse: emptyRokadPulse() };
+        render();
+      }, nextRokadPulse.ms);
+    } else {
+      riderPlay = { ...riderPlay, rokadFade: emptyRokadFade(), rokadPulse: emptyRokadPulse() };
     }
     if (riderResult.ok) {
       const wasDone = hasCompletedFirstRide();
