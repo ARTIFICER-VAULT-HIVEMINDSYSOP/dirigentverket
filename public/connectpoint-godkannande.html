@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ConnectPoint · godkännandeportal · paper</title>
+  <meta name="robots" content="noindex, nofollow, noarchive" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=IBM+Plex+Mono:wght@400;500&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0b0a08;
+      --stone: #16140f;
+      --card: #1c1912;
+      --gold: #d4b06a;
+      --gold-2: #f0d59a;
+      --ink: #ece6d6;
+      --mute: #9a927f;
+      --line: #3a3426;
+      --ok: #7a9e7e;
+      --warn: #c4a04a;
+      --danger: #c45c4a;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; background: var(--bg); color: var(--ink); font: 400 16px/1.5 "Source Sans 3", sans-serif; }
+    body {
+      background:
+        radial-gradient(ellipse at 50% -10%, rgba(212,176,106,.16), transparent 55%),
+        #0b0a08;
+    }
+    .wrap { max-width: 52rem; margin: 0 auto; padding: 2rem 1rem 4rem; }
+    .stamp { font: 500 .78rem "IBM Plex Mono", monospace; color: var(--gold); letter-spacing: .1em; text-transform: uppercase; margin: 0; }
+    h1 { font-family: Fraunces, serif; color: var(--gold-2); margin: .35rem 0 .55rem; font-size: clamp(1.7rem, 4vw, 2.3rem); }
+    .lede, .mute { color: var(--mute); }
+    a { color: var(--gold-2); }
+    .warn, .lock, .config, .detail, article.row {
+      border: 1px solid var(--line);
+      background: var(--stone);
+      border-radius: 12px;
+    }
+    .warn, .lock, .config { padding: .85rem 1rem; margin: 1rem 0; }
+    .warn { color: var(--mute); font-size: .92rem; }
+    .lock { color: var(--warn); font-size: .9rem; }
+    .lock b { color: var(--gold-2); font-weight: 600; }
+    .demo-tag {
+      display: inline-block;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: .08rem .55rem;
+      font: 600 .7rem "IBM Plex Mono", monospace;
+      color: var(--gold);
+      letter-spacing: .06em;
+      text-transform: uppercase;
+    }
+    .config h2, .detail h2 { font-family: Fraunces, serif; font-size: 1.15rem; color: var(--gold-2); margin: 0 0 .55rem; font-weight: 600; }
+    .fields { display: grid; gap: .55rem; }
+    label { display: grid; gap: .2rem; font-size: .82rem; color: var(--mute); }
+    input, textarea, select, button {
+      font-family: inherit;
+    }
+    input, textarea {
+      width: 100%;
+      background: var(--bg);
+      color: var(--ink);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: .55rem .7rem;
+    }
+    input[readonly] { color: var(--mute); }
+    input:focus, textarea:focus { outline: 1px solid var(--gold); }
+    textarea { min-height: 8rem; resize: vertical; font: 400 .92rem "Source Sans 3", sans-serif; }
+    .bar { display: flex; flex-wrap: wrap; gap: .45rem; margin: 1.1rem 0 .8rem; }
+    button, .bar button {
+      background: rgba(212,176,106,.12);
+      color: var(--gold-2);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: .45rem .9rem;
+      font: 600 .88rem "Source Sans 3", sans-serif;
+      cursor: pointer;
+    }
+    button:hover { box-shadow: 0 0 18px rgba(212,176,106,.22); }
+    button:disabled { opacity: .4; cursor: default; box-shadow: none; }
+    button.on { background: rgba(212,176,106,.35); border-color: var(--gold); }
+    button.ok { color: #cfe3d1; }
+    button.danger { color: #f0c4bc; }
+    .flash { min-height: 1.2rem; font: 400 .85rem "IBM Plex Mono", monospace; color: var(--gold-2); margin: 0 0 .6rem; }
+    article.row {
+      display: grid;
+      grid-template-columns: 6.4rem 1fr auto;
+      gap: .65rem 1rem;
+      padding: .85rem 1rem;
+      margin: .55rem 0;
+      background: var(--card);
+    }
+    @media (max-width: 640px) {
+      article.row { grid-template-columns: 1fr; }
+    }
+    .status { font: 600 .78rem "IBM Plex Mono", monospace; letter-spacing: .06em; text-transform: uppercase; padding-top: .15rem; }
+    .status.pending { color: var(--warn); }
+    .status.approved { color: var(--gold-2); }
+    .status.written { color: var(--ok); }
+    .status.rejected { color: var(--danger); }
+    .who strong { display: block; }
+    .who span, .preview { color: var(--mute); font-size: .88rem; }
+    .preview { margin: .25rem 0 0; }
+    .detail { padding: 1rem 1.05rem 1.1rem; margin-top: 1.2rem; }
+    .meta { display: flex; flex-wrap: wrap; gap: .35rem 1.1rem; font: 400 .82rem "IBM Plex Mono", monospace; color: var(--mute); margin: 0 0 .8rem; }
+    .meta b { color: var(--gold); font-weight: 500; }
+    details.transcript {
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: .55rem .75rem;
+      background: var(--bg);
+      margin: 0 0 .9rem;
+    }
+    details.transcript summary { cursor: pointer; color: var(--gold-2); font-weight: 600; }
+    details.transcript pre {
+      white-space: pre-wrap;
+      font: 400 .85rem "IBM Plex Mono", monospace;
+      color: var(--ink);
+      margin: .6rem 0 0;
+    }
+    .actions { display: flex; flex-wrap: wrap; gap: .45rem; margin-top: .75rem; }
+    footer { margin-top: 2rem; color: var(--mute); font: 400 .78rem "IBM Plex Mono", monospace; }
+    .empty { color: var(--mute); padding: .8rem 0; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <p class="stamp">Dirigentverket · paper · ConnectPoint</p>
+    <h1>Godkännandeportal</h1>
+    <p class="lede">Kö för ForceX-kommentar från AI TRANSCRIPT. Paper. Exempelrader endast. Ingen live Create.</p>
+    <div class="warn">
+      <span class="demo-tag">exempeldata</span>
+      Inga riktiga kundnamn, telefon eller ForceX-id. Tom cell = saknas. Godkänn sätter lokal status <code>approved</code> — skriver inte till ForceX. Live Create kräver namngivet ÖB-ja.
+    </div>
+    <div class="lock" id="lock">Live Create: <b>låst</b>. Inga anrop som muterar CRM.</div>
+
+    <section class="config" aria-labelledby="cfg-title">
+      <h2 id="cfg-title">Tenant (platshållare)</h2>
+      <p class="mute">Inte hemligheter. Fylls från tenant-config. Motorn hårdkodar inte URL:er.</p>
+      <div class="fields">
+        <label>Brand
+          <input id="cfg-brand" readonly value="" placeholder="saknas" />
+        </label>
+        <label>ConnectPoint-bas-URL
+          <input id="cfg-cp" readonly value="" placeholder="saknas" />
+        </label>
+        <label>ForceX-bas-URL
+          <input id="cfg-fx" readonly value="" placeholder="saknas" />
+        </label>
+      </div>
+    </section>
+
+    <div class="bar" id="filters">
+      <button type="button" data-filter="all" class="on">Alla</button>
+      <button type="button" data-filter="pending">pending</button>
+      <button type="button" data-filter="approved">approved</button>
+      <button type="button" data-filter="written">written</button>
+      <button type="button" data-filter="rejected">rejected</button>
+    </div>
+    <p class="flash" id="flash"></p>
+    <div id="list"></div>
+
+    <section class="detail" id="detail" hidden>
+      <h2>Detalj</h2>
+      <div class="meta" id="meta"></div>
+      <details class="transcript">
+        <summary>AI TRANSCRIPT (ihopfälld)</summary>
+        <pre id="transcript"></pre>
+      </details>
+      <label>Utkast · ForceX-kommentar (engelska)
+        <textarea id="draft" spellcheck="true"></textarea>
+      </label>
+      <div class="actions">
+        <button type="button" class="ok" id="btn-godkann">Godkänn</button>
+        <button type="button" id="btn-andra">Ändra</button>
+        <button type="button" class="danger" id="btn-avvisa">Avvisa</button>
+      </div>
+    </section>
+
+    <footer>
+      Paper-stub. Paper: <code>marknad/voip/PAPER-connectpoint-forcex-godkannande.md</code>.
+      Sökväg: <code>public/connectpoint-godkannande.html</code>
+    </footer>
+  </div>
+  <script>
+    // Tenant-fält: platshållare, inte hemligheter. Inga live-anrop.
+    const TENANT_PLACEHOLDERS = {
+      brand: '',
+      connectPointBaseUrl: '',
+      forcexBaseUrl: '',
+      paper: true
+    }
+
+    // EXAMPLE DATA ONLY — not customers, not phones, not ForceX ids.
+    const EXAMPLE_ROWS = [
+      {
+        id: 'demo-1',
+        example: true,
+        status: 'pending',
+        customerId: 'EXAMPLE-FX-1001',
+        customerLabel: 'EXAMPLE Desk A',
+        brand: 'EXAMPLE-BRAND',
+        phone: 'EXAMPLE-E164',
+        callId: 'demo-cp-call-001',
+        draft: 'Call ended. Client asked about next step. No amount stated. Follow-up not booked.',
+        transcript: 'EXAMPLE TRANSCRIPT (not a real call)\nAgent: This is a paper demo.\nSpeaker: Asking about the next step only.\nAgent: No amount stated. Call ended.'
+      },
+      {
+        id: 'demo-2',
+        example: true,
+        status: 'pending',
+        customerId: 'EXAMPLE-FX-1002',
+        customerLabel: 'EXAMPLE Desk B',
+        brand: 'EXAMPLE-BRAND',
+        phone: 'EXAMPLE-E164',
+        callId: 'demo-cp-call-002',
+        draft: 'Ended call. Client will think it over. No booking. No amount stated.',
+        transcript: 'EXAMPLE TRANSCRIPT (not a real call)\nAgent: Checking interest.\nSpeaker: Will think it over.\nAgent: Call ended. No booking.'
+      },
+      {
+        id: 'demo-3',
+        example: true,
+        status: 'approved',
+        customerId: 'EXAMPLE-FX-1003',
+        customerLabel: 'EXAMPLE Desk C',
+        brand: 'EXAMPLE-BRAND',
+        phone: 'EXAMPLE-E164',
+        callId: 'demo-cp-call-003',
+        draft: 'Approved locally in paper portal. ForceX Create not run. No amount stated.',
+        transcript: 'EXAMPLE TRANSCRIPT (not a real call)\nLocal approve only. Transcript kept for supervisor sample.'
+      },
+      {
+        id: 'demo-4',
+        example: true,
+        status: 'written',
+        customerId: 'EXAMPLE-FX-1004',
+        customerLabel: 'EXAMPLE Desk D',
+        brand: 'EXAMPLE-BRAND',
+        phone: 'EXAMPLE-E164',
+        callId: 'demo-cp-call-004',
+        draft: 'EXAMPLE written row. Shows status only. Not a live ForceX comment.',
+        transcript: 'EXAMPLE TRANSCRIPT (not a real call)\nWritten status is demo. Live Create still locked.'
+      },
+      {
+        id: 'demo-5',
+        example: true,
+        status: 'rejected',
+        customerId: 'EXAMPLE-FX-1005',
+        customerLabel: 'EXAMPLE Desk E',
+        brand: 'EXAMPLE-BRAND',
+        phone: 'EXAMPLE-E164',
+        callId: 'demo-cp-call-005',
+        draft: 'Rejected example. Draft does not match transcript. No ForceX write.',
+        transcript: 'EXAMPLE TRANSCRIPT (not a real call)\nMismatch sample for Avvisa.'
+      }
+    ]
+
+    const state = {
+      filter: 'all',
+      rows: EXAMPLE_ROWS.map((r) => ({ ...r })),
+      openId: null,
+      tenant: { ...TENANT_PLACEHOLDERS }
+    }
+
+    const $ = (id) => document.getElementById(id)
+    function esc(s) {
+      return String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]))
+    }
+    function cell(v) {
+      const t = String(v ?? '').trim()
+      return t ? esc(t) : '<span class="mute">saknas</span>'
+    }
+    function flash(msg) { $('flash').textContent = msg || '' }
+
+    function applyTenant(t) {
+      if (!t || typeof t !== 'object') return
+      const brand = t.skin && t.skin.name
+      const fx = t.crm && t.crm.url
+      const cp = t.connectpoint && t.connectpoint.baseUrl
+      state.tenant.brand = typeof brand === 'string' ? brand : state.tenant.brand
+      state.tenant.forcexBaseUrl = typeof fx === 'string' ? fx : state.tenant.forcexBaseUrl
+      state.tenant.connectPointBaseUrl = typeof cp === 'string' ? cp : state.tenant.connectPointBaseUrl
+      if (t.connectpoint && t.connectpoint.paper === false) {
+        // Paper-portal ignores live flags. Create stays locked.
+      }
+      renderConfig()
+    }
+
+    function renderConfig() {
+      $('cfg-brand').value = state.tenant.brand
+      $('cfg-cp').value = state.tenant.connectPointBaseUrl
+      $('cfg-fx').value = state.tenant.forcexBaseUrl
+    }
+
+    function visibleRows() {
+      if (state.filter === 'all') return state.rows
+      return state.rows.filter((r) => r.status === state.filter)
+    }
+
+    function renderList() {
+      const rows = visibleRows()
+      const list = $('list')
+      if (!rows.length) {
+        list.innerHTML = '<p class="empty">inga rader i denna status</p>'
+        return
+      }
+      list.innerHTML = rows.map((r) => {
+        const preview = (r.draft || '').slice(0, 88)
+        return `<article class="row" data-id="${esc(r.id)}">
+          <div class="status ${esc(r.status)}">${esc(r.status)}</div>
+          <div class="who">
+            <span class="demo-tag">exempeldata</span>
+            <strong>${cell(r.customerLabel)}</strong>
+            <span>${cell(r.customerId)} · ${cell(r.brand)}</span>
+            <p class="preview">${esc(preview)}${r.draft && r.draft.length > 88 ? '…' : ''}</p>
+          </div>
+          <button type="button" data-open="${esc(r.id)}">öppna</button>
+        </article>`
+      }).join('')
+    }
+
+    function openRow(id) {
+      const row = state.rows.find((r) => r.id === id)
+      if (!row) return
+      state.openId = id
+      $('detail').hidden = false
+      $('meta').innerHTML = [
+        `<span><b>status</b> ${cell(row.status)}</span>`,
+        `<span><b>kund</b> ${cell(row.customerLabel)}</span>`,
+        `<span><b>id</b> ${cell(row.customerId)}</span>`,
+        `<span><b>telefon</b> ${cell(row.phone)}</span>`,
+        `<span><b>call-id</b> ${cell(row.callId)}</span>`,
+        `<span class="demo-tag">exempeldata</span>`
+      ].join('')
+      $('transcript').textContent = row.transcript || 'saknas'
+      $('draft').value = row.draft || ''
+      const locked = row.status === 'written' || row.status === 'rejected'
+      $('draft').readOnly = locked
+      $('btn-godkann').disabled = locked || row.status === 'approved'
+      $('btn-andra').disabled = locked
+      $('btn-avvisa').disabled = locked
+      $('detail').scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+
+    function currentRow() {
+      return state.rows.find((r) => r.id === state.openId)
+    }
+
+    function render() {
+      renderConfig()
+      renderList()
+      if (state.openId) openRow(state.openId)
+    }
+
+    $('filters').addEventListener('click', (e) => {
+      const btn = e.target.closest('button[data-filter]')
+      if (!btn) return
+      state.filter = btn.dataset.filter
+      $('filters').querySelectorAll('button').forEach((b) => b.classList.toggle('on', b === btn))
+      renderList()
+    })
+
+    $('list').addEventListener('click', (e) => {
+      const btn = e.target.closest('button[data-open]')
+      if (!btn) return
+      openRow(btn.dataset.open)
+    })
+
+    $('btn-andra').addEventListener('click', () => {
+      const row = currentRow()
+      if (!row || row.status === 'written' || row.status === 'rejected') return
+      row.draft = $('draft').value
+      flash('Utkast ändrat lokalt. Inte skrivet till ForceX.')
+      render()
+    })
+
+    $('btn-godkann').addEventListener('click', () => {
+      const row = currentRow()
+      if (!row || row.status === 'written' || row.status === 'rejected' || row.status === 'approved') return
+      row.draft = $('draft').value
+      row.status = 'approved'
+      flash('Godkänd lokalt (paper). Live Create i ForceX är låst — kräver ÖB-ja.')
+      render()
+    })
+
+    $('btn-avvisa').addEventListener('click', () => {
+      const row = currentRow()
+      if (!row || row.status === 'written' || row.status === 'rejected') return
+      row.draft = $('draft').value
+      row.status = 'rejected'
+      flash('Avvisad lokalt. Ingen ForceX-rad.')
+      render()
+    })
+
+    render()
+
+    fetch('./tenant.json', { cache: 'no-store' })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((t) => { if (t) applyTenant(t) })
+      .catch(() => {})
+  </script>
+</body>
+</html>

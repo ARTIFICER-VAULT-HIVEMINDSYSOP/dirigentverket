@@ -23,6 +23,7 @@ Kopiera `tenant.example.json` → `public/tenant.json` (eller tenant-overlay) pe
 | `brand.name` | `skin.name` | Kapital och Strategi |
 | `brand.logo` | `skin.logo` | saknas tills namngiven |
 | `crm.baseUrl` | `crm.url` | `crm1.forcex.software` |
+| `connectpoint.baseUrl` | `connectpoint.baseUrl` | saknas (paper-portal) |
 | `crm.open` | `crm.open` | `detail` (aldrig Call) |
 | `calendar.owner` | `calendars[]` | saknas per tenant |
 | `surfaces.magasin` | `magazines[]` | on |

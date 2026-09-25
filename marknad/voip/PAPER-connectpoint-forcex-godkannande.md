@@ -34,10 +34,18 @@ Status: paper. Live Create i ForceX bara efter godkännande. Inget API i agent-U
 - Skrapa/läs UI tills tenant-admin ger API (saknas i agent-Settings)
 - Skapa aldrig kommentar utan portal-godkännande
 
+## Portal-stub (paper)
+
+Statisk HTML: `public/connectpoint-godkannande.html`  
+Tenant-platshållare: `public/connectpoint-godkannande.config.example.json` och `tenant.example.json` → `connectpoint.baseUrl`, `crm.url`, `skin.name`.
+
+Exempelrader endast. Inga ForceX-skrivningar från sidan. **Live Create kräver namngivet ÖB-ja.**
+
 ## Klart när
 
 - Paper-fil i Dirigentverket (denna)
-- Senare: portal HTML + älva-recept; bevis = godkänd rad syns i ForceX-kommentarlista
+- Portal HTML-stub (paper-kö, lokal Godkänn/Ändra/Avvisa)
+- Senare: älva-recept; bevis = godkänd rad syns i ForceX-kommentarlista efter ÖB-ja
 
 ## Inte i scope än
 
