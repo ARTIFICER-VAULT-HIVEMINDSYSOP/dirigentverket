@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>FU · Interactive sales protocol</title>
+<style>
+  :root {
+    --navy:#0f1f2e; --navy2:#163042; --primary:#1b8a7e; --teal:#5dddd5;
+    --accent:#e6f6f5; --sec:#f0faf9; --muted:#5a6b7a; --text:#0f1f2e;
+    --line:#d5e8e6; --white:#fff;
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; font:400 14px "Segoe UI", system-ui, sans-serif; background:var(--sec); color:var(--text); }
+  .wrap { max-width:1180px; margin:0 auto; padding:1rem 1rem 3rem; }
+  header h1 { margin:0 0 .2rem; font-size:1.5rem; letter-spacing:-.02em; }
+  header p { margin:0 0 1rem; color:var(--muted); }
+  .steps-nav { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:1rem; }
+  .steps-nav button {
+    border:1px solid var(--line); background:var(--white); color:var(--muted);
+    border-radius:999px; padding:.35rem .75rem; font:700 .75rem inherit; cursor:pointer;
+  }
+  .steps-nav button.on { background:var(--primary); color:#fff; border-color:var(--primary); }
+  .steps-nav button.done { border-color:var(--teal); color:var(--navy); }
+  .layout { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+  @media (max-width:900px){ .layout { grid-template-columns:1fr; } }
+  .card {
+    background:var(--white); border:1px solid var(--line); border-radius:14px; padding:1rem 1.1rem;
+  }
+  .card h2 { margin:0 0 .35rem; font-size:1.15rem; color:var(--navy); }
+  .proto {
+    background:var(--accent); border:1px solid var(--line); border-radius:10px;
+    padding:10px 12px; margin:0 0 1rem; font-size:.9rem; color:var(--navy2); line-height:1.4;
+  }
+  .proto strong { color:var(--primary); }
+  label { display:block; font-size:.78rem; color:var(--muted); margin:.45rem 0 .15rem; }
+  input, select, textarea {
+    width:100%; padding:.5rem .6rem; border:1px solid var(--line); border-radius:8px; font:inherit;
+  }
+  textarea { min-height:64px; resize:vertical; }
+  .row2 { display:grid; grid-template-columns:1fr 1fr; gap:.5rem; }
+  .checks { display:flex; flex-wrap:wrap; gap:.3rem .65rem; margin:.3rem 0; }
+  .checks label { display:inline-flex; gap:.3rem; align-items:center; margin:0; color:var(--text); font-size:.85rem; }
+  .checks input { width:auto; }
+  .nav-btns { display:flex; flex-wrap:wrap; gap:.5rem; margin-top:1rem; }
+  button.primary { background:var(--primary); color:#fff; border:0; border-radius:999px; padding:.55rem 1.1rem; font:700 .9rem inherit; cursor:pointer; }
+  button.ghost { background:transparent; color:var(--primary); border:1px solid rgba(27,138,126,.45); border-radius:999px; padding:.55rem 1.1rem; font:700 .9rem inherit; cursor:pointer; }
+  .hint { font-size:.72rem; color:var(--muted); margin-top:.6rem; }
+  .preview-head { display:flex; justify-content:space-between; align-items:center; gap:.5rem; margin-bottom:.6rem; }
+  .preview-head h2 { margin:0; font-size:1rem; color:var(--navy); }
+  .sheet {
+    background:#fff; border:1px solid var(--line); border-radius:10px; padding:14px 16px;
+    font-size:10.5pt; line-height:1.4; max-height:70vh; overflow:auto;
+  }
+  .brand { font:700 8pt inherit; letter-spacing:.1em; text-transform:uppercase; color:var(--primary); }
+  .sheet h1 { font-size:16pt; margin:4px 0 6px; color:var(--navy); }
+  .sheet h3 { font-size:10pt; margin:12px 0 4px; color:var(--navy); border-left:3px solid var(--primary); padding-left:7px; }
+  .box { background:var(--accent); border-radius:8px; padding:8px 10px; margin:4px 0; }
+  .box strong { display:block; font-size:8pt; letter-spacing:.06em; text-transform:uppercase; color:var(--primary); }
+  .tags { display:flex; flex-wrap:wrap; gap:5px; margin:4px 0; }
+  .tag { background:var(--navy); color:var(--teal); border-radius:999px; padding:2px 8px; font-size:8pt; font-weight:700; }
+  .kv { display:grid; grid-template-columns:130px 1fr; gap:2px 8px; font-size:10pt; }
+  .kv span:first-child { color:var(--muted); }
+  .qual { display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; margin-top:8px; }
+  .qual div { border:1px solid var(--line); border-radius:8px; text-align:center; padding:6px; }
+  .qual .l { font-size:7.5pt; text-transform:uppercase; color:var(--muted); }
+  .qual .v { font-weight:800; color:var(--navy); }
+  .empty { color:#9aa; font-style:italic; }
+  .foot { margin-top:10px; font-size:8pt; color:var(--muted); }
+  .step-panel { display:none; }
+  .step-panel.on { display:block; }
+  @media print {
+    body { background:#fff; }
+    .no-print, .steps-nav, .nav-btns, .hint, header p, .proto { display:none !important; }
+    .layout { display:block; }
+    .card:first-child { display:none !important; }
+    .sheet { max-height:none; border:0; padding:0; overflow:visible; }
+  }
+
+    .btn.secondary{background:#fff;color:inherit;border:1px solid #94a3b8}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="no-print">
+    <h1>FU · Interactive sales protocol</h1>
+    <p>Appointment setter — step by step · exportable handoff for the salesperson.</p>
+  </header>
+
+  <nav class="steps-nav no-print" id="stepNav"></nav>
+
+  <div class="layout">
+    <section class="card no-print">
+      <div class="step-panel on" data-step="0">
+        <h2>0 · Client &amp; meeting</h2>
+        <div class="proto"><strong>Protocol:</strong> Document who you are speaking with before you go into Why.</div>
+        <div class="row2">
+          <div><label>First name</label><input id="fn" /></div>
+          <div><label>Last name</label><input id="ln" /></div>
+        </div>
+        <label>Phone</label><input id="phone" />
+        <label>Email</label><input id="email" type="email" />
+        <label>Appointment setter</label><input id="setter" />
+        <div class="row2">
+          <div><label>First contact</label><input id="firstContact" type="date" /></div>
+          <div><label>Scheduled meeting</label><input id="meetingDate" type="date" /></div>
+        </div>
+        <label>Meeting format</label>
+        <select id="meetingFormat"><option value="">—</option><option>Phone</option><option>Teams</option><option>Zoom</option><option>In person</option></select>
+        <label>Country / market (choose early)</label>
+        <select id="countryFocus">
+          <option value="">—</option>
+          <option>Dubai</option>
+          <option>Portugal</option>
+          <option>Cyprus</option>
+          <option>Bulgaria</option>
+          <option>Spain</option>
+          <option>Other</option>
+        </select>
+        <label id="countryOtherLab" for="countryOther" style="display:none">Enter country</label>
+        <input id="countryOther" type="text" style="display:none" />
+        <label>Source / lead</label><input id="source" />
+      </div>
+
+      <div class="step-panel" data-step="1">
+        <h2>1 · Start with WHY</h2>
+        <div class="proto" id="whyProto"><strong>Ask:</strong> “What is the main reason you are considering [country]?” — let the client talk. Choose country in step 0.</div>
+        <div class="checks" id="whyReasons"></div>
+        <label>Other</label><input id="whyOther" />
+        <label>Client's own words</label><textarea id="whyOwn"></textarea>
+        <label>What does the client hope to achieve?</label><textarea id="achieve"></textarea>
+        <label>Why is that important?</label><textarea id="whyImportant"></textarea>
+      </div>
+
+      <div class="step-panel" data-step="2">
+        <h2>2 · Location</h2>
+        <div class="proto" id="locProto"><strong>Ask:</strong> “Which areas are you mainly considering?” + “What makes those interesting?”</div>
+        <label>Areas</label><textarea id="areas"></textarea>
+        <label>Why those areas?</label><textarea id="areasWhy"></textarea>
+        <div class="checks" id="locMatters"></div>
+        <label>Other location factor</label><input id="locOther" />
+      </div>
+
+      <div class="step-panel" data-step="3">
+        <h2>3 · Budget without locking early</h2>
+        <div class="proto"><strong>Ask:</strong> Fixed budget, or flexible depending on property type and potential? Separate <b>budget-driven</b> vs <b>value-driven</b>.</div>
+        <label>Client currency</label>
+        <select id="currency">
+          <option value="">—</option>
+          <option>SEK</option>
+          <option>DKK</option>
+          <option>GBP</option>
+          <option>EUR</option>
+        </select>
+        <div class="row2">
+          <div><label>Available capital (€)</label><input id="capital" type="number" min="0" /></div>
+          <div><label>Initial investment (€)</label><input id="initial" type="number" min="0" /></div>
+        </div>
+        <div class="proto" id="fxBox" style="margin-top:10px">
+          <strong>Currency helper</strong> — amount in client currency → €. Enter the rate yourself (no auto rate).
+          <div class="row2" style="margin-top:8px">
+            <div><label>Amount (client currency)</label><input id="fxAmount" type="number" min="0" step="any" /></div>
+            <div><label>Rate (1 unit → €)</label><input id="fxRate" type="number" min="0" step="any" placeholder="enter rate" /></div>
+          </div>
+          <div class="row2">
+            <div><label>≈ €</label><input id="fxEuro" type="text" readonly /></div>
+            <div style="display:flex;align-items:flex-end;gap:8px;padding-bottom:2px">
+              <button type="button" class="btn" id="fxToCapital">Set as capital €</button>
+              <button type="button" class="btn secondary" id="fxToInitial">Set as initial €</button>
+            </div>
+          </div>
+        </div>
+        <label>Budget</label>
+        <select id="budgetFlex">
+          <option value="">—</option>
+          <option>Fixed budget (budget-driven)</option>
+          <option>Somewhat flexible</option>
+          <option>Very flexible / value-driven</option>
+        </select>
+        <label>Would increase for better location / rental / long-term value?</label>
+        <select id="canIncrease"><option value="">—</option><option>Yes</option><option>No</option><option>Possibly</option></select>
+        <label>Financing</label>
+        <select id="financing">
+          <option value="">—</option><option>Own funds</option><option>Bank financing</option>
+          <option>Combination</option><option>Other</option>
+        </select>
+        <label>Comment</label><textarea id="budgetComment"></textarea>
+      </div>
+
+      <div class="step-panel" data-step="4">
+        <h2>4 · Property type</h2>
+        <div class="proto"><strong>Ask:</strong> Ready to use now, or a new build where preferences can be shaped?</div>
+        <div class="checks" id="propType"></div>
+        <label>Other</label><input id="propOther" />
+        <label>Bedrooms</label>
+        <select id="beds"><option value="">—</option><option>1</option><option>2</option><option>3</option><option>4+</option><option>Not decided</option></select>
+        <label>Completed / new build</label>
+        <select id="build"><option value="">—</option><option>Completed</option><option>New build</option><option>Open to both</option></select>
+        <label>Use immediately</label>
+        <select id="useNow"><option value="">—</option><option>Very important</option><option>Quite important</option><option>Not important</option></select>
+      </div>
+
+      <div class="step-panel" data-step="5">
+        <h2>5 · Own use &amp; rental</h2>
+        <div class="proto"><strong>Ask:</strong> Combine own use with rental when they are not there?</div>
+        <label>Private weeks / year (approx.)</label><input id="weeks" type="number" min="0" />
+        <label>Interested in renting?</label>
+        <select id="rentInterest"><option value="">—</option><option>Yes</option><option>No</option><option>Possibly</option></select>
+        <label>How important is rental income?</label>
+        <select id="rentImportance">
+          <option value="">—</option><option>Primary purpose</option><option>Important component</option><option>Bonus</option><option>Not relevant</option>
+        </select>
+        <label>Most important overall</label>
+        <select id="mostImportant">
+          <option value="">—</option><option>Own use</option><option>Rental income</option>
+          <option>Combination</option><option>Capital value</option><option>Long-term appreciation</option>
+        </select>
+      </div>
+
+      <div class="step-panel" data-step="6">
+        <h2>6 · Motivation &amp; decision</h2>
+        <div class="proto"><strong>Ask:</strong> “What would make you say in three years: this was a really good decision?”</div>
+        <label>“Good decision in three years”</label><textarea id="goodDecision"></textarea>
+        <label>Main reason for the investment</label><textarea id="mainReason"></textarea>
+        <label>Will not compromise on</label><textarea id="noCompromise"></textarea>
+        <label>Who decides?</label>
+        <select id="decider"><option value="">—</option><option>Client alone</option><option>Client + partner</option><option>Family</option><option>Other</option></select>
+        <label>Time to decision</label>
+        <select id="decideWhen">
+          <option value="">—</option><option>0–30 days</option><option>1–3 months</option>
+          <option>3–6 months</option><option>6–12 months</option><option>Not decided</option>
+        </select>
+        <label>Stage</label>
+        <select id="stage">
+          <option value="">—</option><option>Curious / researching</option><option>Actively searching</option>
+          <option>Comparing properties</option><option>Ready to buy the right property</option>
+          <option>Has already viewed specific properties</option>
+        </select>
+      </div>
+
+      <div class="step-panel" data-step="7">
+        <h2>7 · Handoff to salesperson</h2>
+        <div class="proto"><strong>Outcome:</strong> Three needs + emotional driver + focus. The salesperson does not start from zero.</div>
+        <label>Need 1</label><input id="need1" />
+        <label>Need 2</label><input id="need2" />
+        <label>Need 3</label><input id="need3" />
+        <label>Emotional driver</label><textarea id="emotion"></textarea>
+        <label>Budget / capital (summary)</label><textarea id="budgetSummary"></textarea>
+        <label>Recommended focus for salesperson</label><textarea id="salesFocus"></textarea>
+        <label>Must know</label><textarea id="mustKnow"></textarea>
+        <div class="row2">
+          <div><label>Purchase intent</label>
+            <select id="intentBuy"><option value="">—</option><option>Low</option><option>Medium</option><option>High</option></select>
+          </div>
+          <div><label>Capital readiness</label>
+            <select id="intentCap"><option value="">—</option><option>Low</option><option>Medium</option><option>High</option></select>
+          </div>
+        </div>
+        <label>Timing readiness</label>
+        <select id="intentTime"><option value="">—</option><option>Low</option><option>Medium</option><option>High</option></select>
+      </div>
+
+      <div class="nav-btns">
+        <button type="button" class="ghost" id="btnPrev">Previous</button>
+        <button type="button" class="primary" id="btnNext">Next</button>
+        <button type="button" class="ghost" id="btnPdf">Export outcome (PDF)</button>
+      </div>
+      <p class="hint">Do not sell the property — sell the solution to the need. Leave blanks empty. No promised returns.</p>
+    </section>
+
+    <aside class="card">
+      <div class="preview-head no-print">
+        <h2>Exportable outcome</h2>
+        <button type="button" class="ghost" id="btnPdf2">PDF</button>
+      </div>
+      <div class="sheet" id="sheet"></div>
+    </aside>
+  </div>
+</div>
+<script>
+(function () {
+  const STEPS = [
+    '0 Client','1 Why','2 Location','3 Budget','4 Property','5 Use','6 Motivation','7 Handoff'
+  ];
+  const WHY = ['Holiday home','Permanent residence','Retirement','Investment','Rental income','Own use + rental','Climate/lifestyle','Tax/residency'];
+  const LOC = ['Sea/beach','Restaurants','Shopping','Golf','Nightlife','Quiet area','Family-friendly','Airport','Tourist area','Rental potential','Future value appreciation'];
+  const PROP = ['Apartment','Villa','Townhouse','Condo'];
+  let step = 0;
+
+  function mount(id, items) {
+    document.getElementById(id).innerHTML = items.map(t =>
+      '<label><input type="checkbox" data-g="'+id+'" value="'+t+'" /> '+t+'</label>'
+    ).join('');
+  }
+  mount('whyReasons', WHY); mount('locMatters', LOC); mount('propType', PROP);
+
+  const nav = document.getElementById('stepNav');
+  nav.innerHTML = STEPS.map((t,i) => '<button type="button" data-i="'+i+'">'+t+'</button>').join('');
+
+  const $ = (id) => document.getElementById(id);
+  const v = (id) => (($(id).value || '').trim());
+  const checked = (g) => Array.from(document.querySelectorAll('input[data-g="'+g+'"]:checked')).map(x => x.value);
+  const line = (s) => s ? s : '<span class="empty">—</span>';
+  const tags = (arr, extra) => {
+    const a = (arr||[]).slice(); if (extra) a.push(extra);
+    if (!a.length) return '<span class="empty">—</span>';
+    return '<div class="tags">'+a.map(t=>'<span class="tag">'+t+'</span>').join('')+'</div>';
+  };
+  const euro = (n) => {
+    if (n===''||n==null||!isFinite(Number(n))) return '—';
+    return '€' + Number(n).toLocaleString('en-GB');
+  };
+
+  
+
+  function syncCountryOther() {
+    const c = v('countryFocus');
+    const show = (c === 'Other' || c === 'Annat');
+    const lab = document.getElementById('countryOtherLab');
+    const inp = document.getElementById('countryOther');
+    if (lab) lab.style.display = show ? '' : 'none';
+    if (inp) {
+      inp.style.display = show ? '' : 'none';
+      if (!show) inp.value = '';
+    }
+  }
+  function countryLabel() {
+    const c = v('countryFocus');
+    if (c === 'Other' || c === 'Annat') return v('countryOther') || c || '—';
+    return c || '—';
+  }
+  
+  function recalcFx() {
+    const amt = parseFloat(document.getElementById('fxAmount').value);
+    const cur = document.getElementById('currency').value;
+    let rate = parseFloat(document.getElementById('fxRate').value);
+    const out = document.getElementById('fxEuro');
+    if (cur === 'EUR' && !document.getElementById('fxRate').value) {
+      document.getElementById('fxRate').value = '1';
+      rate = 1;
+    }
+    if (!isFinite(amt) || amt < 0 || !isFinite(rate) || rate <= 0) {
+      out.value = '';
+      return;
+    }
+    out.value = (Math.round(amt * rate * 100) / 100).toLocaleString('en-GB');
+  }
+  function wireFx() {
+    ['fxAmount','fxRate','currency'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) { el.addEventListener('input', recalcFx); el.addEventListener('change', recalcFx); }
+    });
+    const c = document.getElementById('fxToCapital');
+    const i = document.getElementById('fxToInitial');
+    if (c) c.addEventListener('click', () => {
+      const raw = String(document.getElementById('fxEuro').value).replace(/\s/g,'').replace(/,/g,'');
+      const n = parseFloat(raw);
+      if (isFinite(n)) document.getElementById('capital').value = n;
+      render();
+    });
+    if (i) i.addEventListener('click', () => {
+      const raw = String(document.getElementById('fxEuro').value).replace(/\s/g,'').replace(/,/g,'');
+      const n = parseFloat(raw);
+      if (isFinite(n)) document.getElementById('initial').value = n;
+      render();
+    });
+  }
+
+  function updateProto() {
+    syncCountryOther();
+    const land = countryLabel();
+    const why = document.getElementById('whyProto');
+    const loc = document.getElementById('locProto');
+    if (why) why.innerHTML = '<strong>Ask:</strong> “What is the main reason you are considering '+land+'?” — let the client talk.';
+    if (loc) loc.innerHTML = '<strong>Ask:</strong> “Which areas in '+land+' are you mainly considering?” + “What makes those interesting?”';
+  }
+
+  function showStep(i) {
+    step = Math.max(0, Math.min(STEPS.length-1, i));
+    document.querySelectorAll('.step-panel').forEach(p => p.classList.toggle('on', +p.dataset.step === step));
+    nav.querySelectorAll('button').forEach((b,j) => {
+      b.classList.toggle('on', j===step);
+      b.classList.toggle('done', j<step);
+    });
+    $('btnPrev').disabled = step===0;
+    $('btnNext').textContent = step===STEPS.length-1 ? 'Done' : 'Next';
+    updateProto();
+    render();
+  }
+
+  function render() {
+    const name = [v('fn'),v('ln')].filter(Boolean).join(' ') || 'Client';
+    $('sheet').innerHTML =
+      '<p class="brand">FastigheterUtomlands · protocol outcome · appointment setter → salesperson</p>' +
+      '<h1>'+name+'</h1>' +
+      '<div class="kv">' +
+        '<span>Phone</span><span>'+line(v('phone'))+'</span>' +
+        '<span>Email</span><span>'+line(v('email'))+'</span>' +
+        '<span>Setter</span><span>'+line(v('setter'))+'</span>' +
+        '<span>Meeting</span><span>'+line([v('meetingDate'),v('meetingFormat')].filter(Boolean).join(' · '))+'</span>' +
+        '<span>Country</span><span>'+line(countryLabel())+'</span>' +
+        '<span>Source</span><span>'+line(v('source'))+'</span>' +
+      '</div>' +
+      '<h3>1 · Why '+countryLabel()+'</h3>' +
+      tags(checked('whyReasons'), v('whyOther')) +
+      '<div class="box"><strong>Own words</strong>'+line(v('whyOwn'))+'</div>' +
+      '<div class="box"><strong>Achieve</strong>'+line(v('achieve'))+'</div>' +
+      '<div class="box"><strong>Why important</strong>'+line(v('whyImportant'))+'</div>' +
+      '<h3>2 · Location</h3>' +
+      '<div class="box"><strong>Areas</strong>'+line(v('areas'))+'</div>' +
+      '<div class="box"><strong>Why</strong>'+line(v('areasWhy'))+'</div>' +
+      tags(checked('locMatters'), v('locOther')) +
+      '<h3>3 · Budget</h3>' +
+      '<div class="kv">' +
+        '<span>Currency</span><span>'+line(v('currency'))+'</span>' +
+        '<span>Available</span><span>'+euro(v('capital'))+'</span>' +
+        '<span>Initial</span><span>'+euro(v('initial'))+'</span>' +
+        '<span>Flexibility</span><span>'+line(v('budgetFlex'))+'</span>' +
+        '<span>Can increase</span><span>'+line(v('canIncrease'))+'</span>' +
+        '<span>Financing</span><span>'+line(v('financing'))+'</span>' +
+      '</div>' +
+      '<div class="box"><strong>Comment</strong>'+line(v('budgetComment'))+'</div>' +
+      '<h3>4–5 · Property &amp; use</h3>' +
+      tags(checked('propType'), v('propOther')) +
+      '<div class="kv">' +
+        '<span>Bedrooms</span><span>'+line(v('beds'))+'</span>' +
+        '<span>Build status</span><span>'+line(v('build'))+'</span>' +
+        '<span>Use now</span><span>'+line(v('useNow'))+'</span>' +
+        '<span>Weeks/year</span><span>'+line(v('weeks'))+'</span>' +
+        '<span>Rental</span><span>'+line(v('rentInterest'))+'</span>' +
+        '<span>Rental income</span><span>'+line(v('rentImportance'))+'</span>' +
+        '<span>Most important</span><span>'+line(v('mostImportant'))+'</span>' +
+      '</div>' +
+      '<h3>6 · Motivation &amp; decision</h3>' +
+      '<div class="box"><strong>Good decision in 3 years</strong>'+line(v('goodDecision'))+'</div>' +
+      '<div class="box"><strong>Main reason</strong>'+line(v('mainReason'))+'</div>' +
+      '<div class="box"><strong>No compromise</strong>'+line(v('noCompromise'))+'</div>' +
+      '<div class="kv">' +
+        '<span>Decider</span><span>'+line(v('decider'))+'</span>' +
+        '<span>Timing</span><span>'+line(v('decideWhen'))+'</span>' +
+        '<span>Stage</span><span>'+line(v('stage'))+'</span>' +
+      '</div>' +
+      '<h3>7 · Handoff — three needs</h3>' +
+      '<div class="box"><strong>1</strong>'+line(v('need1'))+'</div>' +
+      '<div class="box"><strong>2</strong>'+line(v('need2'))+'</div>' +
+      '<div class="box"><strong>3</strong>'+line(v('need3'))+'</div>' +
+      '<div class="box"><strong>Emotional driver</strong>'+line(v('emotion'))+'</div>' +
+      '<div class="box"><strong>Budget / capital</strong>'+line(v('budgetSummary'))+'</div>' +
+      '<div class="box"><strong>Focus for salesperson</strong>'+line(v('salesFocus'))+'</div>' +
+      '<div class="box"><strong>Must know</strong>'+line(v('mustKnow'))+'</div>' +
+      '<div class="qual">' +
+        '<div><div class="l">Purchase intent</div><div class="v">'+line(v('intentBuy'))+'</div></div>' +
+        '<div><div class="l">Capital</div><div class="v">'+line(v('intentCap'))+'</div></div>' +
+        '<div><div class="l">Timing</div><div class="v">'+line(v('intentTime'))+'</div></div>' +
+      '</div>' +
+      '<p class="foot">Draft · structured sales process · sell the solution to the need · not personal investment advice</p>';
+  }
+
+  function pdf() {
+    render();
+    const n = ([v('fn'),v('ln')].filter(Boolean).join('-') || 'client');
+    const prev = document.title;
+    document.title = n + '-fu-protocol-outcome';
+    window.print();
+    document.title = prev;
+  }
+
+  nav.addEventListener('click', (e) => {
+    const b = e.target.closest('button[data-i]');
+    if (b) showStep(+b.dataset.i);
+  });
+  $('btnPrev').addEventListener('click', () => showStep(step-1));
+  $('btnNext').addEventListener('click', () => {
+    if (step < STEPS.length-1) showStep(step+1);
+    else render();
+  });
+  $('btnPdf').addEventListener('click', pdf);
+  $('btnPdf2').addEventListener('click', pdf);
+  document.querySelector('.card.no-print').addEventListener('input', () => { updateProto(); render(); });
+  document.querySelector('.card.no-print').addEventListener('change', () => { updateProto(); render(); });
+  document.getElementById('countryFocus').addEventListener('change', updateProto);
+  wireFx();
+  showStep(0);
+})();
+</script>
+</body>
+</html>
