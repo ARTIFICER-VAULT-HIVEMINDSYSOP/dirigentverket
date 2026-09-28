@@ -73,18 +73,21 @@ https://github.com/ARTIFICER-VAULT-HIVEMINDSYSOP/dirigentverket/pull/4
 
 **14:44 Europe/Sofia 16 sep (ständig-process):** Magasin 8765 HTTP 200. PR #13 CLEAN/MERGEABLE, 9 ahead / 0 behind; progress fade-out (`0883099`) landat. Status synkas till main. Cloud follow-up: mjuk frekvens-progress fade-in / återkomst när mitt-hedge går proposed→saknas (omvänd HUD-handoff, samma draft, ingen merge). PR #11 1 behind → update-branch. PR #9 lamp = kväll. PII-fri backup `/workspace/backups/dirigentverket-verktyg-kod-20260916-1040.tar.gz`. Merge väntar namngivet ja. No live/send/merge.
 
+**Kväll 16 sep ~17:55 Sthlm (PR #9):** lamp-branch synkad mot `origin/main` (`35b3367`, rider-kansla PR #13 status). Konflikt i `marknad/rider-kansla-32bit-paper.md` löst: mitt-hedge/rokad från main behållen (PR #8 landat + PR #13 twin/progress). `LIVE_LOCKED`/`paperLock`/`live=false` kvar. Lamp/WATCHERS paper-skinn oförändrat. Draft kvar. Ingen merge.
+
 **16 sep (draft PR #13):** frekvens-progress fade-in proposed→grind landat (`9619709`). När mitt-hedge går proposed→grind (svängar räknas, under minFrequency) tonar progress in mjukt (`HEDGE_FADE_MS` 1100) medan räls/mitt/twin tonar ut. Spegel till fade-out `0883099`. Tom serie / saknas-band / ogiltigt band / !freqProgress = ingen påhittad fade-in. Inga dubbla mitt-markörer. Inga nya play-knappar. Paper. `LIVE_LOCKED` true. Väntar namngivet ÖB merge-ja. No live/send/merge.
 
 **16 sep kväll (draft PR #13):** frekvens-progress engångs-puls när fade-in proposed→grind startar landat (`88062e6`). Samma feel-family som mitt-pip/twin-pip (`HEDGE_MID_PULSE_MS` 900, ease-out). Puls bara när fade-in faktiskt startar med giltig freqProgress (kopierar have/need — aldrig påhittad). Tom serie / saknas-band / `!freqProgress` / already proposed = tyst. Inga dubbla mitt-markörer. Inga nya play-knappar. Paper. `LIVE_LOCKED` true. Väntar namngivet ÖB merge-ja. No live/send/merge.
 
 **10:45 Europe/Sofia 17 sep (ständig-process):** Magasin 8765 HTTP 200. PR #13 fortfarande draft CLEAN/MERGEABLE, 14 ahead / 0 behind; frekvens-progress fade-in proposed→grind (`9619709`) + frekvens-progress engångs-puls när fade-in startar (`88062e6`) redan landat. Status synkas till main. Ingen merge-claim. PR #11 0 behind. PR #9 lamp = kväll. Merge väntar namngivet ÖB-ja. No live/send/merge.
 
-
 **17:53 Europe/Stockholm 17 sep (ständig-process):** Magasin 8765 HTTP 200. PR #13 CLEAN/MERGEABLE, 22 ahead / 0 behind (head `3b49aa6`). Twin side-pip engångs-puls grind→proposed (`3fcbdc0`) + frekvens-progress engångs-puls grind→proposed (`291ff5f`) + test already-proposed silent (`3b49aa6`) redan landat på draft. Mitt-pip handoff-puls `9ee7820` tidigare samma dag. PR #11 CLEAN 0 behind. PR #9 lamp CONFLICTING — CloudAgent ResourceExhausted blockerade kvälls-rebase + nästa Rider-steg (mitt exit-puls proposed→grind). PII-fri backup körs. Merge väntar namngivet ÖB-ja. No live/send/merge.
 
 **17 sep eftermiddag Europe/Sofia (draft PR #13 — status synk till main):** twin side-pip engångs-puls när frekvens-progress fade-out grind→proposed landat (`3fcbdc0`). Frekvens-progress engångs-puls när fade-out grind→proposed landat (`291ff5f`). Paper. `LIVE_LOCKED` true. Väntar namngivet ÖB merge-ja.
 
 **14:42 Sofia 18 sep (ständig-process):** Magasin 8765 HTTP 200. PR #13 draft CLEAN/MERGEABLE, 25 ahead/0 behind after conflict-fix `defe446` (head `1842f0dd`). Cloud bc-45f735b0: mjuk mitt-pip exit-puls proposed→grind (samma draft, ingen merge). PR #11 CLEAN. PR #14 update-branch. PR #9 lamp = kväll. Morgonbackup 1043 hade magasin-JSON/telefon-referens — eftermiddagsbackup byggs PII-fri. Merge väntar namngivet ja. No live/send/merge.
+
+**Kväll 21 sep ~18:20 Europe/Sofia (PR #9):** lamp-branch synkad mot `origin/main` (`956ec03`, PR #19 publik funktionskatalog). Inga konflikter. `LIVE_LOCKED`/`paperLock`/`live=false` kvar. Lamp/WATCHERS paper-skinn oförändrat. Draft kvar. Ingen merge.
 
 ## Prova-känsla (nu på main — paper)
 När ÖB öppnar `#/rider` ska det kännas så här, i den ordningen:
@@ -100,5 +103,4 @@ När ÖB öppnar `#/rider` ska det kännas så här, i den ordningen:
 - Live-order, mäklare, påhittade P&L
 - Sidapp utanför Dirigentverket-nexus
 - Merge utan ÖB-ja på namngiven PR-rad
-- Lamp-/WATCHERS-skin — bara kvällstid (ÖB 9 sep); inte startad här
-
+- Lamp-/WATCHERS-skin — kväll; paper-status i `marknad/lamp-watchers-paper.md`

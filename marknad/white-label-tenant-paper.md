@@ -26,6 +26,7 @@ Kopiera `tenant.example.json` → `public/tenant.json` (eller tenant-overlay) pe
 | `crm.open` | `crm.open` | `detail` (aldrig Call) |
 | `calendar.owner` | `calendars[]` | saknas per tenant |
 | `surfaces.magasin` | `magazines[]` | on |
+| `surfaces.watchers` | `skin.watchers.kicker` / `chamber` | `#/robot` paper-skinn |
 | `surfaces.rider` | (nexus `#/rider`) | on / paper |
 | `live.orders` | `rules.paper_default` + ÖB-ja | off tills namngivet ja |
 | `license.*` | `license.status/licensor/licensee/fee` | paper / `saknas` |

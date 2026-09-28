@@ -22,6 +22,10 @@
       document.querySelectorAll('.hero img.bg').forEach(function (img) {
         if (t.skin.hero) img.src = t.skin.hero
       })
+      var chamber = t.skin.watchers && t.skin.watchers.chamber
+      if (chamber && /^[.]?\/?[\w./-]+\.(png|jpg|jpeg|webp|svg)$/i.test(chamber)) {
+        document.documentElement.style.setProperty('--watchers-chamber', 'url("' + chamber.replace(/["')\s]/g, '') + '")')
+      }
     }
   }
   fetch('./tenant.json', { cache: 'no-store' })
