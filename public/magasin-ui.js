@@ -14,6 +14,7 @@ import {
   rowId,
 } from '/src/contact-queue.js';
 import { renderMagazineHud } from '/src/magazine-hud.js';
+import { MARKET_REFRESH_MS, renderMarketStrip } from '/src/market-strip.js';
 
 const MAGASIN = window.MAGASIN || 'daniel';
 const JSON_URL = window.JSON_URL || './magasin.json';
@@ -22,6 +23,7 @@ const MAIL_TPL = 'Hej,\n\nHör av dig när det passar.\n';
 
 const hudMount = document.getElementById('magasin-hud');
 const listEl = document.getElementById('list');
+const marketMount = document.getElementById('market-strip') || ensureMarketMount();
 const flashEl = document.getElementById('flash');
 const reloadBtn = document.getElementById('reload');
 const filterQueueBtn = document.getElementById('filter-queue');
@@ -34,6 +36,34 @@ let filter = new URLSearchParams(location.search).get('recovery') === '1' ? 'rec
 
 function paperMode() {
   return new URLSearchParams(location.search).get('paper') === '1';
+}
+
+function ensureMarketMount() {
+  const el = document.createElement('aside');
+  el.id = 'market-strip';
+  el.className = 'market-strip';
+  el.hidden = true;
+  const brand = document.querySelector('.brandline');
+  if (brand && brand.parentNode) brand.insertAdjacentElement('afterend', el);
+  else document.body.prepend(el);
+  return el;
+}
+
+function paintMarkets(data) {
+  if (!marketMount) return;
+  marketMount.hidden = false;
+  marketMount.innerHTML = renderMarketStrip(data);
+}
+
+async function loadMarkets() {
+  try {
+    const res = await fetch('/api/markets', { cache: 'no-store' });
+    if (!res.ok) throw new Error('saknas');
+    const data = await res.json();
+    paintMarkets(data && typeof data === 'object' ? data : null);
+  } catch {
+    paintMarkets(null);
+  }
 }
 
 function loadStore() {
@@ -297,3 +327,5 @@ if (filterRecoveryBtn) {
 }
 
 loadRows();
+loadMarkets();
+setInterval(loadMarkets, MARKET_REFRESH_MS);
