@@ -46,11 +46,16 @@ test('the desk shows the practice banner, the position box, and lesson links', (
     takeProfit: null,
   })
   const copy = describePosition(result)
-  expect(view.getByText(copy.shares)).toBeTruthy()
-  expect(view.getByText(copy.risk)).toBeTruthy()
   expect(view.getByText(copy.distance)).toBeTruthy()
-  expect(view.getByLabelText('Kontostorlek (exempel)')).toHaveProperty('value', '20 000')
-  expect(view.getByLabelText('Risk i procent')).toHaveProperty('value', '1')
+  expect(view.getByText('Riskbeloppet saknas.')).toBeTruthy()
+  expect(view.getByText('Antalet aktier saknas.')).toBeTruthy()
+  expect(view.getByLabelText('Kontostorlek (exempel)')).toHaveProperty('value', '')
+  expect(view.getByLabelText('Risk i procent')).toHaveProperty('value', '')
+  expect(view.getByLabelText('Kontostorlek (exempel)')).toHaveProperty('placeholder', 'saknas')
+  const canvas = view.container.querySelector('canvas')
+  const secondary = view.container.querySelector('[data-skola-secondary]')
+  if (!canvas || !secondary) throw new Error('missing chart or skola panel')
+  expect(canvas.compareDocumentPosition(secondary) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
 
   const lesson = view.getByRole('link', { name: 'Lektion 1: Risk och positionsstorlek.' })
   expect(lesson.getAttribute('href')).toBe('../tradingskolan/lektion-1-risk-och-positionsstorlek.html')
@@ -82,7 +87,7 @@ test('crossing the upper band shows the practice note, and reset clears it', () 
   expect(note.querySelector('a')?.getAttribute('href')).toBe('../tradingskolan/lektion-3-bollingerband.html')
 
   fireEvent.click(view.getByRole('button', { name: 'Reset book' }))
-  expect(view.queryByText(/Priset stängde över övre bandet/)).toBeNull()
+  expect(view.getByRole('status').getAttribute('data-skola-note-phase')).toBe('out')
 })
 
 test('risk above 2 percent is warned in plain text and a take-profit shows the ratio', () => {

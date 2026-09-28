@@ -20,19 +20,20 @@ export function BrokerPanel() {
     const existing = loadBrokerSession(window.sessionStorage)
     setStored(existing)
     if (existing) {
-      setEnv(existing.env)
-      setAcked(existing.liveAcknowledged)
+      setEnv('paper')
+      setAcked(false)
       setLine(
         existing.env === 'live'
-          ? 'Live keys are in sessionStorage. Reset will not flatten that position.'
+          ? 'Live is locked. This desk stays on paper.'
           : 'Paper keys are in sessionStorage.',
       )
     }
   }, [])
 
   function chooseEnv(next: BrokerEnv) {
-    setEnv(next)
-    if (next !== 'live') setAcked(false)
+    if (next === 'live') return
+    setEnv('paper')
+    setAcked(false)
   }
 
   function save() {
@@ -134,8 +135,10 @@ export function BrokerPanel() {
         </button>
         <button
           type="button"
+          disabled
+          aria-disabled="true"
           onClick={() => chooseEnv('live')}
-          className={`min-h-11 px-2 text-sm ${env === 'live' ? 'border border-brick bg-brick text-ink' : 'desk-key'}`}
+          className="desk-key min-h-11 px-2 text-sm opacity-50"
         >
           Alpaca live
         </button>

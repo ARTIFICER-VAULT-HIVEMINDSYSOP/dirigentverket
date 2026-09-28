@@ -66,13 +66,46 @@ body {
 }
 
 .skola-note {
-  margin: 0;
-  background: #101412;
-  color: #e9e3d6;
-  border: 1px solid #a68446;
-  padding: 0.7rem 0.85rem;
-  font-size: 0.95rem;
+  margin: 0.5rem 0 0;
+  background: transparent;
+  color: rgba(233, 227, 214, 0.88);
+  border: 1px solid rgba(166, 132, 70, 0.38);
+  padding: 0.45rem 0.65rem;
+  font-size: 0.875rem;
   line-height: 1.45;
+  opacity: 0;
+  animation: skola-fade-in 1100ms ease-out forwards;
+}
+
+.skola-note.is-out {
+  animation: skola-fade-out 1100ms ease-out forwards;
+}
+
+.skola-secondary {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+  opacity: 0;
+  animation: skola-fade-in 1100ms ease-out 420ms forwards;
+}
+
+@keyframes skola-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes skola-fade-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skola-note,
+  .skola-secondary {
+    animation: none;
+    opacity: 1;
+  }
 }
 
 .skola-link {
@@ -132,38 +165,5 @@ body {
 @media (min-width: 1024px) {
   .desk-grid {
     grid-template-columns: minmax(0, 1fr) 340px;
-  }
-
-  .desk-grid.has-skola.has-note {
-    grid-template-areas:
-      "note note"
-      "chart skola"
-      "chart book";
-  }
-
-  .desk-grid.has-skola:not(.has-note) {
-    grid-template-areas:
-      "chart skola"
-      "chart book";
-  }
-
-  .desk-grid:not(.has-skola) {
-    grid-template-areas: "chart book";
-  }
-
-  .desk-note {
-    grid-area: note;
-  }
-
-  .desk-chart {
-    grid-area: chart;
-  }
-
-  .desk-skola {
-    grid-area: skola;
-  }
-
-  .desk-book {
-    grid-area: book;
   }
 }

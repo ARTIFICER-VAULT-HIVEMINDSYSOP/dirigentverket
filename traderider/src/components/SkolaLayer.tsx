@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   describePosition,
   lessonHref,
@@ -39,11 +39,49 @@ export function SkolaToggle({ on, onChange }: { on: boolean; onChange: (next: bo
   )
 }
 
-export function RailNoteView({ note, base }: { note: RailNote; base: string }) {
+/** Same calm length as the Rider hedge fade. Feel, not a cut. */
+export const SKOLA_FADE_MS = 1100
+
+export function SoftRailNote({ note, base }: { note: RailNote | null; base: string }) {
+  const [visible, setVisible] = useState<RailNote | null>(null)
+  const [phase, setPhase] = useState<'in' | 'out'>('in')
+  const visibleRef = useRef<RailNote | null>(null)
+  visibleRef.current = visible
+
+  useEffect(() => {
+    const current = visibleRef.current
+    if (!note) {
+      if (!current) return
+      setPhase('out')
+      const id = window.setTimeout(() => {
+        setVisible(null)
+      }, SKOLA_FADE_MS)
+      return () => window.clearTimeout(id)
+    }
+    if (current && current.index !== note.index) {
+      setPhase('out')
+      const id = window.setTimeout(() => {
+        setVisible(note)
+        setPhase('in')
+      }, SKOLA_FADE_MS)
+      return () => window.clearTimeout(id)
+    }
+    setVisible(note)
+    setPhase('in')
+  }, [note])
+
+  if (!visible) return null
   const href = lessonHref(base, LESSONS[2].file)
   return (
-    <p className="skola-note" lang="sv" role="status" data-skola-note={note.change}>
-      {railExplanation(note.change)} Läs mer i lektion 3:{' '}
+    <p
+      key={visible.index}
+      className={`skola-note is-${phase}`}
+      lang="sv"
+      role="status"
+      data-skola-note={visible.change}
+      data-skola-note-phase={phase}
+    >
+      {railExplanation(visible.change)} Läs mer i lektion 3:{' '}
       <a className="skola-link" href={href}>
         Bollingerband
       </a>
@@ -74,6 +112,7 @@ function Field({
         inputMode="decimal"
         autoComplete="off"
         spellCheck={false}
+        placeholder="saknas"
         value={value}
         aria-describedby={describedBy}
         onChange={(event) => onChange(event.target.value)}
@@ -91,8 +130,8 @@ export function PositionSizeBox({
   suggestedStop: number | null
   base: string
 }) {
-  const [accountRaw, setAccountRaw] = useState('20 000')
-  const [riskRaw, setRiskRaw] = useState('1')
+  const [accountRaw, setAccountRaw] = useState('')
+  const [riskRaw, setRiskRaw] = useState('')
   const [entryRaw, setEntryRaw] = useState(() => (mark == null ? '' : mark.toFixed(2)))
   const [stopRaw, setStopRaw] = useState(() => (suggestedStop == null ? '' : suggestedStop.toFixed(2)))
   const [tpRaw, setTpRaw] = useState('')
@@ -119,9 +158,9 @@ export function PositionSizeBox({
 
   return (
     <section className="armor-panel px-3 py-2" lang="sv" data-skola-position>
-      <h2 className="font-display text-2xl leading-none">Positionsstorlek</h2>
+      <h2 className="font-display text-xl leading-none">Positionsstorlek</h2>
       <p className="mt-2 text-sm leading-snug">
-        Räkneexemplet följer lektion 1 och börjar på 1 procent av exempelkontot.
+        Räkneexemplet följer lektion 1. Tom kontostorlek eller risk visas som saknas.
       </p>
       <div className="mt-2 grid grid-cols-2 gap-x-2 gap-y-1">
         <Field id="skola-account" label="Kontostorlek (exempel)" value={accountRaw} onChange={setAccountRaw} />
@@ -183,8 +222,8 @@ export function PositionSizeBox({
 export function LessonsPanel({ base }: { base: string }) {
   const root = normalizeLessonBase(base)
   return (
-    <nav className="armor-panel px-3 py-3" lang="sv" aria-label="Lektioner" data-lesson-base={root}>
-      <h2 className="font-display text-2xl leading-none">Lektioner</h2>
+    <nav className="armor-panel px-3 py-2" lang="sv" aria-label="Lektioner" data-lesson-base={root}>
+      <h2 className="font-display text-xl leading-none">Lektioner</h2>
       <p className="mt-2 text-sm leading-snug">De här länkarna öppnar övningslektionerna som hör till skrivbordet.</p>
       <ul className="mt-3 flex flex-col gap-1">
         {LESSONS.map((lesson) => (

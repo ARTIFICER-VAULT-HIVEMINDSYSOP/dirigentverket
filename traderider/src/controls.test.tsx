@@ -108,7 +108,9 @@ test('reset does not call the broker when the session is live', async () => {
   }) as typeof fetch
   try {
     const view = render(<Desk candles={fixture()} source="yahoo" label="Yahoo NVDA" autoRun={false} />)
+    expect(view.getByRole('button', { name: 'Alpaca live' })).toHaveProperty('disabled', true)
     await act(async () => {
+      view.getByRole('button', { name: /Buy/ }).click()
       view.getByRole('button', { name: 'Reset book' }).click()
     })
     expect(calls).toEqual([])

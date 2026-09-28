@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Blotter } from './Blotter'
 import { BrokerPanel } from './BrokerPanel'
-import { LessonsPanel, PositionSizeBox, PracticeBanner, RailNoteView, SkolaToggle } from './SkolaLayer'
+import { LessonsPanel, PositionSizeBox, PracticeBanner, SoftRailNote, SkolaToggle } from './SkolaLayer'
 import { drawRide } from '../lib/drawRide'
 import {
   loadBrokerSession,
@@ -105,6 +105,7 @@ export function Desk({
     if (!brokerEnabled) return
     const session = loadBrokerSession(window.sessionStorage)
     if (!session) return
+    if (session.env === 'live') return
     if (!shouldRelayToBroker({ kind, env: session.env, liveAcknowledged: session.liveAcknowledged })) return
     if (!Number.isInteger(qty) || qty < 1) return
     try {
@@ -261,7 +262,7 @@ export function Desk({
   const stopSuggestion = suggestedStop(sideOf(snap.book), band)
   const pctTone =
     marked.pct == null ? 'text-ink' : marked.pct > 0 ? 'text-nvda' : marked.pct < 0 ? 'text-brick' : 'text-ink'
-  const gridClass = `desk-grid${skolaOn ? ' has-skola' : ''}${skolaOn && railNote ? ' has-note' : ''}`
+  const gridClass = 'desk-grid'
 
   return (
     <div data-desk="traderider" className="min-h-screen overflow-x-clip bg-paper text-ink">
@@ -281,16 +282,6 @@ export function Desk({
 
       <div className="mx-auto max-w-[1100px] px-3 py-3">
       <main className={gridClass}>
-        {skolaOn && railNote ? (
-          <div className="desk-note">
-            <RailNoteView key={railNote.index} note={railNote} base={lessonsRoot} />
-          </div>
-        ) : null}
-        {skolaOn ? (
-          <div className="desk-skola min-w-0">
-            <PositionSizeBox mark={marked.close} suggestedStop={stopSuggestion} base={lessonsRoot} />
-          </div>
-        ) : null}
         <section className="desk-chart min-w-0">
           {source === 'fallback' ? (
             <p className="mb-2 border border-brick/40 px-3 py-2 text-sm text-brick" role="status">
@@ -304,6 +295,7 @@ export function Desk({
             className="ride-canvas"
             aria-label="NVDA chart. The train sits on railroad tracks along the active Bollinger rail."
           />
+          {skolaOn ? <SoftRailNote note={railNote} base={lessonsRoot} /> : null}
           <p className="mt-2 text-sm leading-snug">{snap.status}</p>
           <p className="mt-1 text-xs tabular-nums text-ink/60">
             Mark {formatPx(marked.close)} · {formatPct(marked.pct)} · {snap.leverage}× · {speed.toFixed(2)} candles/s ·{' '}
@@ -322,9 +314,14 @@ export function Desk({
               onClick={() => run('pause')}
             />
           </div>
+          {skolaOn ? (
+            <div className="skola-secondary" data-skola-secondary>
+              <PositionSizeBox mark={marked.close} suggestedStop={stopSuggestion} base={lessonsRoot} />
+              <LessonsPanel base={lessonsRoot} />
+            </div>
+          ) : null}
         </section>
         <div className="desk-book flex min-w-0 flex-col gap-3">
-          {skolaOn ? <LessonsPanel base={lessonsRoot} /> : null}
           <Blotter state={snap} onReset={onReset} />
           {brokerEnabled ? (
             <BrokerPanel />
