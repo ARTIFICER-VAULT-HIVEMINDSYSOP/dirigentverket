@@ -1,0 +1,7 @@
+{
+  "paper": true,
+  "note": "Platshållare. Inte hemligheter. Kopiera till tenant.json / connectpoint-fält. Live Create kräver ÖB-ja.",
+  "brand": "",
+  "connectPointBaseUrl": "",
+  "forcexBaseUrl": ""
+}
