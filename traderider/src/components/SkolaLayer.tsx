@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import {
   describePosition,
   lessonHref,
@@ -7,8 +7,36 @@ import {
   parsePracticeNumber,
   positionSize,
   railExplanation,
+  type Lesson,
   type RailNote,
 } from '../lib/skola'
+
+/** A lesson link, or plain text marked "länk saknas" when the lesson has no verified live URL. */
+export function LessonLink({
+  base,
+  lesson,
+  className = 'skola-link',
+  children,
+}: {
+  base: string
+  lesson: Lesson
+  className?: string
+  children: ReactNode
+}) {
+  const href = lessonHref(base, lesson)
+  if (href) {
+    return (
+      <a className={className} href={href}>
+        {children}
+      </a>
+    )
+  }
+  return (
+    <span className={`${className} skola-link-missing`} data-lesson-missing={lesson.id}>
+      {children} (länk saknas)
+    </span>
+  )
+}
 
 export function PracticeBanner() {
   return (
@@ -71,7 +99,6 @@ export function SoftRailNote({ note, base }: { note: RailNote | null; base: stri
   }, [note])
 
   if (!visible) return null
-  const href = lessonHref(base, LESSONS[2].file)
   return (
     <p
       key={visible.index}
@@ -82,9 +109,9 @@ export function SoftRailNote({ note, base }: { note: RailNote | null; base: stri
       data-skola-note-phase={phase}
     >
       {railExplanation(visible.change)} Läs mer i lektion 3:{' '}
-      <a className="skola-link" href={href}>
+      <LessonLink base={base} lesson={LESSONS[2]}>
         Bollingerband
-      </a>
+      </LessonLink>
       .
     </p>
   )
@@ -154,7 +181,6 @@ export function PositionSizeBox({
     takeProfit: parsePracticeNumber(tpRaw),
   })
   const copy = describePosition(result)
-  const lessonTwo = lessonHref(base, LESSONS[1].file)
 
   return (
     <section className="armor-panel px-3 py-2" lang="sv" data-skola-position>
@@ -203,9 +229,9 @@ export function PositionSizeBox({
         ) : (
           <p>
             Vinstmål saknas, så risk mot belöning visas inte. Läs mer i{' '}
-            <a className="skola-link" href={lessonTwo}>
+            <LessonLink base={base} lesson={LESSONS[1]}>
               lektion 2: Risk och belöning
-            </a>
+            </LessonLink>
             .
           </p>
         )}
@@ -224,13 +250,15 @@ export function LessonsPanel({ base }: { base: string }) {
   return (
     <nav className="armor-panel px-3 py-2" lang="sv" aria-label="Lektioner" data-lesson-base={root}>
       <h2 className="font-display text-xl leading-none">Lektioner</h2>
-      <p className="mt-2 text-sm leading-snug">De här länkarna öppnar övningslektionerna som hör till skrivbordet.</p>
+      <p className="mt-2 text-sm leading-snug">
+        Lektionerna som hör till skrivbordet finns i Tradingskolan. En lektion utan fungerande länk visas som saknas.
+      </p>
       <ul className="mt-3 flex flex-col gap-1">
         {LESSONS.map((lesson) => (
           <li key={lesson.id}>
-            <a className="skola-link inline-block py-1 text-sm" href={lessonHref(root, lesson.file)}>
+            <LessonLink base={root} lesson={lesson} className="skola-link inline-block py-1 text-sm">
               Lektion {lesson.id}: {lesson.title}.
-            </a>
+            </LessonLink>
           </li>
         ))}
       </ul>

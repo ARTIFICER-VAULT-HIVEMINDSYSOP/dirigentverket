@@ -102,14 +102,27 @@ test('stop prefills from the opposite band, or the 20-SMA when flat', () => {
   expect(suggestedStop('flat', null)).toBeNull()
 })
 
-test('lesson links keep the configurable base and the lesson 1 file name', () => {
+test('lesson links are lessonBase plus the live path, and a lesson without a verified URL has no link', () => {
   expect(LESSONS.map((lesson) => lesson.id)).toEqual([1, 2, 3])
+  expect(DEFAULT_LESSON_BASE).toBe('https://www.kapitalstrategi.com')
   expect(normalizeLessonBase(undefined)).toBe(DEFAULT_LESSON_BASE)
-  expect(lessonHref('../tradingskolan', LESSONS[0].file)).toBe(
-    '../tradingskolan/lektion-1-risk-och-positionsstorlek.html',
-  )
-  expect(lessonHref('/tradingskolan/', LESSONS[2].file)).toBe('/tradingskolan/lektion-3-bollingerband.html')
+  expect(normalizeLessonBase('  ')).toBe(DEFAULT_LESSON_BASE)
   expect(normalizeLessonBase('javascript:alert(1)')).toBe(DEFAULT_LESSON_BASE)
+  expect(normalizeLessonBase('https://example.test/')).toBe('https://example.test')
+
+  const live = { id: 1, title: 'Prov', path: '/tradingskolan?course=trading-grund&lesson=stop-loss', live: true } as const
+  expect(lessonHref(undefined, live)).toBe(
+    'https://www.kapitalstrategi.com/tradingskolan?course=trading-grund&lesson=stop-loss',
+  )
+  expect(lessonHref('/ovning/skola/', live)).toBe('/ovning/skola/tradingskolan?course=trading-grund&lesson=stop-loss')
+  expect(lessonHref(undefined, { ...live, live: false })).toBeNull()
+  expect(lessonHref(undefined, { ...live, path: null })).toBeNull()
+
+  expect(LESSONS[2].path).toBeNull()
+  for (const lesson of LESSONS) {
+    expect(lesson.path ?? '').not.toMatch(/\.html$/)
+    if (lesson.path) expect(lesson.path.startsWith('/tradingskolan?')).toBe(true)
+  }
 })
 
 test('rail changes are the upper cross, the lower cross, and the return to the 20-SMA', () => {

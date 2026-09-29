@@ -2,7 +2,15 @@ import { act, cleanup, fireEvent, render } from '@testing-library/react'
 import { afterEach, expect, test } from 'vitest'
 import { Desk } from './components/Desk'
 import { createDesk, markFromCandles } from './lib/deskState'
-import { SKOLA_STORAGE_KEY, bandAtProgress, describePosition, positionSize, suggestedStop } from './lib/skola'
+import {
+  LESSONS,
+  SKOLA_STORAGE_KEY,
+  bandAtProgress,
+  describePosition,
+  lessonHref,
+  positionSize,
+  suggestedStop,
+} from './lib/skola'
 import type { Candle } from './lib/types'
 
 function flatThenSpike(): Candle[] {
@@ -57,20 +65,31 @@ test('the desk shows the practice banner, the position box, and lesson links', (
   if (!canvas || !secondary) throw new Error('missing chart or skola panel')
   expect(canvas.compareDocumentPosition(secondary) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
 
-  const lesson = view.getByRole('link', { name: 'Lektion 1: Risk och positionsstorlek.' })
-  expect(lesson.getAttribute('href')).toBe('../tradingskolan/lektion-1-risk-och-positionsstorlek.html')
-  expect(view.getByRole('link', { name: 'Lektion 3: Bollingerband.' }).getAttribute('href')).toBe(
-    '../tradingskolan/lektion-3-bollingerband.html',
-  )
+  const menu = view.getByRole('navigation', { name: 'Lektioner' })
+  expect(menu.getAttribute('data-lesson-base')).toBe('https://www.kapitalstrategi.com')
+  expect(menu.querySelectorAll('a[href$=".html"]').length).toBe(0)
+  for (const lesson of LESSONS) {
+    const name = `Lektion ${lesson.id}: ${lesson.title}.`
+    if (lessonHref(undefined, lesson)) {
+      expect(view.getByRole('link', { name }).getAttribute('href')).toBe(lessonHref(undefined, lesson))
+    } else {
+      expect(view.queryByRole('link', { name })).toBeNull()
+      expect(menu.querySelector(`[data-lesson-missing="${lesson.id}"]`)?.textContent).toBe(`${name} (länk saknas)`)
+    }
+  }
 })
 
 test('a custom lesson base is used for the lesson menu', () => {
   const view = render(
-    <Desk candles={waving()} source="yahoo" label="Yahoo NVDA" autoRun={false} lessonBase="/ovning/skola" />,
+    <Desk candles={waving()} source="yahoo" label="Yahoo NVDA" autoRun={false} lessonBase="/ovning/skola/" />,
   )
-  expect(view.getByRole('link', { name: 'Lektion 2: Risk och belöning.' }).getAttribute('href')).toBe(
-    '/ovning/skola/lektion-2-risk-och-beloning.html',
-  )
+  expect(view.getByRole('navigation', { name: 'Lektioner' }).getAttribute('data-lesson-base')).toBe('/ovning/skola')
+  for (const lesson of LESSONS) {
+    const href = lessonHref('/ovning/skola', lesson)
+    if (href) {
+      expect(view.getByRole('link', { name: `Lektion ${lesson.id}: ${lesson.title}.` }).getAttribute('href')).toBe(href)
+    }
+  }
 })
 
 test('crossing the upper band shows the practice note, and reset clears it', () => {
@@ -82,9 +101,11 @@ test('crossing the upper band shows the practice note, and reset clears it', () 
   act(() => api.step(dt))
   const note = view.getByRole('status')
   expect(note.textContent?.replace(/\s+/g, ' ')).toContain(
-    'Priset stängde över övre bandet. Enligt övningsregeln betyder det köp. Läs mer i lektion 3: Bollingerband.',
+    'Priset stängde över övre bandet. Enligt övningsregeln betyder det köp. Läs mer i lektion 3: Bollingerband (länk saknas).',
   )
-  expect(note.querySelector('a')?.getAttribute('href')).toBe('../tradingskolan/lektion-3-bollingerband.html')
+  // The live site has no Bollinger lesson, so the note names it without a link.
+  expect(note.querySelector('a')).toBeNull()
+  expect(note.querySelector('[data-lesson-missing="3"]')?.textContent).toBe('Bollingerband (länk saknas)')
 
   fireEvent.click(view.getByRole('button', { name: 'Reset book' }))
   expect(view.getByRole('status').getAttribute('data-skola-note-phase')).toBe('out')
@@ -99,6 +120,19 @@ test('risk above 2 percent is warned in plain text and a take-profit shows the r
   fireEvent.change(view.getByLabelText('Vinstmål'), { target: { value: '104' } })
   expect(view.getByText(/Risk mot belöning är 1 till/)).toBeTruthy()
   expect(view.queryByText(/Vinstmål saknas/)).toBeNull()
+})
+
+test('without a take-profit the position box names lesson 2, linked only when its live URL is verified', () => {
+  const view = render(<Desk candles={waving()} source="yahoo" label="Yahoo NVDA" autoRun={false} />)
+  const box = view.container.querySelector('[data-skola-position]')
+  if (!box) throw new Error('missing position box')
+  const href = lessonHref(undefined, LESSONS[1])
+  if (href) {
+    expect(box.querySelector('a')?.getAttribute('href')).toBe(href)
+  } else {
+    expect(box.querySelector('a')).toBeNull()
+    expect(box.querySelector('[data-lesson-missing="2"]')?.textContent).toBe('lektion 2: Risk och belöning (länk saknas)')
+  }
 })
 
 test('skola mode turns off, stays off, and keeps the practice banner', () => {

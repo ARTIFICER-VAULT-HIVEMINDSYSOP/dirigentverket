@@ -113,6 +113,12 @@ body {
   text-underline-offset: 0.15em;
 }
 
+.skola-link-missing {
+  color: #b7ae9c;
+  text-decoration: none;
+  cursor: default;
+}
+
 .skola-input {
   display: block;
   width: 100%;

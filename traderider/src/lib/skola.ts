@@ -29,25 +29,47 @@ export type PositionSizeResult = {
 
 export const SKOLA_STORAGE_KEY = 'traderider-skola-lage'
 
-export const DEFAULT_LESSON_BASE = '../tradingskolan/'
+/**
+ * Tradingskolan host. One place to change it: `VITE_TRADERIDER_LESSON_BASE` or the `lessonBase` prop.
+ * Use www. Do not use the apex or the live host for new links.
+ */
+export const DEFAULT_LESSON_BASE = 'https://www.kapitalstrategi.com'
 
-export const LESSONS = [
+export type Lesson = {
+  id: 1 | 2 | 3
+  title: string
+  /** Route of the lesson on the live Tradingskolan (see utbildning/lektionskarta.md), or null when there is none. */
+  path: string | null
+  /** True only when lessonBase + path answered HTTP 200 at the last check. */
+  live: boolean
+}
+
+/**
+ * Checked 2026-09-29 against https://www.kapitalstrategi.com: every /tradingskolan route answered 404
+ * (the page shell is served as the GitHub Pages 404 page), so no lesson link is active yet.
+ * The live site has no Bollinger lesson, so lesson 3 has no path.
+ * Set `live: true` for a lesson once its URL answers 200.
+ */
+export const LESSONS: readonly Lesson[] = [
   {
     id: 1,
-    file: 'lektion-1-risk-och-positionsstorlek.html',
     title: 'Risk och positionsstorlek',
+    path: '/tradingskolan?course=trading-grund&lesson=stop-loss',
+    live: false,
   },
   {
     id: 2,
-    file: 'lektion-2-risk-och-beloning.html',
     title: 'Risk och belöning',
+    path: '/tradingskolan?course=trading-grund&lesson=take-profit',
+    live: false,
   },
   {
     id: 3,
-    file: 'lektion-3-bollingerband.html',
     title: 'Bollingerband',
+    path: null,
+    live: false,
   },
-] as const
+]
 
 const RAIL_EXPLANATION: Record<RailChange, string> = {
   crossed_upper: 'Priset stängde över övre bandet. Enligt övningsregeln betyder det köp.',
@@ -128,12 +150,15 @@ export function suggestedStop(side: Side, band: Band | null): number | null {
 
 export function normalizeLessonBase(raw: string | undefined): string {
   const value = (raw ?? '').trim()
-  if (value === '' || /^javascript:/i.test(value)) return DEFAULT_LESSON_BASE
-  return value.endsWith('/') ? value : `${value}/`
+  if (value === '' || /^(javascript|data|vbscript):/i.test(value)) return DEFAULT_LESSON_BASE
+  return value.replace(/\/+$/, '')
 }
 
-export function lessonHref(base: string, file: string): string {
-  return `${normalizeLessonBase(base)}${file}`
+/** lessonBase + the lesson's live path, or null when the lesson has no verified live URL. */
+export function lessonHref(base: string | undefined, lesson: Lesson): string | null {
+  if (!lesson.live || !lesson.path) return null
+  const path = lesson.path.startsWith('/') ? lesson.path : `/${lesson.path}`
+  return `${normalizeLessonBase(base)}${path}`
 }
 
 export function readSkolaEnabled(storage: Pick<Storage, 'getItem'> | null | undefined): boolean {
