@@ -31,9 +31,9 @@ This folder is its own app. It does not replace the Magasin or the ROBOT rider i
 
 Lesson links are built as `lessonBase` + the lesson's route on the live Tradingskolan. `lessonBase` defaults to `https://www.kapitalstrategi.com`. Override it with `VITE_TRADERIDER_LESSON_BASE` at build time or the `lessonBase` prop on `Desk`. Use www. Do not use the apex or the live host.
 
-The routes live in `LESSONS` in `src/lib/skola.ts`, next to `utbildning/lektionskarta.md`. A lesson is linked only when `live` is true, which means its URL answered HTTP 200 when checked. Otherwise the desk shows the lesson name with **(länk saknas)** and no link.
+The routes live in `LESSONS` in `src/lib/skola.ts`, next to `utbildning/lektionskarta.md`. A lesson is linked only when `live` is true. Otherwise the desk shows the lesson name with **(länk saknas)** and no link.
 
-Checked 2026-09-29: every `/tradingskolan` route on www answered 404, because Pages serves the page shell as its 404 page. So no lesson link is active yet. The live site has no Bollinger lesson, so lesson 3 has no route. Set `live: true` for a lesson once its URL answers 200.
+Lesson 1 links to `/tradingskolan?course=trading-grund&lesson=stop-loss`. Lesson 2 links to `/tradingskolan?course=trading-grund&lesson=take-profit`. Lesson 3, Bollingerband, has no page on the site, so it stays unlinked.
 
 ## Run
 

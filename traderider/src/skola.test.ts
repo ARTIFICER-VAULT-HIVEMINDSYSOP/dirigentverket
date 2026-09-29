@@ -118,7 +118,17 @@ test('lesson links are lessonBase plus the live path, and a lesson without a ver
   expect(lessonHref(undefined, { ...live, live: false })).toBeNull()
   expect(lessonHref(undefined, { ...live, path: null })).toBeNull()
 
+  expect(LESSONS[0].live).toBe(true)
+  expect(lessonHref(undefined, LESSONS[0])).toBe(
+    'https://www.kapitalstrategi.com/tradingskolan?course=trading-grund&lesson=stop-loss',
+  )
+  expect(LESSONS[1].live).toBe(true)
+  expect(lessonHref(undefined, LESSONS[1])).toBe(
+    'https://www.kapitalstrategi.com/tradingskolan?course=trading-grund&lesson=take-profit',
+  )
   expect(LESSONS[2].path).toBeNull()
+  expect(LESSONS[2].live).toBe(false)
+  expect(lessonHref(undefined, LESSONS[2])).toBeNull()
   for (const lesson of LESSONS) {
     expect(lesson.path ?? '').not.toMatch(/\.html$/)
     if (lesson.path) expect(lesson.path.startsWith('/tradingskolan?')).toBe(true)

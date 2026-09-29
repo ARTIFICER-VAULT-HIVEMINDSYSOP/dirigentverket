@@ -40,28 +40,26 @@ export type Lesson = {
   title: string
   /** Route of the lesson on the live Tradingskolan (see utbildning/lektionskarta.md), or null when there is none. */
   path: string | null
-  /** True only when lessonBase + path answered HTTP 200 at the last check. */
+  /** True when the desk should link the lesson. False shows the name with "länk saknas". */
   live: boolean
 }
 
 /**
- * Checked 2026-09-29 against https://www.kapitalstrategi.com: every /tradingskolan route answered 404
- * (the page shell is served as the GitHub Pages 404 page), so no lesson link is active yet.
- * The live site has no Bollinger lesson, so lesson 3 has no path.
- * Set `live: true` for a lesson once its URL answers 200.
+ * Lessons 1 and 2 are on Tradingskolan. The Pages shell renders those routes in the browser.
+ * Lesson 3 has no page on the site, so it has no path and is not linked.
  */
 export const LESSONS: readonly Lesson[] = [
   {
     id: 1,
     title: 'Risk och positionsstorlek',
     path: '/tradingskolan?course=trading-grund&lesson=stop-loss',
-    live: false,
+    live: true,
   },
   {
     id: 2,
     title: 'Risk och belöning',
     path: '/tradingskolan?course=trading-grund&lesson=take-profit',
-    live: false,
+    live: true,
   },
   {
     id: 3,
