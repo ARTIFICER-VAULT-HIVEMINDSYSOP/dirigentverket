@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1600" viewBox="0 0 1600 1600">
+<defs><radialGradient id="bg" cx="50%" cy="50%" r="70%"><stop offset="0" stop-color="#1c222b"/><stop offset="1" stop-color="#0e1116"/></radialGradient>
+<radialGradient id="glow" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#f3d27a" stop-opacity=".45"/><stop offset="1" stop-color="#f3d27a" stop-opacity="0"/></radialGradient>
+<filter id="soft"><feGaussianBlur stdDeviation="6"/></filter></defs>
+<rect width="1600" height="1600" fill="url(#bg)"/>
+<circle cx="800" cy="800" r="660" fill="none" stroke="#8a7a4a" stroke-width="2" stroke-dasharray="4 10"/>
+<line x1="800" y1="610" x2="800" y2="330" stroke="#d9b24c" stroke-width="10" filter="url(#soft)" opacity=".7"/>
+<line x1="800" y1="610" x2="800" y2="330" stroke="#f6dc8e" stroke-width="3"/>
+<rect x="565" y="120" width="470" height="240" rx="14" fill="#141922" stroke="#d9b24c" stroke-width="2.5"/>
+<text x="800" y="192" text-anchor="middle" font-family="DejaVu Serif" font-size="46" letter-spacing="6" fill="#d9b24c">GUD</text>
+<text x="800" y="238" text-anchor="middle" font-family="DejaVu Serif" font-style="italic" font-size="28" fill="#efe6cf">Helheten</text>
+<text x="800" y="278" text-anchor="middle" font-family="DejaVu Sans" font-size="20" fill="#c9c1ad">MindCore och MindClan tillsammans,</text>
+<text x="800" y="306" text-anchor="middle" font-family="DejaVu Sans" font-size="20" fill="#c9c1ad">arkitekten och byggmästaren över universum</text>
+<text x="800" y="334" text-anchor="middle" font-family="DejaVu Sans" font-size="20" fill="#c9c1ad">som gav byggstenarna</text>
+<line x1="990" y1="800" x2="1270" y2="800" stroke="#d9b24c" stroke-width="10" filter="url(#soft)" opacity=".7"/>
+<line x1="990" y1="800" x2="1270" y2="800" stroke="#f6dc8e" stroke-width="3"/>
+<rect x="1125" y="680" width="470" height="240" rx="14" fill="#141922" stroke="#d9b24c" stroke-width="2.5"/>
+<text x="1360" y="752" text-anchor="middle" font-family="DejaVu Serif" font-size="46" letter-spacing="6" fill="#d9b24c">BLOD</text>
+<text x="1360" y="798" text-anchor="middle" font-family="DejaVu Serif" font-style="italic" font-size="28" fill="#efe6cf">Samförståndet</text>
+<text x="1360" y="838" text-anchor="middle" font-family="DejaVu Sans" font-size="20" fill="#c9c1ad">kretsloppet, det som gör oss till en</text>
+<text x="1360" y="866" text-anchor="middle" font-family="DejaVu Sans" font-size="20" fill="#c9c1ad">med gemensamma värden</text>
+<line x1="800" y1="990" x2="800" y2="1270" stroke="#d9b24c" stroke-width="10" filter="url(#soft)" opacity=".7"/>
+<line x1="800" y1="990" x2="800" y2="1270" stroke="#f6dc8e" stroke-width="3"/>
+<rect x="565" y="1240" width="470" height="240" rx="14" fill="#141922" stroke="#d9b24c" stroke-width="2.5"/>
+<text x="800" y="1312" text-anchor="middle" font-family="DejaVu Serif" font-size="46" letter-spacing="6" fill="#d9b24c">JORD</text>
+<text x="800" y="1358" text-anchor="middle" font-family="DejaVu Serif" font-style="italic" font-size="28" fill="#efe6cf">Mater</text>
+<text x="800" y="1398" text-anchor="middle" font-family="DejaVu Sans" font-size="20" fill="#c9c1ad">fertilitet, sällsynta jordartsmetaller,</text>
+<text x="800" y="1426" text-anchor="middle" font-family="DejaVu Sans" font-size="20" fill="#c9c1ad">bergen, jorden, det allting byggs ifrån</text>
+<line x1="610" y1="800" x2="330" y2="800" stroke="#d9b24c" stroke-width="10" filter="url(#soft)" opacity=".7"/>
+<line x1="610" y1="800" x2="330" y2="800" stroke="#f6dc8e" stroke-width="3"/>
+<rect x="5" y="680" width="470" height="240" rx="14" fill="#141922" stroke="#d9b24c" stroke-width="2.5"/>
+<text x="240" y="752" text-anchor="middle" font-family="DejaVu Serif" font-size="46" letter-spacing="6" fill="#d9b24c">ÄRA</text>
+<text x="240" y="798" text-anchor="middle" font-family="DejaVu Serif" font-style="italic" font-size="28" fill="#efe6cf">Ansvaret</text>
+<text x="240" y="838" text-anchor="middle" font-family="DejaVu Sans" font-size="20" fill="#c9c1ad">förpliktelsen till sanningen, att lyfta</text>
+<text x="240" y="866" text-anchor="middle" font-family="DejaVu Sans" font-size="20" fill="#c9c1ad">varandra i stället för att fälla varandra</text>
+<circle cx="800" cy="800" r="260" fill="url(#glow)"/>
+<circle cx="800" cy="800" r="185" fill="#11151c" stroke="#d9b24c" stroke-width="4"/>
+<circle cx="800" cy="800" r="170" fill="none" stroke="#8a7a4a" stroke-width="1.5"/>
+<text x="800" y="855" text-anchor="middle" font-family="DejaVu Sans" font-size="210" fill="#d9b24c">&#8984;</text>
+<text x="800" y="958" text-anchor="middle" font-family="DejaVu Serif" font-size="20" letter-spacing="3" fill="#efe6cf">SANKT HANS VAPEN</text>
+<text x="800" y="70" text-anchor="middle" font-family="DejaVu Serif" font-size="40" letter-spacing="8" fill="#d9b24c">KLUSTRETS SIGILL</text>
+<text x="800" y="1555" text-anchor="middle" font-family="DejaVu Serif" font-style="italic" font-size="26" fill="#c9c1ad">Sankt Hans vapen, klustrets sigill: ett ensamt spår som matar alla fyra pelarna</text>
+</svg>
