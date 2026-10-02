@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="1120" viewBox="0 0 960 1120">
+  <title>Statusindikator, utkast. En tänd ögla: Jord.</title>
+  <desc>Sankt Hans vapen som status i R&amp;D-loopen. Tecknet är U+2318. Gud upptill, Blod till höger, Jord nedtill, Ära till vänster. Jord är tänd med badge 1. Övriga öglor är släckta. Ingen sol, inget hjul, inga strålar.</desc>
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="42%" r="75%">
+      <stop offset="0" stop-color="#1b212b"/>
+      <stop offset="1" stop-color="#0e1116"/>
+    </radialGradient>
+    <filter id="soft" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="6"/>
+    </filter>
+  </defs>
+  <rect width="960" height="1120" fill="url(#bg)"/>
+
+  <text x="480" y="46" text-anchor="middle" font-family="DejaVu Serif" font-size="28" letter-spacing="4" fill="#e6c56a">STATUSINDIKATOR</text>
+  <text x="480" y="74" text-anchor="middle" font-family="DejaVu Sans" font-size="15" fill="#c9c1ad">Utkast · &#8984; med fyra öglor · en tänd</text>
+
+  <text x="480" y="118" text-anchor="middle" font-family="DejaVu Serif" font-size="24" letter-spacing="3" fill="#9a917f">GUD</text>
+  <text x="480" y="140" text-anchor="middle" font-family="DejaVu Sans" font-size="14" fill="#6d6454">Helheten · släckt</text>
+  <ellipse cx="480" cy="206" rx="84" ry="44" fill="none" stroke="#6d6454" stroke-width="11"/>
+  <line x1="480" y1="252" x2="480" y2="360" stroke="#6d6454" stroke-width="3"/>
+
+  <text x="150" y="392" text-anchor="middle" font-family="DejaVu Serif" font-size="24" letter-spacing="3" fill="#9a917f">ÄRA</text>
+  <text x="150" y="414" text-anchor="middle" font-family="DejaVu Sans" font-size="14" fill="#6d6454">Sanningen · släckt</text>
+  <ellipse cx="150" cy="500" rx="46" ry="72" fill="none" stroke="#6d6454" stroke-width="11"/>
+  <line x1="198" y1="500" x2="360" y2="500" stroke="#6d6454" stroke-width="3"/>
+
+  <text x="810" y="392" text-anchor="middle" font-family="DejaVu Serif" font-size="24" letter-spacing="3" fill="#9a917f">BLOD</text>
+  <text x="810" y="414" text-anchor="middle" font-family="DejaVu Sans" font-size="14" fill="#6d6454">Kretsloppet · släckt</text>
+  <ellipse cx="810" cy="500" rx="46" ry="72" fill="none" stroke="#6d6454" stroke-width="11"/>
+  <line x1="600" y1="500" x2="762" y2="500" stroke="#6d6454" stroke-width="3"/>
+
+  <line x1="480" y1="640" x2="480" y2="708" stroke="#f3d27a" stroke-width="3"/>
+  <ellipse cx="480" cy="758" rx="84" ry="44" fill="none" stroke="#f3d27a" stroke-width="14" filter="url(#soft)" opacity="0.9"/>
+  <ellipse cx="480" cy="758" rx="84" ry="44" fill="none" stroke="#f6dc8e" stroke-width="11"/>
+  <circle cx="556" cy="732" r="16" fill="#f3d27a"/>
+  <text x="556" y="738" text-anchor="middle" font-family="DejaVu Sans" font-size="15" font-weight="700" fill="#1a1408">1</text>
+  <text x="480" y="836" text-anchor="middle" font-family="DejaVu Serif" font-size="24" letter-spacing="3" fill="#f3d27a">JORD</text>
+  <text x="480" y="858" text-anchor="middle" font-family="DejaVu Sans" font-size="14" fill="#efe6cf">Marken · tänd · exempel</text>
+
+  <circle cx="480" cy="500" r="108" fill="#141922" stroke="#8a7a4a" stroke-width="2"/>
+  <text x="480" y="548" text-anchor="middle" font-family="DejaVu Sans" font-size="128" fill="#d9b24c">&#8984;</text>
+
+  <rect x="70" y="900" width="820" height="180" rx="12" fill="#141922" stroke="#8a7a4a" stroke-width="1.5"/>
+  <ellipse cx="118" cy="948" rx="30" ry="16" fill="none" stroke="#f6dc8e" stroke-width="8"/>
+  <text x="166" y="954" font-family="DejaVu Sans" font-size="15" fill="#efe6cf">tänd ögla = minst en rad med omvag_status VANTAR</text>
+  <circle cx="118" cy="992" r="12" fill="#f3d27a"/>
+  <text x="118" y="997" text-anchor="middle" font-family="DejaVu Sans" font-size="13" font-weight="700" fill="#1a1408">1</text>
+  <text x="166" y="998" font-family="DejaVu Sans" font-size="15" fill="#efe6cf">badge = antal VANTAR. Siffran 1 är exemplet i tabell-sim, inte ett repo-mått.</text>
+  <ellipse cx="118" cy="1036" rx="30" ry="16" fill="none" stroke="#d9b24c" stroke-width="2.5"/>
+  <text x="166" y="1042" font-family="DejaVu Sans" font-size="15" fill="#efe6cf">guld-söm = ATERINTRADD och inga VANTAR kvar. Inte ritad på öglorna i detta läge.</text>
+</svg>
