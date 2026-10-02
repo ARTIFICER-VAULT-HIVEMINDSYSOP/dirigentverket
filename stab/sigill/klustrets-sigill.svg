@@ -37,6 +37,57 @@
 <circle cx="800" cy="800" r="185" fill="#11151c" stroke="#d9b24c" stroke-width="4"/>
 <circle cx="800" cy="800" r="170" fill="none" stroke="#8a7a4a" stroke-width="1.5"/>
 <text x="800" y="855" text-anchor="middle" font-family="DejaVu Sans" font-size="210" fill="#d9b24c">&#8984;</text>
+<g id="kub-mitten">
+<circle cx="799.5" cy="774.5" r="41.9" fill="#11151c"/>
+<line x1="786.5" y1="776.4" x2="775.0" y2="798.0" stroke="#11151c" stroke-width="4.4" stroke-linecap="round"/>
+<line x1="786.5" y1="776.4" x2="786.5" y2="744.4" stroke="#11151c" stroke-width="4.4" stroke-linecap="round"/>
+<line x1="786.5" y1="776.4" x2="824.0" y2="783.0" stroke="#11151c" stroke-width="4.4" stroke-linecap="round"/>
+<line x1="812.5" y1="804.6" x2="824.0" y2="783.0" stroke="#11151c" stroke-width="4.4" stroke-linecap="round"/>
+<line x1="812.5" y1="804.6" x2="812.5" y2="772.6" stroke="#11151c" stroke-width="4.4" stroke-linecap="round"/>
+<line x1="824.0" y1="751.0" x2="812.5" y2="772.6" stroke="#11151c" stroke-width="4.4" stroke-linecap="round"/>
+<line x1="824.0" y1="751.0" x2="824.0" y2="783.0" stroke="#11151c" stroke-width="4.4" stroke-linecap="round"/>
+<line x1="775.0" y1="798.0" x2="775.0" y2="766.0" stroke="#11151c" stroke-width="4.4" stroke-linecap="round"/>
+<line x1="786.5" y1="744.4" x2="775.0" y2="766.0" stroke="#11151c" stroke-width="4.4" stroke-linecap="round"/>
+<line x1="824.0" y1="751.0" x2="786.5" y2="744.4" stroke="#11151c" stroke-width="4.4" stroke-linecap="round"/>
+<line x1="812.5" y1="772.6" x2="775.0" y2="766.0" stroke="#11151c" stroke-width="4.4" stroke-linecap="round"/>
+<line x1="812.5" y1="804.6" x2="775.0" y2="798.0" stroke="#11151c" stroke-width="4.4" stroke-linecap="round"/>
+<line x1="792.0" y1="775.6" x2="785.4" y2="788.0" stroke="#11151c" stroke-width="3.4" stroke-linecap="round"/>
+<line x1="792.0" y1="775.6" x2="792.0" y2="757.2" stroke="#11151c" stroke-width="3.4" stroke-linecap="round"/>
+<line x1="792.0" y1="775.6" x2="813.6" y2="779.4" stroke="#11151c" stroke-width="3.4" stroke-linecap="round"/>
+<line x1="807.0" y1="791.8" x2="813.6" y2="779.4" stroke="#11151c" stroke-width="3.4" stroke-linecap="round"/>
+<line x1="807.0" y1="791.8" x2="807.0" y2="773.4" stroke="#11151c" stroke-width="3.4" stroke-linecap="round"/>
+<line x1="813.6" y1="761.0" x2="807.0" y2="773.4" stroke="#11151c" stroke-width="3.4" stroke-linecap="round"/>
+<line x1="813.6" y1="761.0" x2="813.6" y2="779.4" stroke="#11151c" stroke-width="3.4" stroke-linecap="round"/>
+<line x1="785.4" y1="788.0" x2="785.4" y2="769.6" stroke="#11151c" stroke-width="3.4" stroke-linecap="round"/>
+<line x1="792.0" y1="757.2" x2="785.4" y2="769.6" stroke="#11151c" stroke-width="3.4" stroke-linecap="round"/>
+<line x1="813.6" y1="761.0" x2="792.0" y2="757.2" stroke="#11151c" stroke-width="3.4" stroke-linecap="round"/>
+<line x1="807.0" y1="773.4" x2="785.4" y2="769.6" stroke="#11151c" stroke-width="3.4" stroke-linecap="round"/>
+<line x1="807.0" y1="791.8" x2="785.4" y2="788.0" stroke="#11151c" stroke-width="3.4" stroke-linecap="round"/>
+<line x1="786.5" y1="776.4" x2="775.0" y2="798.0" stroke="#efe6cf" stroke-width="1.25" stroke-linecap="round" stroke-opacity="0.62"/>
+<line x1="786.5" y1="776.4" x2="786.5" y2="744.4" stroke="#efe6cf" stroke-width="1.25" stroke-linecap="round" stroke-opacity="0.62"/>
+<line x1="786.5" y1="776.4" x2="824.0" y2="783.0" stroke="#efe6cf" stroke-width="1.25" stroke-linecap="round" stroke-opacity="0.62"/>
+<line x1="812.5" y1="804.6" x2="824.0" y2="783.0" stroke="#f6dc8e" stroke-width="2.2" stroke-linecap="round"/>
+<line x1="812.5" y1="804.6" x2="812.5" y2="772.6" stroke="#f6dc8e" stroke-width="2.2" stroke-linecap="round"/>
+<line x1="824.0" y1="751.0" x2="812.5" y2="772.6" stroke="#f6dc8e" stroke-width="2.2" stroke-linecap="round"/>
+<line x1="824.0" y1="751.0" x2="824.0" y2="783.0" stroke="#f6dc8e" stroke-width="2.2" stroke-linecap="round"/>
+<line x1="775.0" y1="798.0" x2="775.0" y2="766.0" stroke="#f6dc8e" stroke-width="2.2" stroke-linecap="round"/>
+<line x1="786.5" y1="744.4" x2="775.0" y2="766.0" stroke="#f6dc8e" stroke-width="2.2" stroke-linecap="round"/>
+<line x1="824.0" y1="751.0" x2="786.5" y2="744.4" stroke="#f6dc8e" stroke-width="2.2" stroke-linecap="round"/>
+<line x1="812.5" y1="772.6" x2="775.0" y2="766.0" stroke="#f6dc8e" stroke-width="2.2" stroke-linecap="round"/>
+<line x1="812.5" y1="804.6" x2="775.0" y2="798.0" stroke="#f6dc8e" stroke-width="2.2" stroke-linecap="round"/>
+<line x1="792.0" y1="775.6" x2="785.4" y2="788.0" stroke="#efe6cf" stroke-width="1.25" stroke-linecap="round" stroke-opacity="0.62"/>
+<line x1="792.0" y1="775.6" x2="792.0" y2="757.2" stroke="#efe6cf" stroke-width="1.25" stroke-linecap="round" stroke-opacity="0.62"/>
+<line x1="792.0" y1="775.6" x2="813.6" y2="779.4" stroke="#efe6cf" stroke-width="1.25" stroke-linecap="round" stroke-opacity="0.62"/>
+<line x1="807.0" y1="791.8" x2="813.6" y2="779.4" stroke="#f6dc8e" stroke-width="2.2" stroke-linecap="round"/>
+<line x1="807.0" y1="791.8" x2="807.0" y2="773.4" stroke="#f6dc8e" stroke-width="2.2" stroke-linecap="round"/>
+<line x1="813.6" y1="761.0" x2="807.0" y2="773.4" stroke="#f6dc8e" stroke-width="2.2" stroke-linecap="round"/>
+<line x1="813.6" y1="761.0" x2="813.6" y2="779.4" stroke="#f6dc8e" stroke-width="2.2" stroke-linecap="round"/>
+<line x1="785.4" y1="788.0" x2="785.4" y2="769.6" stroke="#f6dc8e" stroke-width="2.2" stroke-linecap="round"/>
+<line x1="792.0" y1="757.2" x2="785.4" y2="769.6" stroke="#f6dc8e" stroke-width="2.2" stroke-linecap="round"/>
+<line x1="813.6" y1="761.0" x2="792.0" y2="757.2" stroke="#f6dc8e" stroke-width="2.2" stroke-linecap="round"/>
+<line x1="807.0" y1="773.4" x2="785.4" y2="769.6" stroke="#f6dc8e" stroke-width="2.2" stroke-linecap="round"/>
+<line x1="807.0" y1="791.8" x2="785.4" y2="788.0" stroke="#f6dc8e" stroke-width="2.2" stroke-linecap="round"/>
+</g>
 <text x="800" y="958" text-anchor="middle" font-family="DejaVu Serif" font-size="20" letter-spacing="3" fill="#efe6cf">SANKT HANS VAPEN</text>
 <text x="800" y="70" text-anchor="middle" font-family="DejaVu Serif" font-size="40" letter-spacing="8" fill="#d9b24c">KLUSTRETS SIGILL</text>
 <text x="800" y="1555" text-anchor="middle" font-family="DejaVu Serif" font-style="italic" font-size="26" fill="#c9c1ad">Sankt Hans vapen, klustrets sigill: ett ensamt spår som matar alla fyra pelarna</text>

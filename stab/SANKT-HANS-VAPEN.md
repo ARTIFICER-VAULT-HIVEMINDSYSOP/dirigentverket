@@ -20,12 +20,30 @@ Hela klustrets arkitektur för beskydd står på det. Det är ett ensamt spår s
 ```
               GUD
                │
-   ÄRA ──────  ⌘  ────── BLOD
+             ┌───┐
+             │┌─┐│
+   ÄRA ───── ││⌘││ ───── BLOD
+             │└─┘│
+             └───┘
                │
               JORD
 ```
 
 Bild: `stab/sigill/klustrets-sigill.svg`
+
+## Kuben i mitten — den femte delen (ÖB 2026-10-02, utkast)
+
+**Krav för att kuben ska vara komprehensiv som del av symbolen:**
+
+1. Kuben är dubbel och tredimensionell, med sträck synliga från alla dimensioner. Betraktaren sitter fast i mitten.
+2. Kuben kopplas visuellt till Great Megaloschemos: analavos, den ortodoxa stora schimans dräkt, sveper ett stort kors runt kroppen i tre dimensioner (axlar, bröst och rygg), och en utvikt kub bildar ett kors.
+3. Kopplingen är visuell, inte textuell. Källorna om stora schiman nämner inte kuben; att en utvikt kub bildar korsform är vår egen iakttagelse.
+4. Kuben i mitten blir symbolens femte del, bredvid de fyra öglorna Gud, Blod, Jord och Ära.
+
+### Bakgrund (verifierbart)
+
+Megaloschemos (grekiska Μεγαλόσχημος) är den högsta graden i ortodoxt klosterväsende; graden markeras av dräkten analavos, broderad med korset, passionsredskapen och förkortningar som IC XC NIKA.
+<!-- Källor: https://orthodoxwiki.org/Schema ; https://en.wikipedia.org/wiki/Analavos_of_the_Great_Schema -->
 
 ## Sankt Hans symboler
 
