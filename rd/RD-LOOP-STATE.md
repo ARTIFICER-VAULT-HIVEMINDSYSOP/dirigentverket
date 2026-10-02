@@ -15,6 +15,7 @@ Paper. Live: **nej**. Inga produktionsdata.
 - Cykel #3: abort→flotta-land tidsordning (paper) 6/6 + ordningstabell; paper-FAIL om geofence saknas. Fil saknas på main.
 - Cykel #4: artefaktpipeline-radformat (paper) gemensamt kuvert + OMFORDELNING/ABORT + två exempelrader (placeholders). Innehållet ligger nu i schemat, uppdaterat för varv 5/6.
 - Cykel #5: omvägen definierad. En `FAIL`-rad sparas och prövas först i nästa loop. Tabell-sim: en ABORT-rad underkänns i #5 på värde-regel (geofence-värden saknas) och återinträder i #6-sim på struktur-regel. Samma `package_id`-token `exempel:samma-package` (EXEMPEL, inte i repot).
+- Cykel #6, pågår: samma rad prövas först. Ingången är `omvag_status=PROVAD`. Slutet i sim är `ATERINTRADD`. Mittkuben i statusindikatorn (förslag) visar loopnumret #6. Kuben tänds vid `PROVAD` och får guld-kant vid `ATERINTRADD`. Se `stab/SANKT-HANS-STATUSINDIKATOR.md`. Inget nytt fältvärde från repot.
 - Kartblad / svensk ruta / sensorprofil / ticket: **saknas**
 - Package-värden för `spår_format` / id:n / geofence: **saknas** (söklista i schemat)
 - Hemside/PR-spår = separat. Denna loop rör inte publika ytor.
@@ -44,7 +45,12 @@ Rader som underkändes i #5 prövas först mot en annan logik. Exempel i detta v
 
 ## Experiment (#6) — pågår
 
-Första prövningen är tabell-sim i schemat: läsning A är `utfall=FAIL`, `omvag_status=VANTAR`, `underkand_i_loop=#5`. Läsning B är samma rad, `utfall=OK` enligt struktur-regeln, `omvag_status=ATERINTRADD`, `provad_i_loop=#6`, `aterintrade_i_loop=#6`, samma `package_id`. Geofence-värdena är fortfarande saknas. Ingen ny mätning mot repo-data.
+#6 läser omvägen först och prövar raden från #5 mot struktur-regeln. Samma `package_id`-token `exempel:samma-package` (EXEMPEL). Geofence-värdena är fortfarande saknas. Ingen ny mätning mot repo-data.
+
+1. Ingång. Raden står kvar. `omvag_status=PROVAD`, `provad_i_loop=#6`, `utfall` är fortfarande `FAIL` från #5 tills den nya logiken svarat. `geofence_check` är fortfarande `FAIL`. Mittkuben tänds och visar loopnumret **#6**. Jord är fortfarande den pelare förslaget sätter på raden.
+2. Utfall i tabell-sim (läsning B i schemat). Struktur-regeln: fältet finns, därför `geofence_check=OK` och `utfall=OK`, utan koordinater. `omvag_status=ATERINTRADD`, `aterintrade_i_loop=#6`. Kuben får guld-kant. Jord går till guld-söm.
+
+Kuben är femte delen i sigillet, förslag tills ÖB bekräftar. Den är inte en femte pelare. De fyra öglorna behåller sin mappning.
 
 ## Mät (#6)
 
@@ -66,4 +72,4 @@ Om #6:s struktur-regel håller när den mäts: nästa utkast visar hur återintr
 - Inga nya block.
 - Live-flygning och namngiven ruta kräver ÖB-ja (ej begärt).
 - Fyllnad av kartblad_ref / sensorläge / N/M / rtk_bas_ref / geofence-värden / spår_format = ÖB när hen vill. Loopen kör paper vidare utan det.
-- Fältet `pelare` och öglornas mappning är förslag. Pelarnas betydelse ändras bara på ÖB:s egna ord. Se `stab/SANKT-HANS-STATUSINDIKATOR.md`.
+- Fältet `pelare`, öglornas mappning och mittkuben som femte element är förslag. Pelarnas betydelse ändras bara på ÖB:s egna ord. Se `stab/SANKT-HANS-STATUSINDIKATOR.md`. Kuben definieras inte om i den här filen. Grundorden ligger hos ÖB för `stab/SANKT-HANS-VAPEN.md` (separat utkast).

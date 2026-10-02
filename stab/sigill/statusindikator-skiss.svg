@@ -1,22 +1,23 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="960" height="1120" viewBox="0 0 960 1120">
-  <title>Statusindikator, utkast. En tänd ögla: Jord.</title>
-  <desc>Sankt Hans vapen som status i R&amp;D-loopen. Tecknet är U+2318. Gud upptill, Blod till höger, Jord nedtill, Ära till vänster. Jord är tänd med badge 1. Övriga öglor är släckta. Ingen sol, inget hjul, inga strålar.</desc>
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="1240" viewBox="0 0 960 1240">
+  <title>Statusindikator, utkast. Kub i mitten, loop #6, guld-kant.</title>
+  <desc>Sankt Hans vapen som status. Tecknet är U+2318. Fyra öglor: Gud upptill, Blod till höger, Jord nedtill, Ära till vänster. I mitten två nästlade isometriska trådkuber, alla kanter synliga. Skissen visar läget efter tabell-simets loop #6: Jord har guld-söm, kuben har guld-kant och bär numret #6. Förslag tills ÖB bekräftar. Ingen sol, inget hjul, inga strålar.</desc>
   <defs>
     <radialGradient id="bg" cx="50%" cy="42%" r="75%">
       <stop offset="0" stop-color="#1b212b"/>
       <stop offset="1" stop-color="#0e1116"/>
     </radialGradient>
     <filter id="soft" x="-50%" y="-50%" width="200%" height="200%">
-      <feGaussianBlur stdDeviation="6"/>
+      <feGaussianBlur stdDeviation="5"/>
     </filter>
   </defs>
-  <rect width="960" height="1120" fill="url(#bg)"/>
+  <rect width="960" height="1240" fill="url(#bg)"/>
 
-  <text x="480" y="46" text-anchor="middle" font-family="DejaVu Serif" font-size="28" letter-spacing="4" fill="#e6c56a">STATUSINDIKATOR</text>
-  <text x="480" y="74" text-anchor="middle" font-family="DejaVu Sans" font-size="15" fill="#c9c1ad">Utkast · &#8984; med fyra öglor · en tänd</text>
+  <text x="480" y="42" text-anchor="middle" font-family="DejaVu Serif" font-size="28" letter-spacing="4" fill="#e6c56a">STATUSINDIKATOR</text>
+  <text x="480" y="68" text-anchor="middle" font-family="DejaVu Sans" font-size="15" fill="#c9c1ad">Utkast · fyra öglor och dubbel kub i mitten av &#8984;</text>
+  <text x="480" y="90" text-anchor="middle" font-family="DejaVu Sans" font-size="14" fill="#f3d27a">FÖRSLAG – ÖB bekräftar</text>
 
-  <text x="480" y="118" text-anchor="middle" font-family="DejaVu Serif" font-size="24" letter-spacing="3" fill="#9a917f">GUD</text>
-  <text x="480" y="140" text-anchor="middle" font-family="DejaVu Sans" font-size="14" fill="#6d6454">Helheten · släckt</text>
+  <text x="480" y="124" text-anchor="middle" font-family="DejaVu Serif" font-size="24" letter-spacing="3" fill="#9a917f">GUD</text>
+  <text x="480" y="144" text-anchor="middle" font-family="DejaVu Sans" font-size="14" fill="#6d6454">Helheten · släckt</text>
   <ellipse cx="480" cy="206" rx="84" ry="44" fill="none" stroke="#6d6454" stroke-width="11"/>
   <line x1="480" y1="252" x2="480" y2="360" stroke="#6d6454" stroke-width="3"/>
 
@@ -30,23 +31,52 @@
   <ellipse cx="810" cy="500" rx="46" ry="72" fill="none" stroke="#6d6454" stroke-width="11"/>
   <line x1="600" y1="500" x2="762" y2="500" stroke="#6d6454" stroke-width="3"/>
 
-  <line x1="480" y1="640" x2="480" y2="708" stroke="#f3d27a" stroke-width="3"/>
-  <ellipse cx="480" cy="758" rx="84" ry="44" fill="none" stroke="#f3d27a" stroke-width="14" filter="url(#soft)" opacity="0.9"/>
-  <ellipse cx="480" cy="758" rx="84" ry="44" fill="none" stroke="#f6dc8e" stroke-width="11"/>
-  <circle cx="556" cy="732" r="16" fill="#f3d27a"/>
-  <text x="556" y="738" text-anchor="middle" font-family="DejaVu Sans" font-size="15" font-weight="700" fill="#1a1408">1</text>
-  <text x="480" y="836" text-anchor="middle" font-family="DejaVu Serif" font-size="24" letter-spacing="3" fill="#f3d27a">JORD</text>
-  <text x="480" y="858" text-anchor="middle" font-family="DejaVu Sans" font-size="14" fill="#efe6cf">Marken · tänd · exempel</text>
+  <line x1="480" y1="640" x2="480" y2="708" stroke="#d9b24c" stroke-width="2"/>
+  <ellipse cx="480" cy="758" rx="84" ry="44" fill="none" stroke="#d9b24c" stroke-width="2.5"/>
+  <text x="480" y="836" text-anchor="middle" font-family="DejaVu Serif" font-size="24" letter-spacing="3" fill="#d9b24c">JORD</text>
+  <text x="480" y="858" text-anchor="middle" font-family="DejaVu Sans" font-size="14" fill="#efe6cf">Marken · guld-söm · exempel</text>
 
   <circle cx="480" cy="500" r="108" fill="#141922" stroke="#8a7a4a" stroke-width="2"/>
-  <text x="480" y="548" text-anchor="middle" font-family="DejaVu Sans" font-size="128" fill="#d9b24c">&#8984;</text>
+  <text x="480" y="548" text-anchor="middle" font-family="DejaVu Sans" font-size="120" fill="#d9b24c" opacity="0.28">&#8984;</text>
+  <g id="mittkub" fill="none">
+    <line x1="421.0" y1="534.6" x2="472.8" y2="563.6" stroke="#f6dc8e" stroke-width="2.6" stroke-linecap="round"/>
+    <line x1="421.0" y1="459.1" x2="472.8" y2="488.1" stroke="#f6dc8e" stroke-width="2.6" stroke-linecap="round"/>
+    <line x1="421.0" y1="534.6" x2="421.0" y2="459.1" stroke="#f6dc8e" stroke-width="2.6" stroke-linecap="round"/>
+    <line x1="472.8" y1="563.6" x2="472.8" y2="488.1" stroke="#f6dc8e" stroke-width="2.6" stroke-linecap="round"/>
+    <line x1="487.2" y1="511.9" x2="539.0" y2="540.9" stroke="#f6dc8e" stroke-width="2.6" stroke-linecap="round"/>
+    <line x1="487.2" y1="436.4" x2="539.0" y2="465.4" stroke="#f6dc8e" stroke-width="2.6" stroke-linecap="round"/>
+    <line x1="487.2" y1="511.9" x2="487.2" y2="436.4" stroke="#f6dc8e" stroke-width="2.6" stroke-linecap="round"/>
+    <line x1="539.0" y1="540.9" x2="539.0" y2="465.4" stroke="#f6dc8e" stroke-width="2.6" stroke-linecap="round"/>
+    <line x1="421.0" y1="534.6" x2="487.2" y2="511.9" stroke="#f6dc8e" stroke-width="2.6" stroke-linecap="round"/>
+    <line x1="472.8" y1="563.6" x2="539.0" y2="540.9" stroke="#f6dc8e" stroke-width="2.6" stroke-linecap="round"/>
+    <line x1="421.0" y1="459.1" x2="487.2" y2="436.4" stroke="#f6dc8e" stroke-width="2.6" stroke-linecap="round"/>
+    <line x1="472.8" y1="488.1" x2="539.0" y2="465.4" stroke="#f6dc8e" stroke-width="2.6" stroke-linecap="round"/>
+    <line x1="449.1" y1="518.1" x2="476.2" y2="533.3" stroke="#f3d27a" stroke-width="1.9" stroke-linecap="round"/>
+    <line x1="449.1" y1="478.6" x2="476.2" y2="493.8" stroke="#f3d27a" stroke-width="1.9" stroke-linecap="round"/>
+    <line x1="449.1" y1="518.1" x2="449.1" y2="478.6" stroke="#f3d27a" stroke-width="1.9" stroke-linecap="round"/>
+    <line x1="476.2" y1="533.3" x2="476.2" y2="493.8" stroke="#f3d27a" stroke-width="1.9" stroke-linecap="round"/>
+    <line x1="483.8" y1="506.2" x2="510.9" y2="521.4" stroke="#f3d27a" stroke-width="1.9" stroke-linecap="round"/>
+    <line x1="483.8" y1="466.7" x2="510.9" y2="481.9" stroke="#f3d27a" stroke-width="1.9" stroke-linecap="round"/>
+    <line x1="483.8" y1="506.2" x2="483.8" y2="466.7" stroke="#f3d27a" stroke-width="1.9" stroke-linecap="round"/>
+    <line x1="510.9" y1="521.4" x2="510.9" y2="481.9" stroke="#f3d27a" stroke-width="1.9" stroke-linecap="round"/>
+    <line x1="449.1" y1="518.1" x2="483.8" y2="506.2" stroke="#f3d27a" stroke-width="1.9" stroke-linecap="round"/>
+    <line x1="476.2" y1="533.3" x2="510.9" y2="521.4" stroke="#f3d27a" stroke-width="1.9" stroke-linecap="round"/>
+    <line x1="449.1" y1="478.6" x2="483.8" y2="466.7" stroke="#f3d27a" stroke-width="1.9" stroke-linecap="round"/>
+    <line x1="476.2" y1="493.8" x2="510.9" y2="481.9" stroke="#f3d27a" stroke-width="1.9" stroke-linecap="round"/>
+  </g>
+  <circle cx="480" cy="500" r="16" fill="#141922"/>
+  <text x="480" y="506" text-anchor="middle" font-family="DejaVu Sans" font-size="16" font-weight="700" fill="#f6dc8e">#6</text>
 
-  <rect x="70" y="900" width="820" height="180" rx="12" fill="#141922" stroke="#8a7a4a" stroke-width="1.5"/>
-  <ellipse cx="118" cy="948" rx="30" ry="16" fill="none" stroke="#f6dc8e" stroke-width="8"/>
-  <text x="166" y="954" font-family="DejaVu Sans" font-size="15" fill="#efe6cf">tänd ögla = minst en rad med omvag_status VANTAR</text>
-  <circle cx="118" cy="992" r="12" fill="#f3d27a"/>
-  <text x="118" y="997" text-anchor="middle" font-family="DejaVu Sans" font-size="13" font-weight="700" fill="#1a1408">1</text>
-  <text x="166" y="998" font-family="DejaVu Sans" font-size="15" fill="#efe6cf">badge = antal VANTAR. Siffran 1 är exemplet i tabell-sim, inte ett repo-mått.</text>
-  <ellipse cx="118" cy="1036" rx="30" ry="16" fill="none" stroke="#d9b24c" stroke-width="2.5"/>
-  <text x="166" y="1042" font-family="DejaVu Sans" font-size="15" fill="#efe6cf">guld-söm = ATERINTRADD och inga VANTAR kvar. Inte ritad på öglorna i detta läge.</text>
+  <rect x="56" y="900" width="848" height="300" rx="12" fill="#141922" stroke="#8a7a4a" stroke-width="1.5"/>
+  <text x="80" y="932" font-family="DejaVu Serif" font-size="16" fill="#f3d27a">FÖRSLAG – ÖB bekräftar · kuben är femte delen</text>
+  <ellipse cx="104" cy="968" rx="30" ry="16" fill="none" stroke="#f6dc8e" stroke-width="8"/>
+  <text x="152" y="974" font-family="DejaVu Sans" font-size="15" fill="#efe6cf">tänd ögla = omväg i pelaren (VANTAR eller PROVAD)</text>
+  <circle cx="104" cy="1004" r="12" fill="#f3d27a"/>
+  <text x="104" y="1009" text-anchor="middle" font-family="DejaVu Sans" font-size="13" font-weight="700" fill="#1a1408">1</text>
+  <text x="152" y="1010" font-family="DejaVu Sans" font-size="15" fill="#efe6cf">badge = antal VANTAR. Siffran är sim, inte ett repo-mått.</text>
+  <ellipse cx="104" cy="1040" rx="30" ry="16" fill="none" stroke="#d9b24c" stroke-width="2.5"/>
+  <text x="152" y="1046" font-family="DejaVu Sans" font-size="15" fill="#efe6cf">guld-söm = ATERINTRADD i pelaren. Jord visas så.</text>
+  <text x="152" y="1082" font-family="DejaVu Sans" font-size="15" fill="#efe6cf">tänd kub = PROVAD. Äldre omvägsrad prövas först. Numret är loopen.</text>
+  <text x="152" y="1118" font-family="DejaVu Sans" font-size="15" fill="#efe6cf">guld-kant = ATERINTRADD. Skissen visar loop #6.</text>
+  <text x="152" y="1154" font-family="DejaVu Sans" font-size="15" fill="#efe6cf">Dubbel trådkub, alla kanter synliga. Betraktaren sitter i mitten.</text>
 </svg>

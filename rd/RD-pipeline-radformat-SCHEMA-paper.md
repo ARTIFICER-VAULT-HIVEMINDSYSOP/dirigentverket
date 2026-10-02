@@ -183,7 +183,13 @@ Enradig form:
 
 `tidstämpel=saknas | handelse_typ=ABORT | enhet_id=saknas | package_id=exempel:samma-package | utfall=FAIL | pipeline_namn=mesh→datacenter | spar_format=paper-v1 | trigger_orsak=saknas | abort_kommando=flotta-land | geofence_check=FAIL | omvag_status=VANTAR | underkand_i_loop=#5 | underkand_mot_logik=värde-regel, geofence-värden saknas | provad_i_loop=saknas | aterintrade_i_loop= | pelare=JORD`
 
-### Läsning B — loop #6 prövar samma rad först, struktur-regel, raden återinträder
+### Ingång i loop #6 — samma rad prövas först
+
+#6 har inte bytt rad och inte fyllt i ett staket. Det enda som ändras i ingången är att raden nu prövas: `omvag_status=PROVAD`, `provad_i_loop=#6`. `utfall` är kvar `FAIL`. `geofence_check` är kvar `FAIL`. Samma `package_id`. Mittkuben i indikatorn tänds här och visar #6. Övriga fält är som i läsning A.
+
+`tidstämpel=saknas | handelse_typ=ABORT | enhet_id=saknas | package_id=exempel:samma-package | utfall=FAIL | pipeline_namn=mesh→datacenter | spar_format=paper-v1 | trigger_orsak=saknas | abort_kommando=flotta-land | geofence_check=FAIL | omvag_status=PROVAD | underkand_i_loop=#5 | underkand_mot_logik=värde-regel, geofence-värden saknas | provad_i_loop=#6 | aterintrade_i_loop= | pelare=JORD`
+
+### Läsning B — loop #6, struktur-regel, raden återinträder
 
 #6 byter inte ut raden och hittar inte på ett staket. Den läser omvägen först och prövar raden mot struktur-regeln: fältet `geofence_check` finns i raden, därför `OK`, även om värdena fortfarande är saknas. Samma `package_id`. Hänvisningen till #5 står kvar.
 
@@ -210,7 +216,7 @@ Enradig form:
 
 `tidstämpel=saknas | handelse_typ=ABORT | enhet_id=saknas | package_id=exempel:samma-package | utfall=OK | pipeline_namn=mesh→datacenter | spar_format=paper-v1 | trigger_orsak=saknas | abort_kommando=flotta-land | geofence_check=OK | omvag_status=ATERINTRADD | underkand_i_loop=#5 | underkand_mot_logik=värde-regel, geofence-värden saknas | provad_i_loop=#6 | aterintrade_i_loop=#6 | pelare=JORD`
 
-Indikatorn på den här enda raden: efter #5 är Jord tänd med badge 1 (en `VANTAR`). Efter #6 har Jord guld-söm (`ATERINTRADD`, inga `VANTAR` kvar). De andra tre öglorna är släckta. Det är inte en signal att hela loopen ligger på omvägen. Räkningen står i `stab/SANKT-HANS-STATUSINDIKATOR.md`. Badge-siffran är räkning av denna sim-rad, inte ett mätvärde från repot.
+Indikatorn på den här enda raden: efter #5 är Jord tänd med badge 1 (en `VANTAR`) och mittkuben är släckt. I ingången till #6 tänds kuben (`omvag_status=PROVAD`) och visar loopnumret #6. Efter återinträdet har Jord guld-söm och kuben guld-kant (`ATERINTRADD`, inga `VANTAR` kvar). De andra tre öglorna är släckta. Det är inte en signal att hela loopen ligger på omvägen. Räkningen står i `stab/SANKT-HANS-STATUSINDIKATOR.md`. Badge-siffran är räkning av denna sim-rad, inte ett mätvärde från repot. Kuben är förslag tills ÖB bekräftar.
 
 Ändrad från den tidigare tanken om en stopp-checklista. Ingen rad fryses eller kastas. Den byter bara spår.
 
